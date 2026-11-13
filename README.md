@@ -131,3 +131,5 @@ Custom games with waves get two factions on top of the map's own waves: **the Sw
 ECLIPSE, Copyright (C) 2026 palle00
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3. It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See [LICENSE](LICENSE) for the full text.
+
+**Additional term (GPL-3.0 section 7(b)):** If you distribute this work, or any work based on it, you must credit palle00 as the original author of ECLIPSE, with a link to https://github.com/palle00/ECLIPSE-build. The credit must be placed where users can reasonably see it, such as the mod description, the mod's download page, or its README.
