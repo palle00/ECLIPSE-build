@@ -1,0 +1,8 @@
+name: "eclipse"
+displayName: "ECLIPSE"
+author: "palle00"
+description: "A new era of industry: deep chemical engineering, advanced materials and expanded warfare."
+version: "0.1.0"
+main: "eclipse.EclipseMod"
+minGameVersion: "160"
+java: true
