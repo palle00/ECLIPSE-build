@@ -684,56 +684,92 @@ public class SpriteGen{
         cell(name, s, cellM, 7);
     }
 
+    /** Wraith (art.md §17.3): a light recon craft. A slim needle with short forward-swept wings, wingtip guns and a nose sensor. */
     static void flyerWraith(String name) throws IOException{
         int s = 28;
         R r = new R(s).turret();
-        boolean[] body = r.poly(new int[]{14, 25, 14, 3}, new int[]{2, 24, 18, 24});
-        r.fill(body, 6, tGrey, 2);
-        r.fill(r.oct(12, 8, 4, 6, 1), 8, glass(0x9fd8ff), 0);
-        boolean[] tips = r.and(body, r.or(r.rect(0, 19, 8, 9), r.rect(20, 19, 8, 9)));
+        boolean[] wings = r.or(r.poly(new int[]{14, 26, 26, 14}, new int[]{11, 15, 19, 19}), r.poly(new int[]{14, 2, 2, 14}, new int[]{11, 15, 19, 19}));
+        r.fill(wings, 5, tGrey, 1);
+        //wingtip guns (the weapon sits 3 units out) and the fuselage
+        for(int x : new int[]{1, 25}) r.fill(r.rect(x, 9, 2, 10), 7, steel, 0);
+        r.fill(r.oct(11, 2, 6, 23, 2), 7, tGrey, 2);
+        r.fill(r.rect(13, 0, 2, 3), 8, steel, 0);
+        r.fill(r.circle(14, 3, 1.2f), 9, lit(0x7fd8ff), 0);
+        r.fill(r.oct(12, 6, 4, 5, 1), 9, glass(0x9fd8ff), 0);
+        r.fill(r.rect(12, 24, 4, 2), 8, lit(0xffa060), 0);
+        boolean[] cellM = r.and(wings, r.or(r.rect(4, 15, 5, 4), r.rect(19, 15, 5, 4)));
         save(r, name);
-        cell(name, s, tips, 6);
+        cell(name, s, cellM, 6);
     }
 
+    /** Interceptor (art.md §17.3): a sleek anti-air fighter. Narrow delta, canards, twin fins and two missile hardpoints. */
     static void flyerInterceptor(String name) throws IOException{
         int s = 40;
         R r = new R(s).turret();
-        boolean[] wings = r.or(r.poly(new int[]{20, 38, 36, 20}, new int[]{12, 30, 35, 26}), r.poly(new int[]{20, 2, 4, 20}, new int[]{12, 30, 35, 26}));
+        boolean[] wings = r.or(r.poly(new int[]{21, 37, 37, 21}, new int[]{12, 25, 30, 30}), r.poly(new int[]{19, 3, 3, 19}, new int[]{12, 25, 30, 30}));
         r.fill(wings, 5, tGrey, 2);
-        r.fill(r.oct(16, 2, 8, 34, 3), 7, tGrey, 2);
-        r.fill(r.oct(17, 7, 6, 8, 2), 9, glass(0x9fd8ff), 0);
-        for(int x : new int[]{16, 21}) r.fill(r.rect(x, 34, 3, 3), 8, lit(0xffa060), 0);
-        boolean[] cellM = r.and(wings, r.or(r.rect(4, 26, 10, 8), r.rect(26, 26, 10, 8)));
+        //hardpoint pylons under the launchers (4 units out)
+        for(int x : new int[]{2, 35}) r.fill(r.rect(x, 16, 3, 12), 6, steel, 1);
+        r.fill(r.or(r.poly(new int[]{22, 28, 22}, new int[]{8, 13, 13}), r.poly(new int[]{18, 12, 18}, new int[]{8, 13, 13})), 6, tGrey, 1);
+        r.fill(r.oct(17, 1, 6, 36, 3), 7, tGrey, 2);
+        for(int x : new int[]{14, 24}) r.fill(r.rect(x, 29, 2, 8), 8, tGrey, 1);
+        r.fill(r.oct(18, 5, 4, 8, 2), 9, glass(0x9fd8ff), 0);
+        r.fill(r.rect(18, 36, 4, 3), 8, lit(0xffa060), 0);
+        boolean[] cellM = r.and(wings, r.or(r.rect(7, 25, 8, 4), r.rect(25, 25, 8, 4)));
         save(r, name);
-        cell(name, s, cellM, 5);
+        cell(name, s, cellM, 6);
     }
 
+    /** Valkyrie (art.md §17.3): a wide gunship. Broad wings with gun mounts at the tips, engine nacelles and an armoured hull. */
     static void flyerValkyrie(String name) throws IOException{
         int s = 56;
         R r = new R(s).turret();
-        r.fill(r.oct(4, 20, 48, 14, 5), 5, tGrey, 2);
-        r.fill(r.oct(17, 5, 22, 46, 8), 7, tGrey, 2);
-        r.fill(r.oct(23, 8, 10, 10, 3), 9, glass(0x9fd8ff), 0);
-        for(float[] p : new float[][]{{9, 37}, {47, 37}}) r.fill(r.circle(p[0], p[1], 4.5f), 8, tGrey, 1);
-        for(float[] p : new float[][]{{9, 37}, {47, 37}}) r.fill(r.circle(p[0], p[1], 2f), 9, lit(0xffa060), 0);
-        boolean[] cellM = r.or(r.rect(6, 24, 9, 6), r.rect(41, 24, 9, 6));
+        boolean[] wing = r.oct(2, 18, 52, 14, 4);
+        r.fill(wing, 5, tGrey, 2);
+        //engine nacelles on the wings
+        for(int x : new int[]{12, 36}){
+            r.fill(r.oct(x, 24, 8, 18, 3), 7, tGrey, 2);
+            r.fill(r.rect(x + 2, 41, 4, 2), 8, lit(0xffa060), 0);
+        }
+        //armoured hull with plate seams, cockpit and tail
+        r.fill(r.oct(20, 44, 16, 8, 3), 6, tGrey, 1);
+        r.fill(r.oct(19, 4, 18, 44, 7), 8, tGrey, 2);
+        for(int y : new int[]{20, 30, 38}) r.fill(r.rect(22, y, 12, 1), 6, bore, 0);
+        r.fill(r.oct(24, 8, 8, 9, 3), 10, glass(0x9fd8ff), 0);
+        //gun mounts where the guns sit (5 units out, 1 forward)
+        for(int x : new int[]{8, 48}){
+            r.fill(r.circle(x, 24, 5.5f), 8, tGrey, 1);
+            r.fill(r.circle(x, 24, 3), 5, bore, 0);
+        }
+        boolean[] cellM = r.or(r.and(wing, r.or(r.rect(2, 29, 10, 3), r.rect(44, 29, 10, 3))), r.rect(26, 31, 4, 6));
         save(r, name);
-        cell(name, s, cellM, 6);
+        cell(name, s, cellM, 9);
     }
 
+    /** Tempest (art.md §17.3): a strategic bomber. A flying wing round a long bomb bay, four engines on the trailing edge. */
     static void flyerTempest(String name) throws IOException{
         int s = 96;
         R r = new R(s).turret();
-        boolean[] wing = r.poly(new int[]{48, 92, 70, 48, 26, 4}, new int[]{6, 64, 74, 62, 74, 64});
+        boolean[] wing = r.poly(new int[]{48, 94, 94, 2, 2}, new int[]{6, 54, 62, 62, 54});
         r.fill(wing, 6, tGrey, 3);
-        r.fill(r.oct(38, 10, 20, 60, 8), 8, tGrey, 2);
-        r.fill(r.rect(42, 34, 12, 22), 4, bore, 0);
-        for(int y = 36; y < 54; y += 4) r.fill(r.rect(43, y, 10, 1), 5, tGrey, 0);
-        r.fill(r.oct(43, 14, 10, 10, 3), 10, glass(0x9fd8ff), 0);
-        for(int x : new int[]{22, 34, 60, 72}) r.fill(r.rect(x, 64, 4, 5), 8, lit(0xffa060), 0);
-        boolean[] cellM = r.and(wing, r.or(r.poly(new int[]{12, 30, 30, 12}, new int[]{58, 46, 52, 64}), r.poly(new int[]{84, 66, 66, 84}, new int[]{58, 46, 52, 64})));
+        //engine nacelles across the trailing edge, intakes forward, exhausts glowing at the back
+        for(int x : new int[]{14, 26, 60, 72}){
+            r.fill(r.oct(x, 42, 10, 26, 4), 8, tGrey, 2);
+            r.fill(r.rect(x + 3, 44, 4, 3), 5, bore, 0);
+            r.fill(r.rect(x + 2, 64, 6, 3), 9, lit(0xffa060), 0);
+        }
+        r.fill(r.oct(34, 6, 28, 70, 10), 9, tGrey, 2);
+        //the bomb bay: a framed recess with two rows of doors
+        r.fill(r.rect(37, 27, 22, 36), 10, steel, 1);
+        r.fill(r.rect(39, 29, 18, 32), 4, bore, 0);
+        for(int y = 31; y < 60; y += 7){
+            r.fill(r.rect(40, y, 7, 5), 6, tGrey, 0);
+            r.fill(r.rect(49, y, 7, 5), 6, tGrey, 0);
+        }
+        r.fill(r.oct(42, 11, 12, 10, 4), 11, glass(0x9fd8ff), 0);
+        boolean[] cellM = r.and(wing, r.or(r.rect(3, 55, 10, 6), r.rect(83, 55, 10, 6)));
         save(r, name);
-        cell(name, s, cellM, 6);
+        cell(name, s, cellM, 7);
     }
 
     static void flyerLeviathan(String name) throws IOException{
