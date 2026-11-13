@@ -32,6 +32,7 @@ public class EclipseWiki extends BaseDialog{
     /** Guide pages, in menu order: id (bundle key eclipse-wiki.guide.&lt;id&gt;.name / .text) and related content names. */
     public static final String[][] guides = {
         {"start", "eclipse-gear-press", "eclipse-wire-drawing-machine", "eclipse-rivet", "eclipse-flow-meter", "eclipse-metal-extruder", "eclipse-component-depot", "eclipse-water-treatment-plant", "eclipse-augmentation-coupler", "eclipse-ore-crusher"},
+        {"qol", "eclipse-flow-meter", "eclipse-component-depot", "eclipse-wave-intelligence-scanner"},
         {"components", "eclipse-titanium-gear", "eclipse-industrial-bearing", "eclipse-precision-component", "eclipse-superalloy-frame", "eclipse-experimental-core", "eclipse-gear-press", "eclipse-component-depot"},
         {"metallurgy", "eclipse-ore-nickel", "eclipse-ore-chromium", "eclipse-ore-cobalt", "eclipse-ore-tungsten", "eclipse-ore-molybdenum", "eclipse-ore-platinum", "eclipse-ore-crusher", "eclipse-alloy-furnace", "eclipse-carbide-drill"},
         {"heat", "eclipse-industrial-heater", "eclipse-electric-heater", "eclipse-geothermal-heat-tap", "eclipse-thermal-storage", "eclipse-heat-exchanger"},
@@ -49,6 +50,7 @@ public class EclipseWiki extends BaseDialog{
 
     /** The icon of each guide in the menu: an ECLIPSE content name whose icon stands for the topic (start uses a vanilla icon). */
     public static final String[][] guideIcons = {
+        {"qol", "eclipse-flow-meter"},
         {"components", "eclipse-titanium-gear"},
         {"metallurgy", "eclipse-superalloy"},
         {"heat", "eclipse-industrial-heater"},
@@ -240,7 +242,10 @@ public class EclipseWiki extends BaseDialog{
 
     void guidePage(String id){
         page.add("[accent]" + Core.bundle.get("eclipse-wiki.guide." + id + ".name")).style(Styles.outlineLabel).padBottom(8f).row();
-        page.add(Core.bundle.get("eclipse-wiki.guide." + id + ".text")).wrap().width(textWidth()).padBottom(10f).row();
+        String text = Core.bundle.get("eclipse-wiki.guide." + id + ".text");
+        //the QOL page names the keys as currently bound, so a rebound key shows correctly
+        if(id.equals("qol")) text = Core.bundle.format("eclipse-wiki.guide.qol.text", keyName(entryKey), keyName(eclipse.input.UpgradePlanner.key));
+        page.add(text).wrap().width(textWidth()).padBottom(10f).row();
         for(String[] g : guides){
             if(!g[0].equals(id) || g.length < 2) continue;
             sub(page, "eclipse-wiki.related");
@@ -566,6 +571,11 @@ public class EclipseWiki extends BaseDialog{
             if(c != null) return new arc.scene.style.TextureRegionDrawable(c.uiIcon);
         }
         return Icon.book;
+    }
+
+    /** A key binding's current key, or "-" when unbound or on mobile. */
+    static String keyName(@Nullable arc.input.KeyBind bind){
+        return bind == null || bind.value.key == null ? "-" : bind.value.key.toString();
     }
 
     static @Nullable UnlockableContent byName(String name){
