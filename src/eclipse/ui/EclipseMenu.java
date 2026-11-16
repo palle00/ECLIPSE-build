@@ -101,6 +101,8 @@ public class EclipseMenu{
         }catch(Throwable ignored){
         }
         all.add(new MenuButton("@quit", Icon.exit, Core.app::exit));
+        //vanilla leaves a null in its list where a button doesn't apply (Workshop outside Steam)
+        all.removeAll(b -> b == null);
         return all;
     }
 
@@ -152,7 +154,7 @@ public class EclipseMenu{
         open = b;
         sub.clear();
         sub.defaults().width(260f).height(58f).padBottom(8f).left();
-        for(MenuButton s : b.submenu) sub.add(button(s, true)).row();
+        for(MenuButton s : b.submenu) if(s != null) sub.add(button(s, true)).row();
         sub.color.a = 0f;
         sub.actions(arc.scene.actions.Actions.alpha(1f, 0.15f));
     }
