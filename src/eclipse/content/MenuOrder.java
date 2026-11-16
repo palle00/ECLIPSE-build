@@ -86,7 +86,7 @@ public class MenuOrder{
         //---- crafting: each ECLIPSE production chain follows the vanilla machine it grows out of ----
         after(Blocks.multiPress, methanePyrolysisReactor, gearPress, extruder, metalPress, lathe, assembler,
             coreAssembler); //mechanical manufacturing
-        after(Blocks.siliconSmelter, siliconReductionFurnace, siliconRefinery, chipFabricator, circuitAssembler);
+        after(Blocks.siliconSmelter, siliconRefinery, chipFabricator, circuitAssembler);
         after(Blocks.plastaniumCompressor, //oil -> petrochemicals and heat
             distillationColumn, industrialHeater, electricHeater, geothermalHeatTap, heatExchanger, thermalStorage, steamCracker,
             carbonFiberFurnace, compositePress, sulfuricAcidPlant);
@@ -106,6 +106,7 @@ public class MenuOrder{
 
         //---- items (core inventory, item pickers); augmentation modules stay at the end as their own group ----
         after(Items.metaglass, hotMetaglass, hotReinforcedGlass, reinforcedGlass);
+        after(Items.sand, sodaAsh);
         after(Items.coal, sulfur);
         after(Items.copper, copperGear, copperWire, magnetWire, insulatedCable, copperPlate, copperFoil);
         after(Items.lead, leadPlate);

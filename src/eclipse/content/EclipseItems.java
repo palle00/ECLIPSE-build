@@ -17,7 +17,8 @@ public class EclipseItems{
         copperPlate, leadPlate, titaniumPlate, aluminiumPlate, superalloyPlate, tungstenPlate, copperFoil, aluminiumFoil,
         tungstenRod, aluminiumWire, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, superalloyGear,
         magnetWire, resistor, capacitor, transistor, insulatedCable,
-        electricMotor, permanentMagnetMotor, superconductingMotor, pumpUnit, piston, rotor, heatingCoil, sensor, emitter;
+        electricMotor, permanentMagnetMotor, superconductingMotor, pumpUnit, piston, rotor, heatingCoil, sensor, emitter,
+        sodaAsh;
 
     public static void load(){
         sulfur = new Item("sulfur", Color.valueOf("e8d44d")){{
@@ -275,5 +276,9 @@ public class EclipseItems{
         heatingCoil = new Item("heating-coil", Color.valueOf("ff8a4a")){{ cost = 1.8f; }};
         sensor = new Item("sensor", Color.valueOf("6dd0f0")){{ cost = 2f; }};
         emitter = new Item("emitter", Color.valueOf("ff5a5a")){{ cost = 2.6f; }};
+
+        // ---- realistic chemistry ----
+        //sodium carbonate: sodium hydroxide carbonated with captured CO2; the flux of soda-lime glass, and lithium's precipitant
+        sodaAsh = new Item("soda-ash", Color.valueOf("f2f0ea")){{ cost = 0.6f; }};
     }
 }

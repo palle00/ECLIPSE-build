@@ -88,6 +88,8 @@ public class RecipeCrafter extends GenericCrafter{
         public int craftsPerCatalyst = 10;
         /** Operating pressure (fraction of maximum) to reach with power before the recipe runs; 0: none. */
         public float pressure;
+        /** Liquid outputs are vented when nothing takes them (exhaust gases), instead of stopping the machine. */
+        public boolean vented;
 
         public Recipe(int tier, float time, ItemStack[] inputs, ItemStack[] outputs){
             if(tier < 1 || tier > maxTier) throw new IllegalArgumentException("recipe tier must be 1-" + maxTier + ", got " + tier);
@@ -101,6 +103,12 @@ public class RecipeCrafter extends GenericCrafter{
         public Recipe catalyst(Item item, int crafts){
             catalyst = item;
             craftsPerCatalyst = crafts;
+            return this;
+        }
+
+        /** The liquid outputs are exhaust: vented when nothing takes them, so they never stop the machine. */
+        public Recipe vented(){
+            vented = true;
             return this;
         }
 
@@ -436,7 +444,7 @@ public class RecipeCrafter extends GenericCrafter{
         public boolean shouldConsume(){
             if(recipe == null || !enabled || catalystMissing()) return false;
             for(ItemStack out : recipe.outputs) if(items.get(out.item) + out.amount > itemCapacity) return false;
-            for(LiquidStack out : recipe.liquidOutputs) if(liquids.get(out.liquid) >= liquidCapacity - 0.001f) return false;
+            if(!recipe.vented) for(LiquidStack out : recipe.liquidOutputs) if(liquids.get(out.liquid) >= liquidCapacity - 0.001f) return false;
             return true;
         }
 

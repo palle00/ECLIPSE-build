@@ -320,7 +320,6 @@ public class EclipseTechTree{
         child(find(Blocks.mendProjector), repairDispatchBay);
 
         //upgraded production of the vanilla materials ECLIPSE consumes most, each under the vanilla building it upgrades
-        child(find(Blocks.siliconSmelter), siliconReductionFurnace);
         child(find(Blocks.graphitePress), methanePyrolysisReactor);
         child(find(Blocks.separator), chlorideTitaniumPlant);
     }

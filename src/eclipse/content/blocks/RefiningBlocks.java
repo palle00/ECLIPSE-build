@@ -17,27 +17,9 @@ import static mindustry.type.ItemStack.*;
  * chemistry and heat. On Serpulo, Erekir's silicon arc furnace and electrolyzer can't be built, so nothing is duplicated.
  */
 public class RefiningBlocks{
-    public static Block siliconReductionFurnace, methanePyrolysisReactor, chlorideTitaniumPlant;
+    public static Block methanePyrolysisReactor, chlorideTitaniumPlant;
 
     public static void load(){
-        // Sand reduced with methane as the carbon source, in a heated retort -> silicon. No coal; up to 8 silicon/s at full heat.
-        siliconReductionFurnace = new HeatCrafter("silicon-reduction-furnace"){{
-            requirements(Category.crafting, with(Items.titanium, 80, Items.metaglass, 40, Items.silicon, 60, pressureCasing, 10, titaniumGear, 10, copperWire, 20));
-            size = 3;
-            health = 650;
-            itemCapacity = 20;
-            liquidCapacity = 30f;
-            craftTime = 60f;
-            heatRequirement = 8f;
-            maxEfficiency = 2f;
-            consumeItem(Items.sand, 4);
-            consumeLiquid(methane, 3f / 60f);
-            consumePower(1f);
-            outputItem = new ItemStack(hotSilicon, 4); //cooled in the vacuum freezer
-            craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ffb46b"); }}, new DrawHeatInput());
-        }};
-
         // CH4 -> C + 2 H2 (methane pyrolysis): graphite without coal, with hydrogen as a by-product.
         methanePyrolysisReactor = new HeatCrafter("methane-pyrolysis-reactor"){{
             requirements(Category.crafting, with(Items.titanium, 60, Items.graphite, 40, Items.metaglass, 40, pressureCasing, 10, titaniumRod, 10));

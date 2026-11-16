@@ -79,7 +79,7 @@ public class MachineStatus{
         if(b instanceof RecipeBuild r){
             if(r.recipe == null) return s.set(r.auto() ? Kind.autoWaiting : Kind.noRecipe, null, 0f);
             for(ItemStack out : r.recipe.outputs) if(b.items.get(out.item) + out.amount > b.block.itemCapacity) return s.set(Kind.outputFull, out.item, 0f);
-            for(LiquidStack out : r.recipe.liquidOutputs) if(b.liquids.get(out.liquid) >= b.block.liquidCapacity - 0.001f) return s.set(Kind.outputFull, out.liquid, 0f);
+            if(!r.recipe.vented) for(LiquidStack out : r.recipe.liquidOutputs) if(b.liquids.get(out.liquid) >= b.block.liquidCapacity - 0.001f) return s.set(Kind.outputFull, out.liquid, 0f);
         }
 
         //outputs that have nowhere to go stop the machine

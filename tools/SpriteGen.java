@@ -91,6 +91,7 @@ public class SpriteGen{
         // ---- batch 3 ----
         sulfurIcon("polymer-catalyst", 0xb07ad6);
         pellets("ammonium-nitrate", 0xf2efe4);
+        pellets("soda-ash", 0xf2f0ea);
         gas("ammonia", 0xc9e6f2);
         liquid("nitric-acid", 0xf0d98c);
 
@@ -365,7 +366,6 @@ public class SpriteGen{
         coolingTower("cooling-tower");
 
         // ---- upgraded vanilla production ----
-        reductionFurnace("silicon-reduction-furnace");
         pyrolysisReactor("methane-pyrolysis-reactor");
         chloridePlant("chloride-titanium-plant");
 
@@ -4039,24 +4039,6 @@ public class SpriteGen{
         save(r, name);
         glowOf(r, name);
         heatLayer(r, name, r.circle(42, 52, 24));
-    }
-
-    /** Silicon Reduction Furnace (3×3, heat): a long horizontal hot chamber, sand hoppers above, silicon collected below. */
-    static void reductionFurnace(String name) throws IOException{
-        int s = 3 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 5, metal);
-        for(int x : new int[]{10, 38, 66}) hopper(r, x, 4, 20, 11, sandM);
-        r.fill(r.oct(6, 32, 84, 32, 10), 12, steel, 3);
-        r.fill(r.oct(12, 38, 72, 20, 7), 4, deep, 1);
-        r.fill(r.rect(18, 45, 60, 6), 5, molten, 0);
-        //collection trough with cast silicon
-        r.fill(r.rect(10, 70, 76, 18), 6, steel, 2);
-        r.fill(r.rect(14, 74, 68, 10), 3, deep, 0);
-        for(int x = 18; x < 80; x += 12) r.fill(r.rect(x, 76, 8, 6), 4, dull(0x53565f), 1);
-        save(r, name);
-        glowOf(r, name);
-        heatLayer(r, name, r.oct(12, 38, 72, 20, 7));
     }
 
     /**

@@ -29,7 +29,7 @@ public class MetallurgyBlocks{
             craftTime = 40f;
             itemCapacity = 20;
             liquidCapacity = 30f;
-            results = with(nickel, 5, chromium, 3, cobalt, 2, molybdenum, 2, vanadium, 2, tungsten, 1);
+            results = with(vanadium, 3, chromium, 2); //steel slag really carries vanadium and chromium
             consumeLiquids(LiquidStack.with(Liquids.slag, 4f / 60f, sulfuricAcid, 2f / 60f));
             consumePower(1.1f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.slag, 3f), new DrawDefault());
@@ -61,6 +61,7 @@ public class MetallurgyBlocks{
             itemCapacity = 10;
             craftTime = 90f;
             consumeLiquid(brine, 6f / 60f);
+            consumeItem(sodaAsh, 1); //lithium carbonate precipitated with soda ash
             consumePower(1f);
             outputItem = new ItemStack(lithium, 1);
             craftEffect = Fx.pulverizeSmall;
@@ -125,24 +126,24 @@ public class MetallurgyBlocks{
             size = 3;
             health = 700;
             itemCapacity = 20;
-            liquidCapacity = 20f;
             recipe(3, 90f, with(nickel, 2, chromium, 1, cobalt, 1), with(hotSuperalloy, 1)).heat(8f);
             recipe(3, 120f, with(superalloyPlate, 2, titaniumRod, 2, titaniumBolt, 2), with(superalloyFrame, 1)).heat(8f);
-            recipe(2, 60f, with(Items.sand, 3), with(hotMetaglass, 3)).liquidsIn(sodiumHydroxide, 2f / 60f).heat(6f);
+            recipe(2, 60f, with(Items.sand, 3, sodaAsh, 1), with(hotMetaglass, 3)).heat(6f); //soda-lime glass: sand with a soda ash flux
             recipe(2, 60f, with(Items.metaglass, 2, Items.titanium, 1), with(hotReinforcedGlass, 1)).heat(5f);
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ffb46b"); }}, new DrawHeatInput());
         }};
 
         // Electric furnace: melting and sintering by electricity alone. AlNiCo magnets (induction), hot tungsten carbide
-        // (sintering) and hot surge superalloy (electric arc). Its cost must not need anything it makes.
+        // (sintering, cobalt binder), silicon (sand reduced with graphite in the arc; CO2 vented) and hot surge superalloy (electric arc). Its cost must not need anything it makes.
         electricFurnace = new RecipeCrafter("electric-furnace"){{
             requirements(Category.crafting, with(Items.lead, 60, Items.titanium, 80, Items.silicon, 60, tungstenRod, 10, heatingCoil, 4, industrialBearing, 5));
             size = 3;
             health = 700;
             itemCapacity = 20;
             recipe(3, 60f, with(aluminium, 1, nickel, 1, cobalt, 1), with(alnicoMagnet, 2));
-            recipe(3, 60f, with(tungsten, 1, Items.graphite, 1), with(hotTungstenCarbide, 1));
+            recipe(3, 120f, with(tungsten, 2, Items.graphite, 2, cobalt, 1), with(hotTungstenCarbide, 2)); //cemented carbide: WC in a cobalt binder
+            recipe(2, 60f, with(Items.sand, 2, Items.graphite, 1), with(hotSilicon, 2)).liquidsOut(carbonDioxide, 1f / 60f).vented(); //SiO2 + C in the arc
             recipe(5, 120f, with(Items.surgeAlloy, 1, superalloy, 2), with(hotSurgeSuperalloy, 1));
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff6a3d"); }});

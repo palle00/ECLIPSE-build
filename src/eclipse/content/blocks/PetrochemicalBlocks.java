@@ -66,7 +66,7 @@ public class PetrochemicalBlocks{
             recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(Liquids.nitrogen, 3f / 60f, Liquids.hydrogen, 9f / 60f)
                 .liquidsOut(ammonia, 6f / 60f).pressure(0.8f);
             recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(carbonDioxide, 3f / 60f, Liquids.hydrogen, 9f / 60f)
-                .liquidsOut(methanol, 4f / 60f).pressure(0.6f);
+                .liquidsOut(methanol, 4f / 60f, wastewater, 2f / 60f).sides(1, 3).pressure(0.6f); //CO2 + 3 H2 -> CH3OH + H2O
             recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(methanol, 8f / 60f)
                 .liquidsOut(propylene, 4f / 60f, wastewater, 3f / 60f).sides(1, 3);
             recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(ammonia, 4f / 60f, oxygen, 8f / 60f)
@@ -88,7 +88,7 @@ public class PetrochemicalBlocks{
             craftTime = 60f;
             heatRequirement = 12f;
             maxEfficiency = 2f;
-            consumeLiquid(acrylonitrile, 4f / 60f);
+            consumeLiquids(LiquidStack.with(acrylonitrile, 4f / 60f, Liquids.nitrogen, 2f / 60f)); //carbonized under nitrogen
             consumePower(1f);
             outputItem = new ItemStack(carbonFiber, 1);
             outputLiquid = new LiquidStack(flueGas, 2f / 60f);
