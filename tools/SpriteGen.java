@@ -57,7 +57,6 @@ public class SpriteGen{
         nozzles("chlor-alkali-cell", 3, "eclipse-chlorine", 0xb6dc4c);
         nozzles("chlor-alkali-cell", 3, "hydrogen", 0x9ab7ff);
 
-        acidSynth("acid-synthesizer");
         leachingVat("acid-leaching-vat");
 
         fuelCellArt("hydrogen-fuel-cell");
@@ -85,7 +84,6 @@ public class SpriteGen{
 
         polymerizationReactor("polymerization-reactor");
         sulfuricPlant("sulfuric-acid-plant");
-        neutralizer("industrial-neutralizer");
 
         methaneTurbine("methane-turbine");
         industrialBattery("industrial-battery");
@@ -102,9 +100,6 @@ public class SpriteGen{
         nozzles("air-separation-unit", 3, "eclipse-oxygen", 0xd8efff);
         pressureReactor("high-pressure-reactor");
         nitricPlant("nitric-acid-plant");
-        nitratePlant("ammonium-nitrate-plant");
-        catalystPlant("catalyst-plant");
-        explosivesPlant("explosives-plant");
 
         // ---- polymer transport assets ----
         for(int i = 0; i < 5; i++) polymer("conduit-top-" + i, "polymer-conduit-top-" + i);
@@ -258,7 +253,6 @@ public class SpriteGen{
         ore("ore-molybdenum", 0x76808f);
         ore("ore-platinum", 0xe4e6ea);
 
-        aquaRegiaMixer("aqua-regia-mixer");
         platinumRefinery("platinum-refinery");
         electricHeater("electric-heater");
         flowBattery("flow-battery");
@@ -289,7 +283,6 @@ public class SpriteGen{
         olefinReactor("olefin-reactor");
         nozzles("olefin-reactor", 3, "eclipse-propylene", 0xe6d3a8);
         nozzles("olefin-reactor", 3, "eclipse-wastewater", 0x6f7f5a);
-        epoxyPlant("epoxy-plant");
         rubberPlant("rubber-plant");
         acrylonitrileReactor("acrylonitrile-reactor");
         carbonFiberFurnace("carbon-fiber-furnace");
@@ -302,7 +295,6 @@ public class SpriteGen{
         pellets("fertilizer", 0xe8e2c8);
         sulfurIcon("enzyme-extract", 0xe86fd0);
         liquid("biofuel", 0xf0e6a0);
-        fertilizerPlant("fertilizer-plant");
         cultivator("biomass-cultivator");
         photobioreactor("algae-photobioreactor");
         enzymeExtractor("enzyme-extractor");
@@ -329,6 +321,7 @@ public class SpriteGen{
         assemblerSprite("assembler");
         blastFurnace("blast-furnace");
         electrolyzerSprite("electrolyzer");
+        chemicalReactorSprite("chemical-reactor");
         electricFurnace("electric-furnace");
         coreAssembler("experimental-core-assembler");
         componentDepotArt("component-depot");
@@ -2940,6 +2933,26 @@ public class SpriteGen{
     }
 
     /**
+     * Chemical Reactor (2×2): a round stirred vessel with a window onto its contents, the stirrer drive on top and feed
+     * and outlet nozzles round it.
+     */
+    static void chemicalReactorSprite(String name) throws IOException{
+        int s = 2 * T;
+        float c = s / 2f;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 4, 5, metal);
+        r.fill(r.circle(c, c, 25), 9, steel, 3);
+        r.fill(r.ring(c, c, 19, 21), 6, deep, 0);
+        liquidWindow(r, r.circle(c, c, 17), 10);
+        r.fill(r.circle(c, c, 6), 13, metal, 2);
+        r.fill(r.bar(c, c, 0, 14, 3, 0), 14, steel, 1);
+        for(int i = 0; i < 4; i++) r.fill(r.bar(c, c, 24, 6, 6, i * 90 + 45), 11, steel, 2);
+        save(r, name);
+        glowOf(r, name);
+        liquidBottom(name, s);
+    }
+
+    /**
      * Electrolyzer (3×3): a row of electrolytic cells in a liquid bath (seen through the windows), each with its pair of
      * electrodes, a bus bar across the top feeding them, and gas outlets on the sides.
      */
@@ -4351,22 +4364,6 @@ public class SpriteGen{
         heatLayer(r, name, r.rect(24, 22, 48, 52));
     }
 
-    static void catalystPlant(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 5, metal);
-        vessel(r, 26, 34, 18, 10, metal);
-        liquidWindow(r, r.circle(26, 34, 7), 12);
-        //replaceable catalyst cartridges
-        for(int y : new int[]{8, 26, 44}){
-            r.fill(r.rect(48, y, 12, 14), 11, steel, 2);
-            r.fill(r.rect(51, y + 3, 6, 8), 12, acc(0xb07ad6), 1);
-        }
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
     static void polymerizationReactor(String name) throws IOException{
         int s = 3 * T;
         float c = s / 2f;
@@ -4414,22 +4411,6 @@ public class SpriteGen{
         r.fill(r.oct(18, 14, 60, 68, 10), 12, steel, 3);
         liquidWindow(r, r.rect(26, 24, 44, 26), 13);
         for(int x = 30; x < 68; x += 8) r.fill(r.rect(x, 56, 4, 18), 13, metal, 1);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
-    static void epoxyPlant(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 5, metal);
-        //mixing kettle (left) and curing compartment (right)
-        r.fill(r.circle(20, 24, 16), 10, steel, 3);
-        liquidWindow(r, r.circle(20, 24, 9), 11);
-        r.fill(r.rect(38, 8, 22, 48), 10, steel, 3);
-        r.fill(r.rect(42, 14, 14, 36), 4, deep, 0);
-        for(int y = 17; y < 48; y += 8) r.fill(r.rect(43, y, 12, 5), 5, acc(0xe0a94a), 1);
-        r.fill(r.rect(10, 46, 22, 10), 8, metal, 1);
         save(r, name);
         glowOf(r, name);
         liquidBottom(name, s);
@@ -4668,23 +4649,6 @@ public class SpriteGen{
         liquidBottom(name, s);
     }
 
-    static void acidSynth(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 6, metal);
-        //hydrogen and chlorine meet in a dark burner; acid leaves at the bottom
-        stub(r, 2, 14, 12, acc(0xe8edf0));
-        stub(r, 0, 14, 12, acc(0xb6dc4c));
-        r.fill(r.oct(12, 10, 40, 36, 6), 11, steel, 3);
-        r.fill(r.oct(18, 16, 28, 24, 4), 4, deep, 1);
-        r.fill(r.circle(32, 28, 5), 5, lit(0xdfe882), 0);
-        r.fill(r.rect(22, 48, 20, 12), 9, metal, 2);
-        liquidWindow(r, r.rect(26, 51, 12, 6), 10);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
     static void leachingVat(String name) throws IOException{
         int s = 3 * T;
         float c = s / 2f;
@@ -4811,27 +4775,6 @@ public class SpriteGen{
         liquidBottom(name, s);
     }
 
-    static void aquaRegiaMixer(String name) throws IOException{
-        int s = 2 * T;
-        float c = s / 2f;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 6, steel);
-        //a small, heavily sealed mixing vessel; two acid feeds; a tiny window
-        stub(r, 1, 12, 12, acc(0xdfe882));
-        stub(r, 1, 40, 12, acc(0xf0d98c));
-        r.fill(r.circle(c, c, 22), 11, metal, 4);
-        for(int i = 0; i < 8; i++) r.fill(r.bar(c, c, 18, 4, 4, i * 45 + 22.5f), 13, steel, 0);
-        r.fill(r.circle(c, c, 13), 12, steel, 2);
-        liquidWindow(r, r.circle(c, c, 6), 13);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-        R rot = canvas(s);
-        rot.fill(rot.bar(c, c, 0, 11, 3, 45), 14, metal, 0);
-        rot.fill(rot.bar(c, c, 0, 11, 3, 225), 14, metal, 0);
-        save(rot, name + "-rotator");
-    }
-
     static void platinumRefinery(String name) throws IOException{
         int s = 2 * T;
         R r = canvas(s);
@@ -4867,53 +4810,6 @@ public class SpriteGen{
         for(int i = 0; i < 8; i++) r.fill(r.bar(c, c + 2, 30, 10, 10, i * 45), 15, steel, 2);
         r.fill(r.circle(c, c + 2, 24), 14, steel, 3);
         liquidWindow(r, r.circle(c, c + 2, 14), 15);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
-    static void nitratePlant(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 5, metal);
-        //neutraliser vessel and a crystalliser bin with pale granules
-        r.fill(r.circle(20, 22, 15), 10, steel, 3);
-        liquidWindow(r, r.circle(20, 22, 8), 11);
-        r.fill(r.rect(38, 8, 22, 48), 9, metal, 2);
-        r.fill(r.rect(42, 12, 14, 40), 4, deep, 0);
-        for(int[] g : new int[][]{{44, 40}, {49, 44}, {45, 47}, {51, 38}, {47, 34}}) r.fill(r.rect(g[0], g[1], 3, 3), 5, dull(0xe8edf0), 1);
-        r.fill(r.rect(8, 44, 24, 14), 8, metal, 2);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
-    static void explosivesPlant(String name) throws IOException{
-        int s = 2 * T;
-        float c = s / 2f;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 6, steel);
-        //a reinforced sealed mixer: thick bands, a feed region, small orange status markers
-        r.fill(r.rect(4, 4, 56, 12), 10, metal, 2);
-        for(int x = 8; x < 56; x += 12) r.fill(r.rect(x, 7, 8, 6), 6, deep, 0);
-        r.fill(r.circle(c, c + 6, 22), 11, metal, 4);
-        r.fill(r.ring(c, c + 6, 15, 19), 13, steel, 2);
-        r.fill(r.circle(c, c + 6, 9), 12, metal, 2);
-        for(int i = 0; i < 4; i++) r.fill(r.bar(c, c + 6, 20, 3, 4, i * 90 + 45), 14, lit(0xff795e), 0);
-        save(r, name);
-        glowOf(r, name);
-    }
-
-    static void fertilizerPlant(String name) throws IOException{
-        int s = 2 * T;
-        float c = s / 2f;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 5, metal);
-        //granulator drum (turns) with a small granule outlet
-        r.fill(r.oct(6, 8, 52, 44, 8), 9, steel, 3);
-        liquidWindow(r, r.oct(12, 14, 40, 32, 6), 10);
-        r.fill(r.rect(24, 52, 16, 10), 8, metal, 2);
-        r.fill(r.rect(28, 55, 8, 4), 9, dull(0xb8a878), 1);
         save(r, name);
         glowOf(r, name);
         liquidBottom(name, s);

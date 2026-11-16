@@ -88,19 +88,18 @@ public class MenuOrder{
             coreAssembler); //mechanical manufacturing
         after(Blocks.siliconSmelter, siliconReductionFurnace, siliconRefinery, chipFabricator, circuitAssembler);
         after(Blocks.plastaniumCompressor, //oil -> petrochemicals and heat
-            distillationColumn, industrialHeater, electricHeater, geothermalHeatTap, heatExchanger, thermalStorage, steamCracker, catalystPlant,
-            polymerizationReactor, methanolSynthesizer, olefinReactor, epoxyPlant, rubberPlant, acrylonitrileReactor,
+            distillationColumn, industrialHeater, electricHeater, geothermalHeatTap, heatExchanger, thermalStorage, steamCracker,
+            polymerizationReactor, methanolSynthesizer, olefinReactor, rubberPlant, acrylonitrileReactor,
             carbonFiberFurnace, compositePress, sulfuricAcidPlant);
         after(Blocks.phaseWeaver, reprocessingPlant); //thorium -> nuclear fuel
         after(Blocks.surgeSmelter, blastFurnace, electricFurnace);
         after(Blocks.pulverizer, oreCrusher, oreWasher);
         after(Blocks.cryofluidMixer, //water -> chemical industry
-            coolingTower, waterTreatmentPlant, electrolyzer, airSeparationUnit, cryogenicCondenser, vacuumFreezer, highPressureReactor, nitricAcidPlant, acidSynthesizer, acidLeachingVat, industrialNeutralizer, industrialScrubber, gasSeparator,
-            wastewaterTreatmentPlant, thermalWasteProcessor, lithiumExtractor, aluminaRefinery,
-            aquaRegiaMixer, platinumRefinery, synthesisComplex);
-        after(Blocks.blastMixer, ammoniumNitratePlant, explosivesPlant);
+            coolingTower, waterTreatmentPlant, electrolyzer, chemicalReactor, airSeparationUnit, cryogenicCondenser, vacuumFreezer, highPressureReactor, nitricAcidPlant, acidLeachingVat, industrialScrubber, gasSeparator,
+            wastewaterTreatmentPlant, thermalWasteProcessor, lithiumExtractor, aluminaRefinery, platinumRefinery, synthesisComplex);
+        after(Blocks.blastMixer);
         after(Blocks.separator, chlorideTitaniumPlant, mineralSeparator);
-        after(Blocks.sporePress, fertilizerPlant, enzymeExtractor, biochemicalFermenter, anaerobicDigester); //biology
+        after(Blocks.sporePress, enzymeExtractor, biochemicalFermenter, anaerobicDigester); //biology
         after(Blocks.incinerator, basicModuleAssembler, advancedModuleAssembler, experimentalFacility, aetheriteForge, moduleRecycler); //augmentation section
 
         //---- environment (map editor) ----

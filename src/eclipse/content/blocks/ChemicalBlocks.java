@@ -17,10 +17,10 @@ import static mindustry.type.ItemStack.*;
 /** Inorganic chemical industry: water chemistry, chlor-alkali, acids, nitrogen chemistry, electrochemistry and waste treatment. */
 public class ChemicalBlocks{
     public static Block
-    waterTreatmentPlant, acidSynthesizer, acidLeachingVat,
-    sulfuricAcidPlant, industrialNeutralizer,
-    airSeparationUnit, highPressureReactor, cryogenicCondenser, nitricAcidPlant, aquaRegiaMixer, ammoniumNitratePlant, explosivesPlant,
-    industrialScrubber, gasSeparator, wastewaterTreatmentPlant, thermalWasteProcessor, electrolyzer;
+    waterTreatmentPlant, acidLeachingVat,
+    sulfuricAcidPlant,
+    airSeparationUnit, highPressureReactor, cryogenicCondenser, nitricAcidPlant,
+    industrialScrubber, gasSeparator, wastewaterTreatmentPlant, thermalWasteProcessor, electrolyzer, chemicalReactor;
 
     public static void load(){
         // Water -> purified water + brine concentrate (reverse osmosis style).
@@ -36,6 +36,27 @@ public class ChemicalBlocks{
             outputLiquids = LiquidStack.with(purifiedWater, 13f / 60f, brine, 5f / 60f);
             liquidOutputDirections = new int[]{1, 3};
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 3f), new DrawDefault(), new DrawLiquidOutputs());
+        }};
+
+        // Small-batch chemistry: hydrochloric acid (H2 + Cl2), aqua regia (3 HCl : 1 HNO3), neutralizing acidic waste with
+        // sodium hydroxide, ammonium nitrate (NH3 + HNO3), ammonium sulfate fertilizer (NH3 + H2SO4), the titanium chloride
+        // polymerization catalyst, epoxy resin (propylene + chlorine, cured with NaOH; wastewater out) and blast compound.
+        chemicalReactor = new RecipeCrafter("chemical-reactor"){{
+            requirements(Category.crafting, with(Items.lead, 60, Items.titanium, 40, Items.metaglass, 40, Items.silicon, 30, pressureCasing, 5));
+            size = 2;
+            health = 320;
+            itemCapacity = 10;
+            liquidCapacity = 20f;
+            recipe(2, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(Liquids.hydrogen, 3f / 60f, chlorine, 3f / 60f).liquidsOut(hydrochloricAcid, 6f / 60f);
+            recipe(2, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(acidicWaste, 6f / 60f, sodiumHydroxide, 3f / 60f).liquidsOut(Liquids.water, 8f / 60f);
+            recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(hydrochloricAcid, 6f / 60f, nitricAcid, 2f / 60f).liquidsOut(aquaRegia, 8f / 60f);
+            recipe(3, 60f, ItemStack.empty, with(ammoniumNitrate, 1)).liquidsIn(ammonia, 3f / 60f, nitricAcid, 3f / 60f);
+            recipe(3, 60f, ItemStack.empty, with(fertilizer, 2)).liquidsIn(ammonia, 3f / 60f, sulfuricAcid, 3f / 60f);
+            recipe(3, 120f, with(Items.titanium, 1), with(polymerCatalyst, 1)).liquidsIn(chlorine, 3f / 60f);
+            recipe(3, 90f, ItemStack.empty, with(epoxyResin, 1)).liquidsIn(propylene, 3f / 60f, chlorine, 3f / 60f, sodiumHydroxide, 2f / 60f)
+                .liquidsOut(wastewater, 2f / 60f);
+            recipe(3, 60f, with(ammoniumNitrate, 2, Items.coal, 1), with(Items.blastCompound, 2));
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(), new DrawDefault());
         }};
 
         // Electrolysis of every kind: water into hydrogen (left) and oxygen (right); brine into chlorine (left), hydrogen
@@ -55,18 +76,6 @@ public class ChemicalBlocks{
             recipe(2, 60f, with(Items.scrap, 2), with(Items.copper, 2, Items.lead, 1)).liquidsIn(sulfuricAcid, 4f / 60f).liquidsOut(acidicWaste, 1f / 60f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 4f),
                 new DrawBubbles(Color.valueOf("ffffff")){{ amount = 14; radius = 6f; spread = 10f; }}, new DrawDefault());
-        }};
-
-        // H2 + Cl2 -> HCl.
-        acidSynthesizer = new GenericCrafter("acid-synthesizer"){{
-            requirements(Category.crafting, with(Items.lead, 50, Items.titanium, 30, Items.metaglass, 40, Items.silicon, 20, pressureCasing, 5));
-            size = 2;
-            health = 300;
-            liquidCapacity = 30f;
-            consumeLiquids(LiquidStack.with(Liquids.hydrogen, 3f / 60f, chlorine, 3f / 60f));
-            consumePower(0.3f);
-            outputLiquid = new LiquidStack(hydrochloricAcid, 6f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(hydrochloricAcid, 3f), new DrawDefault());
         }};
 
         // Scrap + HCl -> titanium + copper + lead, leaving acidic waste.
@@ -103,18 +112,6 @@ public class ChemicalBlocks{
             consumePower(0.5f);
             outputLiquid = new LiquidStack(sulfuricAcid, 8f / 60f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(sulfuricAcid, 3f), new DrawDefault(), new DrawHeatOutput());
-        }};
-
-        // Acidic waste + sodium hydroxide -> water.
-        industrialNeutralizer = new GenericCrafter("industrial-neutralizer"){{
-            requirements(Category.crafting, with(Items.lead, 50, Items.titanium, 30, Items.metaglass, 40, pressureCasing, 5));
-            size = 2;
-            health = 320;
-            liquidCapacity = 30f;
-            consumeLiquids(LiquidStack.with(acidicWaste, 6f / 60f, sodiumHydroxide, 3f / 60f));
-            consumePower(0.2f);
-            outputLiquid = new LiquidStack(Liquids.water, 8f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(acidicWaste, 3f), new DrawDefault());
         }};
 
         // ---- nitrogen chemistry ----
@@ -182,46 +179,6 @@ public class ChemicalBlocks{
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(nitricAcid, 3f), new DrawDefault());
         }};
 
-        // 3 HCl + 1 HNO3 -> aqua regia.
-        aquaRegiaMixer = new GenericCrafter("aqua-regia-mixer"){{
-            requirements(Category.crafting, with(polyethylene, 30, Items.titanium, 30, Items.metaglass, 30, pressureCasing, 5));
-            size = 2;
-            health = 300;
-            liquidCapacity = 30f;
-            consumeLiquids(LiquidStack.with(hydrochloricAcid, 6f / 60f, nitricAcid, 2f / 60f));
-            consumePower(0.2f);
-            outputLiquid = new LiquidStack(aquaRegia, 8f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(aquaRegia, 3f), new DrawDefault());
-        }};
-
-        // NH3 + HNO3 -> ammonium nitrate.
-        ammoniumNitratePlant = new GenericCrafter("ammonium-nitrate-plant"){{
-            requirements(Category.crafting, with(Items.lead, 50, Items.titanium, 40, Items.metaglass, 30, Items.silicon, 30, titaniumGear, 5, pressureCasing, 5));
-            size = 2;
-            health = 320;
-            liquidCapacity = 30f;
-            itemCapacity = 10;
-            craftTime = 60f;
-            consumeLiquids(LiquidStack.with(ammonia, 3f / 60f, nitricAcid, 3f / 60f));
-            consumePower(0.3f);
-            outputItem = new ItemStack(ammoniumNitrate, 1);
-            craftEffect = Fx.pulverizeSmall;
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(nitricAcid, 3f), new DrawDefault());
-        }};
-
-        // Ammonium nitrate + coal -> blast compound (an alternative to the vanilla blast mixer).
-        explosivesPlant = new GenericCrafter("explosives-plant"){{
-            requirements(Category.crafting, with(Items.lead, 60, Items.titanium, 40, Items.silicon, 30, Items.graphite, 30, titaniumGear, 10));
-            size = 2;
-            health = 280;
-            itemCapacity = 10;
-            craftTime = 60f;
-            consumeItems(with(ammoniumNitrate, 2, Items.coal, 1));
-            consumePower(0.4f);
-            outputItem = new ItemStack(Items.blastCompound, 2);
-            craftEffect = Fx.pulverizeSmall;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff795e"); }});
-        }};
     
         // ---- waste and emissions (flue gas comes from methane turbines and industrial heaters) ----
 

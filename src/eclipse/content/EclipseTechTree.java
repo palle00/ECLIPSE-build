@@ -51,15 +51,10 @@ public class EclipseTechTree{
         TechNode airSeparation = child(electrolysis, airSeparationUnit);
         TechNode haber = child(airSeparation, highPressureReactor);
         TechNode nitric = child(haber, nitricAcidPlant);
-        TechNode aquaRegiaNode = child(nitric, aquaRegiaMixer);
-        child(aquaRegiaNode, platinumRefinery);
-        TechNode nitrate = child(nitric, ammoniumNitratePlant);
-        child(nitrate, explosivesPlant);
+        child(nitric, platinumRefinery);
         TechNode chlorAlkali = electrolysis;
-        child(chlorAlkali, catalystPlant);
-        TechNode acid = child(chlorAlkali, acidSynthesizer);
-        TechNode leaching = child(acid, acidLeachingVat);
-        child(leaching, industrialNeutralizer);
+        TechNode acid = child(chlorAlkali, chemicalReactor); //HCl, aqua regia, neutralizing, nitrates, fertilizer, catalyst, epoxy, explosives
+        child(acid, acidLeachingVat);
 
         TechNode distillation = child(treatment, distillationColumn);
         child(distillation, methaneTurbine);
@@ -169,7 +164,6 @@ public class EclipseTechTree{
 
         //organic chemistry and composites
         TechNode olefin = child(child(separatorNode, methanolSynthesizer), olefinReactor);
-        child(olefin, epoxyPlant);
         TechNode rubber = child(olefin, rubberPlant);
         TechNode press = child(child(child(rubber, acrylonitrileReactor), carbonFiberFurnace), compositePress);
         child(child(press, compositeWall), compositeWallLarge);
@@ -177,8 +171,7 @@ public class EclipseTechTree{
         child(wastewaterNode, thermalWasteProcessor);
 
         //biology: fertilizer from the nitrogen industry, biomass, enzymes, fermentation, digestion
-        TechNode fertilizerNode = child(haber, fertilizerPlant);
-        TechNode cultivator = child(fertilizerNode, biomassCultivator);
+        TechNode cultivator = child(haber, biomassCultivator); //fertilizer comes from the Chemical Reactor
         child(cultivator, algaePhotobioreactor);
         TechNode enzymes = child(cultivator, enzymeExtractor);
         child(child(enzymes, biochemicalFermenter), biofuelEngine);

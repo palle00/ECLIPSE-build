@@ -15,8 +15,8 @@ import static mindustry.type.ItemStack.*;
 
 /** Organic chemistry: oil refining, cracking, catalysts, polymers, methanol chemistry and carbon composites. */
 public class PetrochemicalBlocks{
-    public static Block distillationColumn, steamCracker, catalystPlant, polymerizationReactor,
-        methanolSynthesizer, olefinReactor, epoxyPlant, rubberPlant, acrylonitrileReactor, carbonFiberFurnace, compositePress,
+    public static Block distillationColumn, steamCracker, polymerizationReactor,
+        methanolSynthesizer, olefinReactor, rubberPlant, acrylonitrileReactor, carbonFiberFurnace, compositePress,
         compositeWall, compositeWallLarge;
 
     public static void load(){
@@ -49,22 +49,6 @@ public class PetrochemicalBlocks{
             consumeLiquids(LiquidStack.with(naphtha, 6f / 60f, purifiedWater, 2f / 60f));
             outputLiquid = new LiquidStack(ethylene, 5f / 60f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(naphtha, 4f), new DrawDefault(), new DrawHeatInput());
-        }};
-
-        // Titanium + chlorine -> Ziegler-Natta catalyst (titanium chloride based).
-        catalystPlant = new GenericCrafter("catalyst-plant"){{
-            requirements(Category.crafting, with(Items.lead, 60, Items.titanium, 50, Items.silicon, 50, Items.metaglass, 30, pressureCasing, 5, titaniumGear, 5));
-            size = 2;
-            health = 300;
-            liquidCapacity = 20f;
-            itemCapacity = 10;
-            craftTime = 120f;
-            consumeItem(Items.titanium, 1);
-            consumeLiquid(chlorine, 3f / 60f);
-            consumePower(1f);
-            outputItem = new ItemStack(polymerCatalyst, 1);
-            craftEffect = Fx.pulverizeSmall;
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(chlorine, 3f), new DrawDefault());
         }};
 
         // Ethylene -> polyethylene over a reusable catalyst.
@@ -115,22 +99,6 @@ public class PetrochemicalBlocks{
             outputLiquids = LiquidStack.with(propylene, 4f / 60f, wastewater, 3f / 60f);
             liquidOutputDirections = new int[]{1, 3};
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(methanol, 4f), new DrawDefault(), new DrawLiquidOutputs());
-        }};
-
-        // Propylene + chlorine -> epichlorohydrin, cured with sodium hydroxide -> epoxy resin. Salty wastewater remains.
-        epoxyPlant = new GenericCrafter("epoxy-plant"){{
-            requirements(Category.crafting, with(Items.lead, 60, Items.metaglass, 40, Items.titanium, 50, polyethylene, 20, pressureCasing, 5, pumpUnit, 1));
-            size = 2;
-            health = 340;
-            liquidCapacity = 30f;
-            itemCapacity = 10;
-            craftTime = 90f;
-            consumeLiquids(LiquidStack.with(propylene, 3f / 60f, chlorine, 3f / 60f, sodiumHydroxide, 2f / 60f));
-            consumePower(0.8f);
-            outputItem = new ItemStack(epoxyResin, 1);
-            outputLiquid = new LiquidStack(wastewater, 2f / 60f);
-            craftEffect = Fx.pulverizeSmall;
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(propylene, 3f), new DrawDefault());
         }};
 
         // Ethylene + propylene over the Ziegler-Natta catalyst -> EPDM rubber, vulcanized with sulfur.

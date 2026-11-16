@@ -19,25 +19,10 @@ import static mindustry.type.ItemStack.*;
  * Closes loops with the rest of the mod: algae eat captured CO2, digesters turn industrial sludge back into methane.
  */
 public class BiologyBlocks{
-    public static Block fertilizerPlant, biomassCultivator, algaePhotobioreactor, enzymeExtractor, biochemicalFermenter,
+    public static Block biomassCultivator, algaePhotobioreactor, enzymeExtractor, biochemicalFermenter,
         biofuelEngine, anaerobicDigester;
 
     public static void load(){
-        // NH3 + H2SO4 -> ammonium sulfate fertilizer.
-        fertilizerPlant = new GenericCrafter("fertilizer-plant"){{
-            requirements(Category.crafting, with(Items.lead, 50, Items.titanium, 30, Items.metaglass, 30, Items.silicon, 20, pressureCasing, 5, titaniumRod, 10));
-            size = 2;
-            health = 300;
-            liquidCapacity = 30f;
-            itemCapacity = 10;
-            craftTime = 60f;
-            consumeLiquids(LiquidStack.with(ammonia, 3f / 60f, sulfuricAcid, 3f / 60f));
-            consumePower(0.4f);
-            outputItem = new ItemStack(fertilizer, 2);
-            craftEffect = Fx.pulverizeSmall;
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(sulfuricAcid, 3f), new DrawDefault());
-        }};
-
         // Purified water + fertilizer under grow lights -> biomass. Works on any floor, unlike the vanilla cultivator.
         biomassCultivator = new AttributeCrafter("biomass-cultivator"){{
             attribute = Attribute.spores; //faster on spore moss and moss
