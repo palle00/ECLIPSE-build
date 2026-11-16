@@ -41,7 +41,7 @@ public class NuclearBlocks{
             liquidCapacity = 30f;
             craftTime = 120f;
             consumeItem(spentFuelRod, 1);
-            consumeLiquid(nitricAcid, 4f / 60f);
+            consumeLiquids(LiquidStack.with(nitricAcid, 4f / 60f, diesel, 1f / 60f)); //PUREX: the extractant is carried in a kerosene-like diluent
             consumePower(2f);
             outputItem = new ItemStack(Items.thorium, 2);
             outputLiquid = new LiquidStack(acidicWaste, 3f / 60f);

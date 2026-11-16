@@ -107,7 +107,7 @@ public class MenuOrder{
         //---- items (core inventory, item pickers); augmentation modules stay at the end as their own group ----
         after(Items.metaglass, hotMetaglass, hotReinforcedGlass, reinforcedGlass);
         after(Items.sand, sodaAsh);
-        after(Items.coal, sulfur);
+        after(Items.coal, sulfur, petroleumCoke);
         after(Items.copper, copperGear, copperWire, magnetWire, insulatedCable, copperPlate, copperFoil);
         after(Items.lead, leadPlate);
         after(Items.titanium, hotTitanium, titaniumRod, titaniumGear, titaniumPlate, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, rotor, electricMotor, pumpUnit, piston, pressureCasing, industrialBearing, nickel, chromium, cobalt, molybdenum, vanadium, tungsten, tungstenPlate, tungstenRod, hotTungstenCarbide, tungstenCarbide, alumina, hotAluminium, aluminium, aluminiumPlate, aluminiumFoil, aluminiumWire, lithium, hotSuperalloy, superalloy, superalloyPlate, superalloyGear, superalloyFrame, alnicoMagnet, permanentMagnetMotor, heatingCoil, platinum);
@@ -123,8 +123,8 @@ public class MenuOrder{
         //---- liquids ----
         after(Liquids.water, chilledWater, purifiedWater, EclipseLiquids.steam, brine, sodiumHydroxide, chlorine, hydrochloricAcid, sulfuricAcid, acidicWaste,
             wastewater, ammonia, nitricAcid, aquaRegia);
-        after(Liquids.oil, methane, naphtha, ethylene, flueGas, carbonDioxide, methanol, propylene, acrylonitrile, biofuel);
-        after(Liquids.cryofluid, oxygen, liquidNitrogen);
+        after(Liquids.oil, methane, naphtha, diesel, ethylene, flueGas, carbonDioxide, methanol, propylene, acrylonitrile, biofuel);
+        after(Liquids.cryofluid, oxygen, argon, liquidNitrogen);
 
         apply(ContentType.block);
         apply(ContentType.item);

@@ -144,7 +144,8 @@ public class MetallurgyBlocks{
             recipe(3, 60f, with(aluminium, 1, nickel, 1, cobalt, 1), with(alnicoMagnet, 2));
             recipe(3, 120f, with(tungsten, 2, Items.graphite, 2, cobalt, 1), with(hotTungstenCarbide, 2)); //cemented carbide: WC in a cobalt binder
             recipe(2, 60f, with(Items.sand, 2, Items.graphite, 1), with(hotSilicon, 2)).liquidsOut(carbonDioxide, 1f / 60f).vented(); //SiO2 + C in the arc
-            recipe(5, 120f, with(Items.surgeAlloy, 1, superalloy, 2), with(hotSurgeSuperalloy, 1));
+            recipe(5, 120f, with(Items.surgeAlloy, 1, superalloy, 2), with(hotSurgeSuperalloy, 1)).liquidsIn(argon, 1f / 60f); //arc under argon
+            recipe(3, 120f, with(petroleumCoke, 2), with(Items.graphite, 2)); //coke graphitized in the electric furnace
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff6a3d"); }});
         }};

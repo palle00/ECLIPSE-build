@@ -11,7 +11,8 @@ public class EclipseLiquids{
         methane, naphtha, ethylene, sulfuricAcid, sodiumHydroxide, acidicWaste,
         ammonia, nitricAcid, steam, liquidNitrogen, aquaRegia,
         flueGas, carbonDioxide, wastewater,
-        methanol, propylene, acrylonitrile, biofuel, chilledWater;
+        methanol, propylene, acrylonitrile, biofuel, chilledWater,
+        diesel, argon;
 
     public static void load(){
         steam = new Liquid("steam", Color.valueOf("e8edf0")){{
@@ -177,6 +178,18 @@ public class EclipseLiquids{
             heatCapacity = 0.6f;
             effect = StatusEffects.wet;
             coolant = true;
+        }};
+
+        //a middle distillate of crude oil: the fuel in ANFO and the solvent carrier in fuel reprocessing
+        diesel = new Liquid("diesel", Color.valueOf("d8b25e")){{
+            flammability = 1f;
+            explosiveness = 0.4f;
+            viscosity = 0.6f;
+        }};
+
+        //about 1% of air: the inert shielding gas of electric arcs
+        argon = new Liquid("argon", Color.valueOf("c9d6ff")){{
+            gas = true;
         }};
     }
 }

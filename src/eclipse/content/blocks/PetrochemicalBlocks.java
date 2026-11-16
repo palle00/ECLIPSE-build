@@ -31,9 +31,11 @@ public class PetrochemicalBlocks{
             craftTime = 60f;
             consumeLiquid(Liquids.oil, 12f / 60f);
             consumePower(1f);
-            outputLiquids = LiquidStack.with(naphtha, 6f / 60f, methane, 4f / 60f);
-            liquidOutputDirections = new int[]{1, 3};
-            outputItem = new ItemStack(sulfur, 1);
+            //refinery gas (methane), naphtha and diesel; the residue is coked, and the sulfur is recovered from the sour gas
+            //(hydrodesulfurization and a Claus unit, folded into the column)
+            outputLiquids = LiquidStack.with(naphtha, 6f / 60f, methane, 4f / 60f, diesel, 3f / 60f);
+            liquidOutputDirections = new int[]{1, 3, 0};
+            outputItems = with(sulfur, 1, petroleumCoke, 1);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.oil, 4f), new DrawDefault(), new DrawLiquidOutputs());
         }};
 

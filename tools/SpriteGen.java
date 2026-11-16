@@ -51,11 +51,7 @@ public class SpriteGen{
         nozzles("water-treatment-plant", 2, "eclipse-purified-water", 0x8fd3ff);
         nozzles("water-treatment-plant", 2, "eclipse-brine", 0xa7c9b4);
 
-        nozzles("electrolysis-plant", 3, "hydrogen", 0x9ab7ff);
-        nozzles("electrolysis-plant", 3, "eclipse-oxygen", 0xd8efff);
 
-        nozzles("chlor-alkali-cell", 3, "eclipse-chlorine", 0xb6dc4c);
-        nozzles("chlor-alkali-cell", 3, "hydrogen", 0x9ab7ff);
 
         leachingVat("acid-leaching-vat");
 
@@ -68,16 +64,18 @@ public class SpriteGen{
 
         gas("methane", 0xc4b3e6);
         liquid("naphtha", 0xd9a45a);
+        liquid("diesel", 0xd8b25e);
+        gas("argon", 0xc9d6ff);
         gas("ethylene", 0xaee3cf);
         liquid("sulfuric-acid", 0xe8b84a);
         liquid("sodium-hydroxide", 0xd8dff0);
         liquid("acidic-waste", 0x8f8a3a);
 
-        nozzles("chlor-alkali-cell", 3, "eclipse-sodium-hydroxide", 0xd8dff0);
 
         distillationColumn("distillation-column");
         nozzles("distillation-column", 3, "eclipse-naphtha", 0xd9a45a);
         nozzles("distillation-column", 3, "eclipse-methane", 0xc4b3e6);
+        nozzles("distillation-column", 3, "eclipse-diesel", 0xd8b25e);
 
         steamCracker("steam-cracker");
         edgeGlow("steam-cracker-heat", 3);
@@ -92,11 +90,13 @@ public class SpriteGen{
         sulfurIcon("polymer-catalyst", 0xb07ad6);
         pellets("ammonium-nitrate", 0xf2efe4);
         pellets("soda-ash", 0xf2f0ea);
+        pellets("petroleum-coke", 0x33333a);
         gas("ammonia", 0xc9e6f2);
         liquid("nitric-acid", 0xf0d98c);
 
         airSeparation("air-separation-unit");
         nozzles("air-separation-unit", 3, "nitrogen", 0xefefef);
+        nozzles("air-separation-unit", 3, "eclipse-argon", 0xc9d6ff);
         nozzles("air-separation-unit", 3, "eclipse-oxygen", 0xd8efff);
 
         // ---- polymer transport assets ----
@@ -277,8 +277,6 @@ public class SpriteGen{
         sulfurIcon("epoxy-resin", 0xe0a94a);
         pane("carbon-fiber", 0x2b2d33);
         ingot("carbon-composite", 0x4a5260);
-        nozzles("olefin-reactor", 3, "eclipse-propylene", 0xe6d3a8);
-        nozzles("olefin-reactor", 3, "eclipse-wastewater", 0x6f7f5a);
         carbonFiberFurnace("carbon-fiber-furnace");
         compositePress("composite-press");
         wallArt("composite-wall", 1, 1);

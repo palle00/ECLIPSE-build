@@ -55,7 +55,7 @@ public class ChemicalBlocks{
             recipe(3, 120f, with(Items.titanium, 1), with(polymerCatalyst, 1)).liquidsIn(chlorine, 3f / 60f);
             recipe(3, 90f, ItemStack.empty, with(epoxyResin, 1)).liquidsIn(propylene, 3f / 60f, chlorine, 3f / 60f, sodiumHydroxide, 2f / 60f)
                 .liquidsOut(wastewater, 2f / 60f);
-            recipe(3, 60f, with(ammoniumNitrate, 2, Items.coal, 1), with(Items.blastCompound, 2));
+            recipe(3, 60f, with(ammoniumNitrate, 2), with(Items.blastCompound, 2)).liquidsIn(diesel, 1f / 60f); //ANFO: ammonium nitrate + fuel oil
             recipe(2, 60f, ItemStack.empty, with(sodaAsh, 1)).liquidsIn(sodiumHydroxide, 4f / 60f, carbonDioxide, 2f / 60f); //2 NaOH + CO2 -> Na2CO3 + H2O
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(), new DrawDefault());
         }};
@@ -73,7 +73,7 @@ public class ChemicalBlocks{
                 .liquidsOut(Liquids.hydrogen, 8f / 60f, oxygen, 4f / 60f).sides(1, 3);
             recipe(2, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(brine, 6f / 60f)
                 .liquidsOut(chlorine, 3f / 60f, Liquids.hydrogen, 3f / 60f, sodiumHydroxide, 6f / 60f).sides(1, 3, 0); //2 NaCl + 2 H2O -> Cl2 + H2 + 2 NaOH
-            recipe(3, 60f, with(alumina, 2, Items.graphite, 1), with(hotAluminium, 1)).liquidsOut(carbonDioxide, 1f / 60f).vented(); //the graphite anodes burn to CO2
+            recipe(3, 60f, with(alumina, 2, petroleumCoke, 1), with(hotAluminium, 1)).liquidsOut(carbonDioxide, 1f / 60f).vented(); //the coke anodes burn to CO2
             recipe(2, 60f, with(Items.scrap, 2), with(Items.copper, 2, Items.lead, 1)).liquidsIn(sulfuricAcid, 4f / 60f).liquidsOut(acidicWaste, 1f / 60f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 4f),
                 new DrawBubbles(Color.valueOf("ffffff")){{ amount = 14; radius = 6f; spread = 10f; }}, new DrawDefault());
@@ -127,8 +127,8 @@ public class ChemicalBlocks{
             liquidCapacity = 40f;
             consumeLiquid(Liquids.cryofluid, 1f / 60f);
             consumePower(3f);
-            outputLiquids = LiquidStack.with(Liquids.nitrogen, 8f / 60f, oxygen, 2f / 60f);
-            liquidOutputDirections = new int[]{1, 3};
+            outputLiquids = LiquidStack.with(Liquids.nitrogen, 8f / 60f, oxygen, 2f / 60f, argon, 0.5f / 60f);
+            liquidOutputDirections = new int[]{1, 3, 0};
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.cryofluid, 4f), new DrawDefault(), new DrawLiquidOutputs());
         }};
 

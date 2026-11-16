@@ -18,7 +18,7 @@ public class EclipseItems{
         tungstenRod, aluminiumWire, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, superalloyGear,
         magnetWire, resistor, capacitor, transistor, insulatedCable,
         electricMotor, permanentMagnetMotor, superconductingMotor, pumpUnit, piston, rotor, heatingCoil, sensor, emitter,
-        sodaAsh;
+        sodaAsh, petroleumCoke;
 
     public static void load(){
         sulfur = new Item("sulfur", Color.valueOf("e8d44d")){{
@@ -280,5 +280,7 @@ public class EclipseItems{
         // ---- realistic chemistry ----
         //sodium carbonate: sodium hydroxide carbonated with captured CO2; the flux of soda-lime glass, and lithium's precipitant
         sodaAsh = new Item("soda-ash", Color.valueOf("f2f0ea")){{ cost = 0.6f; }};
+        //the heavy residue of crude oil, coked: graphitized into graphite, and the anodes of aluminium cells
+        petroleumCoke = new Item("petroleum-coke", Color.valueOf("33333a")){{ cost = 0.7f; flammability = 0.8f; }};
     }
 }
