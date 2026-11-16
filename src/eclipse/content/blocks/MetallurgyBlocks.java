@@ -98,7 +98,7 @@ public class MetallurgyBlocks{
 
         // Faster than the laser drill at the same size.
         carbideDrill = new Drill("carbide-drill"){{
-            requirements(Category.production, with(tungstenCarbide, 30, Items.titanium, 40, Items.silicon, 40, Items.graphite, 30, titaniumGear, 20, industrialBearing, 10, controlUnit, 5));
+            requirements(Category.production, with(tungstenCarbide, 30, Items.titanium, 40, Items.silicon, 40, Items.graphite, 30, superalloyGear, 10, industrialBearing, 10, controlUnit, 5));
             size = 3;
             health = 600;
             tier = 4;
@@ -199,7 +199,7 @@ public class MetallurgyBlocks{
 
         // Surge alloy + superalloy -> hot surge superalloy (cooled in the vacuum freezer).
         arcFurnace = new GenericCrafter("arc-furnace"){{
-            requirements(Category.crafting, with(superalloy, 40, tungstenCarbide, 30, microchip, 20, Items.titanium, 80, Items.silicon, 60, superalloyFrame, 10, precisionComponent, 5, tungsten, 20));
+            requirements(Category.crafting, with(superalloy, 40, tungstenCarbide, 30, microchip, 20, Items.titanium, 80, Items.silicon, 60, superalloyFrame, 10, precisionComponent, 5, tungstenRod, 10));
             size = 3;
             health = 800;
             itemCapacity = 20;

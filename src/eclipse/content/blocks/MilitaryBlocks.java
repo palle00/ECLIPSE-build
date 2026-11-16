@@ -112,7 +112,7 @@ public class MilitaryBlocks{
 
         //Piledriver: a slow carbide slug that punches through up to three ground units in a line; no splash, no air
         piledriver = new ItemTurret("piledriver"){{
-            requirements(Category.turret, with(Items.titanium, 160, Items.graphite, 120, superalloy, 80, tungstenCarbide, 60, superalloyFrame, 6, industrialBearing, 8));
+            requirements(Category.turret, with(Items.titanium, 160, Items.graphite, 120, tungstenPlate, 40, tungstenCarbide, 60, superalloyFrame, 6, industrialBearing, 8));
             size = 3;
             health = 2400;
             range = 240f;

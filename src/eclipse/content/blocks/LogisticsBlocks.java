@@ -65,7 +65,7 @@ public class LogisticsBlocks{
         }};
 
         lineBalancer = new ControlledSplitter("line-balancer"){{
-            requirements(Category.distribution, with(superalloy, 10, Items.titanium, 30, Items.silicon, 30, microchip, 6, precisionComponent, 2, industrialBearing, 2, controlUnit, 1));
+            requirements(Category.distribution, with(superalloyGear, 4, Items.titanium, 30, Items.silicon, 30, microchip, 6, precisionComponent, 2, industrialBearing, 2, controlUnit, 1));
             size = 2;
             health = 400;
             maxBranches = 4;
@@ -81,7 +81,7 @@ public class LogisticsBlocks{
         }};
 
         batchGate = new BatchGate("batch-gate"){{
-            requirements(Category.distribution, with(Items.titanium, 6, Items.lead, 6, Items.silicon, 4, copperGear, 2));
+            requirements(Category.distribution, with(Items.titanium, 6, Items.lead, 6, Items.silicon, 4, titaniumSpring, 2));
             health = 80;
         }};
 
@@ -92,7 +92,7 @@ public class LogisticsBlocks{
         }};
 
         smartUnloader = new SmartUnloader("smart-unloader"){{
-            requirements(Category.distribution, with(Items.titanium, 30, Items.silicon, 30, microchip, 3, precisionComponent, 2, titaniumGear, 4, circuitBoard, 2));
+            requirements(Category.distribution, with(Items.titanium, 30, Items.silicon, 30, microchip, 3, precisionComponent, 2, titaniumSpring, 4, circuitBoard, 2));
             health = 120;
         }};
 

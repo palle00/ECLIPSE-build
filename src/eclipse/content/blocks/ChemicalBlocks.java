@@ -25,7 +25,7 @@ public class ChemicalBlocks{
     public static void load(){
         // Water -> purified water + brine concentrate (reverse osmosis style).
         waterTreatmentPlant = new GenericCrafter("water-treatment-plant"){{
-            requirements(Category.crafting, with(Items.copper, 60, Items.lead, 50, Items.metaglass, 40, Items.graphite, 25, copperGear, 10));
+            requirements(Category.crafting, with(copperPlate, 30, Items.lead, 50, Items.metaglass, 40, Items.graphite, 25, copperGear, 10));
             size = 2;
             health = 320;
             rotate = true;
@@ -105,7 +105,7 @@ public class ChemicalBlocks{
 
         // Sulfur + oxygen + water -> sulfuric acid (contact process). Strongly exothermic: waste heat leaves the front.
         sulfuricAcidPlant = new HeatProducer("sulfuric-acid-plant"){{
-            requirements(Category.crafting, with(Items.lead, 60, Items.titanium, 40, Items.metaglass, 50, Items.silicon, 30, pressureCasing, 10));
+            requirements(Category.crafting, with(leadPlate, 30, Items.titanium, 40, Items.metaglass, 50, Items.silicon, 30, pressureCasing, 10));
             size = 2;
             health = 320;
             rotateDraw = false;
@@ -128,7 +128,7 @@ public class ChemicalBlocks{
             liquidCapacity = 20f;
             itemCapacity = 10;
             craftTime = 90f;
-            consumeItems(with(Items.lead, 2, polyethylene, 1));
+            consumeItems(with(leadPlate, 2, polyethylene, 1));
             consumeLiquid(sulfuricAcid, 3f / 60f);
             consumePower(1f);
             outputItem = new ItemStack(leadAcidCell, 1);
@@ -167,7 +167,7 @@ public class ChemicalBlocks{
 
         // N2 + 3 H2 -> 2 NH3 (Haber process). Must reach operating pressure first.
         highPressureReactor = new ChemicalReactor("high-pressure-reactor"){{
-            requirements(Category.crafting, with(Items.lead, 120, Items.titanium, 100, Items.thorium, 40, Items.silicon, 60, reinforcedGlass, 40, superalloyFrame, 10, industrialBearing, 10, pressureCasing, 20));
+            requirements(Category.crafting, with(Items.lead, 120, titaniumPlate, 50, Items.thorium, 40, Items.silicon, 60, reinforcedGlass, 40, superalloyFrame, 10, industrialBearing, 10, pressureCasing, 20));
             size = 3;
             health = 900;
             liquidCapacity = 40f;

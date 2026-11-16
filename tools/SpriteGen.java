@@ -332,7 +332,9 @@ public class SpriteGen{
         experimentalCoreIcon("experimental-core");
         //art pass (art.md §5.1): mechanical components
         gearPress("gear-press");
-        metalExtruder("metal-extruder");
+        metalExtruder("extruder");
+        metalPress("metal-press");
+        lathe("lathe");
         casingForge("casing-forge");
         bearingPress("bearing-press");
         frameForge("frame-forge");
@@ -342,12 +344,27 @@ public class SpriteGen{
 
         // ---- electronics & ore processing ----
         coilIcon("copper-wire", 0xe8a070);
+        //forms and small parts (Metal Press, Extruder, Lathe, Gear Press)
+        plateIcon("copper-plate", 0xd99d73);
+        plateIcon("lead-plate", 0x8c7fa9);
+        plateIcon("titanium-plate", 0x8da1e3);
+        plateIcon("aluminium-plate", 0xb9c4cf);
+        plateIcon("superalloy-plate", 0xcdb98a);
+        plateIcon("tungsten-plate", 0x8a8c96);
+        foilIcon("copper-foil", 0xe8a070);
+        foilIcon("aluminium-foil", 0xd6dde3);
+        rod("tungsten-rod", 0x8a8c96);
+        coilIcon("aluminium-wire", 0xc9d2da);
+        boltIcon("titanium-bolt", 0x8da1e3, false);
+        boltIcon("titanium-screw", 0xa0b2ec, true);
+        partRingIcon("titanium-ring", 0x8da1e3);
+        springIcon("titanium-spring", 0x9aaee8);
+        gearIcon("superalloy-gear", 0xcdb98a);
         boardIcon("circuit-board", 0x3f9a5c);
         chip("control-unit", 0x5ab8ff);
         magnetIcon("alnico-magnet", 0xc04a4a);
         chunks("crushed-ore", 0x8a7f72);
         liquid("chilled-water", 0x7fd8ff);
-        wireDrawer("wire-drawing-machine");
         boardPrinter("circuit-assembler");
         oreCrusher("ore-crusher");
         oreWasher("ore-washer");
@@ -2902,6 +2919,44 @@ public class SpriteGen{
     }
 
     /**
+     * Metal Press (2×2): a rolling mill. Two heavy mill stands carry a pair of work rolls one above the other; metal
+     * goes in from the feed table at the top and the rolled plate leaves at the bottom.
+     */
+    static void metalPress(String name) throws IOException{
+        int s = 2 * T;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 3, 4, steel);
+        slab(r, 0, 6, s, 52, 4, 6, metal);
+        for(int x : new int[]{2, 52}) r.fill(r.oct(x, 6, 10, 52, 2), 12, steel, 3);
+        r.cylH(10, 15, 44, 13, 8, 6, metal);
+        r.cylH(10, 31, 44, 13, 8, 6, metal);
+        r.fill(r.rect(16, 2, 32, 6), 8, deep, 0);
+        r.fill(r.rect(16, 49, 32, 9), 7, copperGearM, 1);
+        save(r, name);
+        glowOf(r, name);
+    }
+
+    /**
+     * Lathe (2×2): a horizontal bed with the headstock and its chuck on the left, the work rod running to the
+     * tailstock on the right, and the tool post cutting it in the middle.
+     */
+    static void lathe(String name) throws IOException{
+        int s = 2 * T;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 3, 4, steel);
+        r.fill(r.rect(4, 36, 56, 10), 7, metal, 2);
+        r.fill(r.oct(2, 10, 18, 40, 3), 12, steel, 3);
+        r.fill(r.circle(20, 29, 8), 14, metal, 2);
+        r.fill(r.circle(20, 29, 3), 15, deep, 0);
+        r.cylH(20, 26, 30, 6, 9, 3, titaniumM);
+        r.fill(r.oct(48, 18, 12, 22, 2), 11, steel, 2);
+        r.fill(r.oct(31, 37, 11, 11, 2), 12, metal, 2);
+        r.fill(r.rect(35, 32, 3, 5), 13, lit(0xffb46b), 0);
+        save(r, name);
+        glowOf(r, name);
+    }
+
+    /**
      * Casing Forge (2×2): a closed forming chamber. A capsule-shaped mould (the pressure casing being formed, with its
      * seam), two clamp halves ("-press") closing on it, a metaglass window and two small feed slots on top.
      */
@@ -4350,26 +4405,6 @@ public class SpriteGen{
         r.fill(r.rect(4, 6, 56, 8), 12, steel, 2);
         r.fill(r.oct(26, 4, 12, 14, 3), 14, metal, 2);
         r.fill(r.rect(31, 16, 2, 6), 13, lit(0x6dff9a), 0);
-        save(r, name);
-        glowOf(r, name);
-    }
-
-    static void wireDrawer(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 3, 4, steel);
-        slab(r, 0, 16, s, 32, 3, 6, metal);
-        //a narrow drawing channel with three fine roller pairs
-        r.fill(r.rect(4, 30, 42, 4), 4, deep, 0);
-        r.fill(r.rect(4, 31, 42, 2), 5, copperGearM, 0);
-        for(int x : new int[]{10, 20, 30}){
-            r.fill(r.circle(x, 25, 4), 9, metal, 2);
-            r.fill(r.circle(x, 39, 4), 9, metal, 2);
-        }
-        //the output coil
-        r.fill(r.circle(52, 32, 10), 9, steel, 2);
-        r.fill(r.ring(52, 32, 4, 8), 10, copperGearM, 1);
-        r.fill(r.circle(52, 32, 2), 8, deep, 0);
         save(r, name);
         glowOf(r, name);
     }
@@ -6055,6 +6090,54 @@ public class SpriteGen{
         R r = new R(T);
         r.fill(r.poly(new int[]{5, 22, 28, 11}, new int[]{8, 3, 24, 29}), 4, glass(tint(rgb, 0.2f)), 2);
         r.paint(r.bar(12, 10, 0, 6, 1, -15), 0xccffffff);
+        save(r, name);
+    }
+
+    /** Two flat plates, one on the other. */
+    static void plateIcon(String name, int rgb) throws IOException{
+        R r = new R(T);
+        Mat m = acc(rgb);
+        r.fill(r.oct(6, 13, 22, 14, 2), 3, m, 1);
+        r.fill(r.oct(3, 6, 22, 14, 2), 6, m, 1);
+        r.raise(r.rect(6, 8, 16, 1), 0.6f);
+        save(r, name);
+    }
+
+    /** A roll of foil with its loose end unrolled. */
+    static void foilIcon(String name, int rgb) throws IOException{
+        R r = new R(T);
+        Mat m = acc(rgb);
+        r.fill(r.rect(6, 17, 22, 9), 2, m, 0);
+        r.cylH(4, 5, 24, 13, 3, 6, m);
+        r.fill(r.rect(4, 10, 2, 3), 7, deep, 0);
+        save(r, name);
+    }
+
+    /** A hex-headed bolt across the icon; a screw has thread ridges along its shaft. */
+    static void boltIcon(String name, int rgb, boolean thread) throws IOException{
+        R r = new R(T);
+        Mat m = acc(rgb);
+        r.fill(r.bar(17, 17, 0, 22, 5, 45), 4, m, 1);
+        if(thread) for(int i = 0; i < 4; i++) r.raise(r.bar(13 + i * 4, 13 + i * 4, 0, 6, 1, -45), 1f);
+        r.fill(r.oct(3, 3, 11, 11, 3), 7, m, 2);
+        r.fill(r.rect(7, 7, 3, 3), 8, deep, 0);
+        save(r, name);
+    }
+
+    /** A plain machined ring (a flange or bearing race). */
+    static void partRingIcon(String name, int rgb) throws IOException{
+        R r = new R(T);
+        Mat m = acc(rgb);
+        r.fill(r.ring(16, 16, 7, 12.5f), 5, m, 1);
+        r.raise(r.ring(16, 16, 9, 10.5f), 0.8f);
+        save(r, name);
+    }
+
+    /** A coil spring seen from the side. */
+    static void springIcon(String name, int rgb) throws IOException{
+        R r = new R(T);
+        Mat m = acc(rgb);
+        for(int i = 0; i < 6; i++) r.fill(r.bar(16, 5 + i * 4.4f, 0, 18, 2.5f, i % 2 == 0 ? 18 : -18), 4, m, 1);
         save(r, name);
     }
 

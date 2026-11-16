@@ -32,7 +32,7 @@ import static mindustry.Vars.*;
 public class EclipseWiki extends BaseDialog{
     /** Guide pages, in menu order: id (bundle key eclipse-wiki.guide.&lt;id&gt;.name / .text) and related content names. */
     public static final String[][] guides = {
-        {"start", "eclipse-gear-press", "eclipse-wire-drawing-machine", "eclipse-rivet", "eclipse-flow-meter", "eclipse-metal-extruder", "eclipse-component-depot", "eclipse-water-treatment-plant", "eclipse-augmentation-coupler", "eclipse-ore-crusher"},
+        {"start", "eclipse-gear-press", "eclipse-extruder", "eclipse-rivet", "eclipse-flow-meter", "eclipse-metal-press", "eclipse-component-depot", "eclipse-water-treatment-plant", "eclipse-augmentation-coupler", "eclipse-ore-crusher"},
         {"qol", "eclipse-flow-meter", "eclipse-component-depot", "eclipse-wave-intelligence-scanner"},
         {"components", "eclipse-titanium-gear", "eclipse-industrial-bearing", "eclipse-precision-component", "eclipse-superalloy-frame", "eclipse-experimental-core", "eclipse-gear-press", "eclipse-component-depot"},
         {"metallurgy", "eclipse-ore-nickel", "eclipse-ore-chromium", "eclipse-ore-cobalt", "eclipse-ore-tungsten", "eclipse-ore-molybdenum", "eclipse-ore-platinum", "eclipse-ore-crusher", "eclipse-alloy-furnace", "eclipse-carbide-drill"},

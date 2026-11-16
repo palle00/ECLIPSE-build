@@ -27,7 +27,7 @@ public class ExplorationBlocks{
         }};
 
         aetheriteCapacitor = new Battery("aetherite-capacitor"){{
-            requirements(Category.power, with(aetherite, 30, lithium, 20, carbonFiber, 10, circuitBoard, 10, precisionComponent, 5));
+            requirements(Category.power, with(aetherite, 30, lithium, 20, aluminiumFoil, 10, circuitBoard, 10, precisionComponent, 5));
             size = 2;
             health = 500;
             consumePowerBuffered(120000f);

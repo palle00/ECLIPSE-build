@@ -26,7 +26,7 @@ public class PowerBlocks{
 
         // Collects heat from the back and sides and passes it out of the front.
         heatExchanger = new HeatConductor("heat-exchanger"){{
-            requirements(Category.crafting, with(aluminium, 30, Items.copper, 50, Items.graphite, 30, titaniumRod, 10));
+            requirements(Category.crafting, with(aluminiumPlate, 15, Items.copper, 50, Items.graphite, 30, titaniumRod, 10));
             size = 3;
             health = 500;
             drawer = new DrawMulti(new DrawDefault(), new DrawHeatOutput(), new DrawHeatInput("-heat"));
@@ -50,7 +50,7 @@ public class PowerBlocks{
 
         // Power -> heat through molybdenum disilicide elements. No fuel needed, but costs a lot of power.
         electricHeater = new HeatProducer("electric-heater"){{
-            requirements(Category.crafting, with(molybdenum, 20, Items.silicon, 30, Items.lead, 30, Items.graphite, 20, titaniumRod, 10, copperWire, 20));
+            requirements(Category.crafting, with(molybdenum, 20, Items.silicon, 30, Items.lead, 30, Items.graphite, 20, tungstenRod, 10, copperWire, 20));
             size = 2;
             health = 300;
             heatOutput = 4f;
@@ -60,7 +60,7 @@ public class PowerBlocks{
 
         // Vanadium redox flow battery: the largest energy store.
         flowBattery = new Battery("flow-battery"){{
-            requirements(Category.power, with(vanadium, 60, polyethylene, 40, aluminium, 30, microchip, 10, pressureCasing, 10, precisionComponent, 5, carbonFiber, 10));
+            requirements(Category.power, with(vanadium, 60, polyethylene, 40, aluminiumWire, 30, microchip, 10, pressureCasing, 10, precisionComponent, 5, carbonFiber, 10));
             size = 3;
             health = 700;
             consumePowerBuffered(120000f);
@@ -70,7 +70,7 @@ public class PowerBlocks{
 
         // Steam -> power; condensate is returned as purified water.
         steamTurbine = new ConsumeGenerator("steam-turbine"){{
-            requirements(Category.power, with(aluminium, 60, microchip, 10, Items.titanium, 40, Items.silicon, 40, industrialBearing, 20, superalloyFrame, 5, cobalt, 20, alnicoMagnet, 10));
+            requirements(Category.power, with(aluminium, 60, microchip, 10, titaniumRing, 20, Items.silicon, 40, industrialBearing, 20, superalloyFrame, 5, cobalt, 20, alnicoMagnet, 10));
             size = 3;
             health = 600;
             liquidCapacity = 40f;
@@ -121,7 +121,7 @@ public class PowerBlocks{
 
         // Twice the industrial battery's capacity in the same footprint.
         lithiumBattery = new Battery("lithium-battery"){{
-            requirements(Category.power, with(lithium, 30, polyethylene, 20, Items.silicon, 20, Items.graphite, 20, titaniumRod, 5, cobalt, 10, copperWire, 10));
+            requirements(Category.power, with(lithium, 30, polyethylene, 20, copperFoil, 10, Items.graphite, 20, aluminiumFoil, 10, cobalt, 10, aluminiumWire, 10));
             size = 2;
             health = 400;
             consumePowerBuffered(50000f);

@@ -46,9 +46,9 @@ public class Polish{
         kind(Kind.combustion, "industrial-heater", "methane-turbine", "biofuel-engine");
         kind(Kind.reactor, "fission-reactor");
         kind(Kind.cryo, "hydrogen-fuel-cell", "air-separation-unit", "cryogenic-condenser", "gas-separator", "vacuum-freezer");
-        kind(Kind.press, "gear-press", "metal-extruder", "wire-drawing-machine", "bearing-press", "composite-press",
+        kind(Kind.press, "gear-press", "extruder", "metal-press", "bearing-press", "composite-press",
             "battery-assembly-plant", "explosives-plant");
-        kind(Kind.grind, "ore-crusher", "ore-washer");
+        kind(Kind.grind, "ore-crusher", "ore-washer", "lathe");
         kind(Kind.electronics, "circuit-assembler", "chip-fabricator", "precision-assembler", "experimental-core-assembler", "silicon-refinery");
         kind(Kind.bio, "biomass-cultivator", "algae-photobioreactor", "enzyme-extractor", "biochemical-fermenter", "anaerobic-digester");
         kind(Kind.assembler, "basic-module-assembler", "advanced-module-assembler", "experimental-augmentation-facility", "aetherite-module-forge", "module-recycling-facility");

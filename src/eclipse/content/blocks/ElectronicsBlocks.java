@@ -14,7 +14,7 @@ import static mindustry.type.ItemStack.*;
 
 /** Semiconductors. */
 public class ElectronicsBlocks{
-    public static Block siliconRefinery, chipFabricator, wireDrawer, circuitAssembler;
+    public static Block siliconRefinery, chipFabricator, circuitAssembler;
 
     public static void load(){
         // Silicon + HCl + H2 -> high-purity silicon (Siemens process).
@@ -47,21 +47,9 @@ public class ElectronicsBlocks{
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("6dff9a"); }});
         }};
     
-        // ---- wiring and control ----
+        // ---- wiring and control (wire comes from the Extruder) ----
 
-        // Copper -> copper wire.
-        wireDrawer = new GenericCrafter("wire-drawing-machine"){{
-            requirements(Category.crafting, with(Items.copper, 40, Items.lead, 30, copperGear, 10));
-            size = 2;
-            health = 220;
-            itemCapacity = 10;
-            craftTime = 30f;
-            consumeItem(Items.copper, 1);
-            consumePower(0.3f);
-            outputItem = new ItemStack(copperWire, 2);
-        }};
-
-        // Every circuit: circuit boards (copper wire traces on polyethylene, etched in hydrochloric acid; the spent
+        // Every circuit: circuit boards (copper-foil-clad polyethylene etched in hydrochloric acid; the spent
         // etchant leaves as acidic waste) and control units (microchip + circuit boards + an AlNiCo motor magnet).
         // Its cost must not include circuit boards or later components (no circular costs).
         circuitAssembler = new RecipeCrafter("circuit-assembler"){{
@@ -70,9 +58,9 @@ public class ElectronicsBlocks{
             health = 300;
             itemCapacity = 10;
             liquidCapacity = 20f;
-            recipe(3, 60f, with(copperWire, 2, polyethylene, 1), with(circuitBoard, 1))
+            recipe(3, 60f, with(copperFoil, 2, polyethylene, 1), with(circuitBoard, 1))
                 .liquidsIn(hydrochloricAcid, 2f / 60f).liquidsOut(acidicWaste, 1f / 60f);
-            recipe(4, 90f, with(microchip, 1, circuitBoard, 2, alnicoMagnet, 1), with(controlUnit, 1));
+            recipe(4, 90f, with(microchip, 1, circuitBoard, 2, alnicoMagnet, 1, titaniumScrew, 2), with(controlUnit, 1));
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(hydrochloricAcid, 3f), new DrawDefault());
         }};
 }

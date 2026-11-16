@@ -34,7 +34,7 @@ public class NuclearBlocks{
 
         // Fuel rods -> a large amount of heat out of the front (drives the boiler / steam turbine chain).
         fissionReactor = new HeatProducer("fission-reactor"){{
-            requirements(Category.power, with(reinforcedGlass, 60, superalloy, 60, Items.thorium, 80, Items.lead, 200, Items.silicon, 100, microchip, 20, superalloyFrame, 30, pressureCasing, 30, precisionComponent, 10, carbonComposite, 20, tungsten, 40, controlUnit, 10));
+            requirements(Category.power, with(reinforcedGlass, 60, superalloyPlate, 30, Items.thorium, 80, Items.lead, 200, Items.silicon, 100, microchip, 20, superalloyFrame, 30, pressureCasing, 30, precisionComponent, 10, carbonComposite, 20, tungstenPlate, 20, controlUnit, 10));
             size = 3;
             health = 1400;
             itemCapacity = 10;

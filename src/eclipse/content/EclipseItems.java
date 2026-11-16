@@ -13,7 +13,9 @@ public class EclipseItems{
         biomass, fertilizer, enzymeExtract,
         copperGear, titaniumRod, titaniumGear, pressureCasing, industrialBearing, superalloyFrame, precisionComponent, experimentalCore,
         copperWire, circuitBoard, controlUnit, alnicoMagnet, crushedOre,
-        aetherite, superconductor;
+        aetherite, superconductor,
+        copperPlate, leadPlate, titaniumPlate, aluminiumPlate, superalloyPlate, tungstenPlate, copperFoil, aluminiumFoil,
+        tungstenRod, aluminiumWire, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, superalloyGear;
 
     public static void load(){
         sulfur = new Item("sulfur", Color.valueOf("e8d44d")){{
@@ -236,5 +238,22 @@ public class EclipseItems{
         // ---- endgame ----
         //made in the Chemical Synthesis Complex; consumed by the World Engine and the Temporal Interference Array
         superconductor = new Item("superconductor", Color.valueOf("8fd0ff")){{ cost = 3f; }};
+
+        // ---- forms and small parts (Metal Press, Extruder, Lathe, Gear Press): only what a part or component needs ----
+        copperPlate = new Item("copper-plate", Color.valueOf("d99d73")){{ cost = 0.6f; }};
+        leadPlate = new Item("lead-plate", Color.valueOf("8c7fa9")){{ cost = 0.6f; }};
+        titaniumPlate = new Item("titanium-plate", Color.valueOf("8da1e3")){{ cost = 1.1f; }};
+        aluminiumPlate = new Item("aluminium-plate", Color.valueOf("b9c4cf")){{ cost = 1.2f; }};
+        superalloyPlate = new Item("superalloy-plate", Color.valueOf("cdb98a")){{ cost = 1.8f; }};
+        tungstenPlate = new Item("tungsten-plate", Color.valueOf("8a8c96")){{ cost = 1.6f; }};
+        copperFoil = new Item("copper-foil", Color.valueOf("e8a070")){{ cost = 0.6f; }};
+        aluminiumFoil = new Item("aluminium-foil", Color.valueOf("d6dde3")){{ cost = 1.2f; }};
+        tungstenRod = new Item("tungsten-rod", Color.valueOf("8a8c96")){{ cost = 1.5f; }};
+        aluminiumWire = new Item("aluminium-wire", Color.valueOf("c9d2da")){{ cost = 1.1f; }};
+        titaniumBolt = new Item("titanium-bolt", Color.valueOf("8da1e3")){{ cost = 1f; }};
+        titaniumScrew = new Item("titanium-screw", Color.valueOf("a0b2ec")){{ cost = 1f; }};
+        titaniumRing = new Item("titanium-ring", Color.valueOf("8da1e3")){{ cost = 1f; }};
+        titaniumSpring = new Item("titanium-spring", Color.valueOf("9aaee8")){{ cost = 1f; }};
+        superalloyGear = new Item("superalloy-gear", Color.valueOf("cdb98a")){{ cost = 1.8f; }};
     }
 }

@@ -31,7 +31,9 @@ public class EclipseTechTree{
     public static void load(){
         //mechanical manufacturing
         TechNode gears = child(find(Blocks.graphitePress), gearPress);
-        TechNode rods = child(gears, metalExtruder);
+        TechNode rods = child(gears, extruder);
+        child(gears, metalPress);
+        child(rods, lathe);
         child(rods, casingForge);
         TechNode bearings = child(rods, bearingPress);
         child(bearings, frameForge);
@@ -274,8 +276,7 @@ public class EclipseTechTree{
         child(naphthaNode, ethylene);
 
         //electronics, ore processing, heat storage and cooling
-        TechNode wire = child(find(gearPress), wireDrawer);
-        child(wire, circuitAssembler);
+        child(find(extruder), circuitAssembler);
         child(child(find(Blocks.pulverizer), oreCrusher), oreWasher);
         child(find(alloyFurnace), inductionFurnace);
         child(find(heatExchanger), thermalStorage);

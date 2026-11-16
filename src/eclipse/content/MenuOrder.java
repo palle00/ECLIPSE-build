@@ -84,9 +84,9 @@ public class MenuOrder{
         after(Blocks.overdriveDome, augmentationCoupler, advancedCoupler, chemicalInterface, militaryInterface, augmentationHub);
 
         //---- crafting: each ECLIPSE production chain follows the vanilla machine it grows out of ----
-        after(Blocks.multiPress, methanePyrolysisReactor, gearPress, metalExtruder, casingForge, bearingPress, frameForge,
+        after(Blocks.multiPress, methanePyrolysisReactor, gearPress, extruder, metalPress, lathe, casingForge, bearingPress, frameForge,
             precisionAssembler, coreAssembler); //mechanical manufacturing
-        after(Blocks.siliconSmelter, siliconReductionFurnace, siliconRefinery, chipFabricator, wireDrawer, circuitAssembler);
+        after(Blocks.siliconSmelter, siliconReductionFurnace, siliconRefinery, chipFabricator, circuitAssembler);
         after(Blocks.kiln, sodaGlassFurnace, glassKiln);
         after(Blocks.plastaniumCompressor, //oil -> petrochemicals and heat
             distillationColumn, industrialHeater, electricHeater, geothermalHeatTap, heatExchanger, thermalStorage, steamCracker, catalystPlant,
@@ -111,8 +111,9 @@ public class MenuOrder{
         //---- items (core inventory, item pickers); augmentation modules stay at the end as their own group ----
         after(Items.metaglass, hotMetaglass, hotReinforcedGlass, reinforcedGlass);
         after(Items.coal, sulfur);
-        after(Items.copper, copperGear, copperWire);
-        after(Items.titanium, hotTitanium, titaniumRod, titaniumGear, pressureCasing, industrialBearing, nickel, chromium, cobalt, molybdenum, vanadium, tungsten, hotTungstenCarbide, tungstenCarbide, alumina, hotAluminium, aluminium, lithium, hotSuperalloy, superalloy, superalloyFrame, alnicoMagnet, platinum);
+        after(Items.copper, copperGear, copperWire, copperPlate, copperFoil);
+        after(Items.lead, leadPlate);
+        after(Items.titanium, hotTitanium, titaniumRod, titaniumGear, titaniumPlate, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, pressureCasing, industrialBearing, nickel, chromium, cobalt, molybdenum, vanadium, tungsten, tungstenPlate, tungstenRod, hotTungstenCarbide, tungstenCarbide, alumina, hotAluminium, aluminium, aluminiumPlate, aluminiumFoil, aluminiumWire, lithium, hotSuperalloy, superalloy, superalloyPlate, superalloyGear, superalloyFrame, alnicoMagnet, platinum);
         after(Items.thorium, thoriumFuelRod, spentFuelRod);
         after(Items.scrap, crushedOre, industrialSludge);
         after(Items.silicon, hotSilicon, highPuritySilicon, microchip, circuitBoard, precisionComponent, controlUnit);

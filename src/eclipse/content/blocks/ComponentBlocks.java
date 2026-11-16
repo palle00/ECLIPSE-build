@@ -18,7 +18,7 @@ import static mindustry.type.ItemStack.*;
  * Each producer only needs earlier components to build, so there are no circular costs (checked by the test).
  */
 public class ComponentBlocks{
-    public static Block gearPress, metalExtruder, casingForge, bearingPress, frameForge, precisionAssembler, coreAssembler,
+    public static Block gearPress, extruder, metalPress, lathe, casingForge, bearingPress, frameForge, precisionAssembler, coreAssembler,
         componentDepot;
 
     public static void load(){
@@ -31,49 +31,82 @@ public class ComponentBlocks{
             itemCapacity = 10;
             recipe(1, 30f, with(Items.copper, 2), with(copperGear, 1));
             recipe(2, 60f, with(Items.titanium, 3), with(titaniumGear, 2));
+            recipe(3, 60f, with(superalloy, 3), with(superalloyGear, 2));
             craftEffect = Fx.pulverizeSmall;
         }};
 
-        // Titanium + graphite die lubricant -> titanium rods. Structural frames, pressure vessels.
-        metalExtruder = new GenericCrafter("metal-extruder"){{
+        // Every rod and wire: copper wire (tier I), titanium rods (tier II, graphite as die lubricant),
+        // tungsten rods and aluminium wire (tier III). Its cost must not need copper wire, rods or later components.
+        extruder = new RecipeCrafter("extruder"){{
             requirements(Category.crafting, with(Items.copper, 60, Items.lead, 40, Items.graphite, 20, copperGear, 10));
             size = 2;
             health = 260;
             itemCapacity = 10;
-            craftTime = 60f;
-            consumeItems(with(Items.titanium, 2, Items.graphite, 1));
-            consumePower(0.6f);
-            outputItem = new ItemStack(titaniumRod, 2);
+            recipe(1, 30f, with(Items.copper, 1), with(copperWire, 2));
+            recipe(2, 60f, with(Items.titanium, 2, Items.graphite, 1), with(titaniumRod, 2));
+            recipe(3, 60f, with(tungsten, 2, Items.graphite, 1), with(tungstenRod, 2));
+            recipe(3, 30f, with(aluminium, 1), with(aluminiumWire, 2));
             craftEffect = Fx.pulverizeSmall;
         }};
 
-        // Titanium rods + metaglass + graphite seals -> pressure casings for vessels and reactors.
+        // Every plate, rolled from metal, and foil, rolled thin from plate. Tier I for copper and lead,
+        // II for titanium, III for aluminium, superalloy and tungsten.
+        metalPress = new RecipeCrafter("metal-press"){{
+            requirements(Category.crafting, with(Items.copper, 60, Items.lead, 40, Items.graphite, 20, copperGear, 10));
+            size = 2;
+            health = 260;
+            itemCapacity = 10;
+            recipe(1, 40f, with(Items.copper, 2), with(copperPlate, 1));
+            recipe(1, 40f, with(Items.lead, 2), with(leadPlate, 1));
+            recipe(2, 50f, with(Items.titanium, 2), with(titaniumPlate, 1));
+            recipe(3, 40f, with(aluminium, 2), with(aluminiumPlate, 1));
+            recipe(3, 60f, with(superalloy, 2), with(superalloyPlate, 1));
+            recipe(3, 60f, with(tungsten, 2), with(tungstenPlate, 1));
+            recipe(1, 30f, with(copperPlate, 1), with(copperFoil, 2));
+            recipe(3, 30f, with(aluminiumPlate, 1), with(aluminiumFoil, 2));
+            craftEffect = Fx.pulverizeSmall;
+        }};
+
+        // Small titanium parts turned from rods: bolts, screws (threaded bolts), rings and springs. All tier II.
+        lathe = new RecipeCrafter("lathe"){{
+            requirements(Category.crafting, with(Items.titanium, 40, Items.lead, 30, Items.graphite, 20, copperGear, 10));
+            size = 2;
+            health = 260;
+            itemCapacity = 10;
+            recipe(2, 30f, with(titaniumRod, 1), with(titaniumBolt, 2));
+            recipe(2, 20f, with(titaniumBolt, 1), with(titaniumScrew, 1));
+            recipe(2, 40f, with(titaniumRod, 1), with(titaniumRing, 1));
+            recipe(2, 40f, with(titaniumRod, 1), with(titaniumSpring, 2));
+            craftEffect = Fx.pulverizeSmall;
+        }};
+
+        // Titanium plates bolted round metaglass, sealed with graphite -> pressure casings for vessels and reactors.
         casingForge = new GenericCrafter("casing-forge"){{
             requirements(Category.crafting, with(Items.titanium, 50, Items.lead, 40, Items.metaglass, 30, titaniumGear, 10, titaniumRod, 10));
             size = 2;
             health = 320;
             itemCapacity = 10;
             craftTime = 90f;
-            consumeItems(with(titaniumRod, 2, Items.metaglass, 2, Items.graphite, 1));
+            consumeItems(with(titaniumPlate, 2, titaniumBolt, 2, Items.metaglass, 2, Items.graphite, 1));
             consumePower(1f);
             outputItem = new ItemStack(pressureCasing, 1);
             craftEffect = Fx.pulverizeMedium;
         }};
 
-        // Titanium rod races + copper cages + graphite lubricant -> industrial bearings.
+        // Titanium ring races + copper cages + graphite lubricant -> industrial bearings.
         bearingPress = new GenericCrafter("bearing-press"){{
             requirements(Category.crafting, with(Items.titanium, 50, Items.silicon, 30, titaniumGear, 10, copperGear, 10));
             size = 2;
             health = 300;
             itemCapacity = 10;
             craftTime = 60f;
-            consumeItems(with(titaniumRod, 1, Items.copper, 2, Items.graphite, 1));
+            consumeItems(with(titaniumRing, 2, Items.copper, 2, Items.graphite, 1));
             consumePower(1f);
             outputItem = new ItemStack(industrialBearing, 2);
             craftEffect = Fx.pulverizeSmall;
         }};
 
-        // Superalloy + titanium rods, hot-formed -> superalloy machine frames for heavy and hot machinery.
+        // Superalloy plates + titanium rods, hot-formed and bolted -> superalloy machine frames for heavy and hot machinery.
         frameForge = new HeatCrafter("frame-forge"){{
             requirements(Category.crafting, with(Items.titanium, 60, Items.silicon, 40, Items.graphite, 40, industrialBearing, 10, pressureCasing, 10));
             size = 3;
@@ -82,21 +115,21 @@ public class ComponentBlocks{
             craftTime = 120f;
             heatRequirement = 8f;
             maxEfficiency = 2f;
-            consumeItems(with(superalloy, 2, titaniumRod, 2));
+            consumeItems(with(superalloyPlate, 2, titaniumRod, 2, titaniumBolt, 2));
             consumePower(1f);
             outputItem = new ItemStack(superalloyFrame, 1);
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ffb46b"); }}, new DrawHeatInput());
         }};
 
-        // Titanium gears + silicon + high-purity silicon -> precision components for electronics and smart blocks.
+        // Titanium gears + screws + silicon + high-purity silicon -> precision components for electronics and smart blocks.
         precisionAssembler = new GenericCrafter("precision-assembler"){{
             requirements(Category.crafting, with(Items.titanium, 60, Items.silicon, 60, Items.lead, 40, industrialBearing, 10, titaniumGear, 10));
             size = 2;
             health = 320;
             itemCapacity = 10;
             craftTime = 90f;
-            consumeItems(with(titaniumGear, 1, Items.silicon, 2, highPuritySilicon, 1));
+            consumeItems(with(titaniumGear, 1, titaniumScrew, 2, Items.silicon, 2, highPuritySilicon, 1));
             consumePower(1.5f);
             outputItem = new ItemStack(precisionComponent, 1);
             craftEffect = Fx.pulverizeSmall;
