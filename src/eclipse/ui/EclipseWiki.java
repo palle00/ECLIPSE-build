@@ -393,6 +393,52 @@ public class EclipseWiki extends BaseDialog{
         page.add("[lightgray]" + Core.bundle.get("eclipse-wiki.recipes.hint")).wrap().width(textWidth()).left().padBottom(8f).row();
     }
 
+    /** The whole chain for 1 per second: an indented tree, then raw materials and machines in total. */
+    void recipeTree(Item item){
+        RecipeTree.Step root = RecipeTree.plan(item, 1f);
+        sub(page, "eclipse-wiki.tree");
+        Table tree = new Table().left();
+        treeRows(tree, root, 0);
+        page.add(tree).left().row();
+
+        sub(page, "eclipse-wiki.tree.raw");
+        Table raw = new Table().left();
+        ObjectFloatMap<UnlockableContent> totals = RecipeTree.totals(root);
+        Seq<UnlockableContent> keys = totals.keys().toSeq().sort(Structs.comparingFloat(c -> -totals.get(c, 0f)));
+        int n = 0;
+        for(UnlockableContent c : keys){
+            link(raw, c, perSecond(totals.get(c, 0f)));
+            if(++n % 3 == 0) raw.row();
+        }
+        page.add(raw).left().row();
+
+        sub(page, "eclipse-wiki.tree.machines");
+        Table machines = new Table().left();
+        ObjectFloatMap<Block> counts = RecipeTree.machines(root);
+        n = 0;
+        for(Block b : counts.keys().toSeq().sort(Structs.comparingFloat(x -> -counts.get(x, 0f)))){
+            link(machines, b, "x" + Strings.autoFixed(counts.get(b, 0f), 2));
+            if(++n % 3 == 0) machines.row();
+        }
+        page.add(machines).left().row();
+        page.add("[lightgray]" + Core.bundle.get("eclipse-wiki.tree.hint")).wrap().width(textWidth()).left().padBottom(8f).row();
+    }
+
+    void treeRows(Table t, RecipeTree.Step s, int depth){
+        Table row = new Table().left();
+        row.add().width(depth * 22f);
+        link(row, s.item, perSecond(s.perSecond));
+        if(s.source != null) link(row, s.source.block, "x" + Strings.autoFixed(s.machines, 2));
+        t.add(row).left().row();
+        for(LiquidStack l : s.liquids){
+            Table lr = new Table().left();
+            lr.add().width((depth + 1) * 22f);
+            link(lr, l.liquid, perSecond(l.amount));
+            t.add(lr).left().row();
+        }
+        for(RecipeTree.Step in : s.inputs) treeRows(t, in, depth + 1);
+    }
+
     void materialFacts(UnlockableContent mat){
         //made by
         Table madeBy = new Table().left();
@@ -406,6 +452,9 @@ public class EclipseWiki extends BaseDialog{
         if(madeBy.hasChildren()){
             sub(page, "eclipse-wiki.made-by");
             page.add(madeBy).left().row();
+        }
+        if(mat instanceof Item item && !(item instanceof AugmentModule) && !RecipeTree.raw(item) && RecipeTree.sourceOf(item) != null){
+            recipeTree(item);
         }
         if(mat instanceof AugmentModule m && m.recipe.length > 0){
             sub(page, "eclipse-wiki.recipe");
