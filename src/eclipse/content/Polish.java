@@ -36,7 +36,7 @@ public class Polish{
     static{
         kind(Kind.furnace, "blast-furnace", "silicon-reduction-furnace",
             "carbon-fiber-furnace", "thermal-waste-processor", "chloride-titanium-plant", "alumina-refinery", "methane-pyrolysis-reactor");
-        kind(Kind.electric, "electric-furnace", "electrolysis-plant", "chlor-alkali-cell", "electrowinning-cell", "aluminium-smelter", "electric-heater");
+        kind(Kind.electric, "electrolyzer", "electric-furnace", "electric-heater");
         kind(Kind.chemical, "acid-synthesizer", "acid-leaching-vat", "sulfuric-acid-plant", "nitric-acid-plant", "aqua-regia-mixer", "platinum-refinery",
             "ammonium-nitrate-plant", "catalyst-plant", "polymerization-reactor", "rubber-plant", "acrylonitrile-reactor", "epoxy-plant", "olefin-reactor",
             "methanol-synthesizer", "high-pressure-reactor", "industrial-neutralizer", "industrial-scrubber", "fertilizer-plant", "reprocessing-plant",

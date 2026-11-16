@@ -95,12 +95,11 @@ public class MenuOrder{
         after(Blocks.surgeSmelter, blastFurnace, electricFurnace);
         after(Blocks.pulverizer, oreCrusher, oreWasher);
         after(Blocks.cryofluidMixer, //water -> chemical industry
-            coolingTower, waterTreatmentPlant, electrolysisPlant, airSeparationUnit, cryogenicCondenser, vacuumFreezer, highPressureReactor, nitricAcidPlant,
-            chlorAlkaliCell, acidSynthesizer, acidLeachingVat, industrialNeutralizer, industrialScrubber, gasSeparator,
-            wastewaterTreatmentPlant, thermalWasteProcessor, lithiumExtractor, aluminaRefinery, aluminiumSmelter,
+            coolingTower, waterTreatmentPlant, electrolyzer, airSeparationUnit, cryogenicCondenser, vacuumFreezer, highPressureReactor, nitricAcidPlant, acidSynthesizer, acidLeachingVat, industrialNeutralizer, industrialScrubber, gasSeparator,
+            wastewaterTreatmentPlant, thermalWasteProcessor, lithiumExtractor, aluminaRefinery,
             aquaRegiaMixer, platinumRefinery, synthesisComplex);
         after(Blocks.blastMixer, ammoniumNitratePlant, explosivesPlant);
-        after(Blocks.separator, chlorideTitaniumPlant, electrowinningCell, mineralSeparator);
+        after(Blocks.separator, chlorideTitaniumPlant, mineralSeparator);
         after(Blocks.sporePress, fertilizerPlant, enzymeExtractor, biochemicalFermenter, anaerobicDigester); //biology
         after(Blocks.incinerator, basicModuleAssembler, advancedModuleAssembler, experimentalFacility, aetheriteForge, moduleRecycler); //augmentation section
 

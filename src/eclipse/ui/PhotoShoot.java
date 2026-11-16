@@ -38,13 +38,13 @@ public class PhotoShoot{
 
     static final Shot[] sceneShots = {
         new Shot("overview", "!core-shard", 20, 12, 2.4f),
-        new Shot("chemistry", "electrolysis-plant", 2, -4, 4.4f),
+        new Shot("chemistry", "electrolyzer", 2, -4, 4.4f),
         new Shot("fission", "fission-reactor", 3, -2, 4.4f),
         new Shot("components", "component-depot", -6, -3, 4.4f),
         new Shot("smelting", "blast-furnace", -6, 0, 4f),
         new Shot("lattice", "lattice-drill", 11, 1, 3.4f),
         new Shot("defense", "thunderhead", -4, -3, 3.4f, false, true),
-        new Shot("chemistry-night", "electrolysis-plant", 2, -4, 4.4f, true, false),
+        new Shot("chemistry-night", "electrolyzer", 2, -4, 4.4f, true, false),
         new Shot("fission-night", "fission-reactor", 3, -2, 4.4f, true, false),
         new Shot("smelting-night", "blast-furnace", -6, 0, 4f, true, false),
         //wide night shot between the chemistry, the reactor and the smelter: the cover art is cut from its middle
@@ -52,7 +52,7 @@ public class PhotoShoot{
     };
 
     static Shot[] showcaseShots = {
-        new Shot("chemistry", "electrolysis-plant", 18, -2, 3.2f),
+        new Shot("chemistry", "electrolyzer", 18, -2, 3.2f),
         new Shot("military", "piledriver", -14, 2, 3.2f),
         new Shot("lattice", "lattice-drill", 5, 1, 4f),
     };

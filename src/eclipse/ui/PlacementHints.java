@@ -42,13 +42,25 @@ public class PlacementHints{
         if(selected != null){
             int tx = World.toTile(m.x - selected.offset), ty = World.toTile(m.y - selected.offset);
             int rotation = selected.rotate ? control.input.rotation : 0;
-            if(selected instanceof GenericCrafter g) outputArrows(g, tx * tilesize + selected.offset, ty * tilesize + selected.offset, rotation, false);
+            if(selected instanceof eclipse.world.blocks.RecipeCrafter rc){
+                eclipse.world.blocks.RecipeCrafter.Recipe r = rc.lastConfig instanceof Integer v ? rc.recipes.get(Math.max((v & 0xff) - 1, 0) % rc.recipes.size)
+                    : rc.recipes.find(x -> x.liquidSides.length > 0);
+                if(r != null) recipeArrows(rc, r, tx * tilesize + selected.offset, ty * tilesize + selected.offset, rotation);
+            }else if(selected instanceof GenericCrafter g) outputArrows(g, tx * tilesize + selected.offset, ty * tilesize + selected.offset, rotation, false);
             if(selected instanceof HeatProducer heater) heatPreview(heater, tx, ty, rotation);
         }else{
             Building b = world.buildWorld(m.x, m.y);
-            if(b != null && b.block instanceof GenericCrafter g && b.block.name.startsWith("eclipse-")) outputArrows(g, b.x, b.y, b.rotation, true);
+            if(b instanceof eclipse.world.blocks.RecipeCrafter.RecipeBuild r && r.recipe != null) recipeArrows((eclipse.world.blocks.RecipeCrafter)b.block, r.recipe, b.x, b.y, b.rotation);
+            else if(b != null && b.block instanceof GenericCrafter g && b.block.name.startsWith("eclipse-")) outputArrows(g, b.x, b.y, b.rotation, true);
         }
         Draw.reset();
+    }
+
+    /** Arrows for a universal machine's recipe with fixed liquid output sides. */
+    static void recipeArrows(eclipse.world.blocks.RecipeCrafter rc, eclipse.world.blocks.RecipeCrafter.Recipe r, float x, float y, int rotation){
+        for(int i = 0; i < r.liquidOutputs.length; i++){
+            if(r.sideOf(i) >= 0) arrow(rc, r.liquidOutputs[i].liquid, r.sideOf(i), x, y, rotation);
+        }
     }
 
     /** An arrow (and, for built machines, the liquid's icon) at each side with a fixed liquid output. */
@@ -58,16 +70,20 @@ public class PlacementHints{
         for(int i = 0; i < g.outputLiquids.length && i < g.liquidOutputDirections.length; i++){
             int dir = g.liquidOutputDirections[i];
             if(dir == -1) continue;
-            int d = (dir + (g.rotate ? rotation : 0)) % 4;
-            Liquid liquid = g.outputLiquids[i].liquid;
-            //outward and sideways unit vectors; the arrow sits just inside the edge, pointing out (the liquid icon is just outside)
-            float ux = Geometry.d4x(d), uy = Geometry.d4y(d), sx = -uy, sy = ux, edge = g.size * tilesize / 2f;
-            float bx = x + ux * (edge - 4f), by = y + uy * (edge - 4f), tipX = x + ux * (edge - 0.5f), tipY = y + uy * (edge - 0.5f);
-            Draw.color(Pal.darkestGray);
-            Fill.tri(bx + sx * 2.9f - ux * 0.8f, by + sy * 2.9f - uy * 0.8f, bx - sx * 2.9f - ux * 0.8f, by - sy * 2.9f - uy * 0.8f, tipX + ux * 1f, tipY + uy * 1f);
-            Draw.color(liquid.color);
-            Fill.tri(bx + sx * 2f, by + sy * 2f, bx - sx * 2f, by - sy * 2f, tipX, tipY);
+            arrow(g, g.outputLiquids[i].liquid, dir, x, y, rotation);
         }
+    }
+
+    /** One arrow at a fixed liquid output side, in the liquid's colour. */
+    static void arrow(Block g, Liquid liquid, int dir, float x, float y, int rotation){
+        int d = (dir + (g.rotate ? rotation : 0)) % 4;
+        //outward and sideways unit vectors; the arrow sits just inside the edge, pointing out (the liquid icon is just outside)
+        float ux = Geometry.d4x(d), uy = Geometry.d4y(d), sx = -uy, sy = ux, edge = g.size * tilesize / 2f;
+        float bx = x + ux * (edge - 4f), by = y + uy * (edge - 4f), tipX = x + ux * (edge - 0.5f), tipY = y + uy * (edge - 0.5f);
+        Draw.color(Pal.darkestGray);
+        Fill.tri(bx + sx * 2.9f - ux * 0.8f, by + sy * 2.9f - uy * 0.8f, bx - sx * 2.9f - ux * 0.8f, by - sy * 2.9f - uy * 0.8f, tipX + ux * 1f, tipY + uy * 1f);
+        Draw.color(liquid.color);
+        Fill.tri(bx + sx * 2f, by + sy * 2f, bx - sx * 2f, by - sy * 2f, tipX, tipY);
     }
 
     /** The building on the tile right in front of a block of this size placed at (tx, ty) facing rotation (odd or even size). */

@@ -90,6 +90,7 @@ public class SetupDiagram extends Element{
         if(recipe != null){
             for(ItemStack s : recipe.outputs) itemsOut.addUnique(s.item);
             liquidsOut.addAll(recipe.liquidOutputs);
+            dirs = recipe.liquidSides.length > 0 ? recipe.liquidSides : null;
         }else if(b instanceof GenericCrafter g){
             if(g.outputItems != null) for(ItemStack s : g.outputItems) itemsOut.addUnique(s.item);
             if(g.outputLiquids != null) liquidsOut.addAll(g.outputLiquids);

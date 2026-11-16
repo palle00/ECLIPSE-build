@@ -17,7 +17,7 @@ import static mindustry.type.ItemStack.*;
  * chemistry and heat. On Serpulo, Erekir's silicon arc furnace and electrolyzer can't be built, so nothing is duplicated.
  */
 public class RefiningBlocks{
-    public static Block siliconReductionFurnace, methanePyrolysisReactor, chlorideTitaniumPlant, electrowinningCell;
+    public static Block siliconReductionFurnace, methanePyrolysisReactor, chlorideTitaniumPlant;
 
     public static void load(){
         // Sand reduced with methane as the carbon source, in a heated retort -> silicon. No coal; up to 8 silicon/s at full heat.
@@ -74,22 +74,5 @@ public class RefiningBlocks{
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("8da1e3"); }}, new DrawHeatInput());
         }};
 
-        // Scrap dissolved in sulfuric acid and plated out electrically -> copper and lead. The spent electrolyte leaves as acidic waste.
-        electrowinningCell = new GenericCrafter("electrowinning-cell"){{
-            requirements(Category.crafting, with(Items.lead, 80, Items.metaglass, 40, Items.silicon, 40, copperWire, 30, pressureCasing, 10));
-            size = 3;
-            health = 600;
-            itemCapacity = 20;
-            liquidCapacity = 30f;
-            craftTime = 60f;
-            consumeItem(Items.scrap, 2);
-            consumeLiquid(sulfuricAcid, 4f / 60f);
-            consumePower(2.5f);
-            outputItems = with(Items.copper, 2, Items.lead, 1);
-            outputLiquid = new LiquidStack(acidicWaste, 1f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(sulfuricAcid, 4f),
-                new DrawBubbles(Color.valueOf("e8b84a")){{ amount = 10; radius = 4f; spread = 9f; }},
-                new DrawDefault());
-        }};
     }
 }

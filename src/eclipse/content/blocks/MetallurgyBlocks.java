@@ -17,7 +17,7 @@ import static mindustry.type.ItemStack.*;
 public class MetallurgyBlocks{
     public static Block oreCrusher, oreWasher,
         mineralSeparator, platinumRefinery, lithiumExtractor, carbideDrill, superalloyWall, superalloyWallLarge,
-        aluminaRefinery, aluminiumSmelter, surgeSuperalloyWall, surgeSuperalloyWallLarge, vacuumFreezer,
+        aluminaRefinery, surgeSuperalloyWall, surgeSuperalloyWallLarge, vacuumFreezer,
         blastFurnace, electricFurnace;
 
     public static void load(){
@@ -113,20 +113,6 @@ public class MetallurgyBlocks{
             outputItem = new ItemStack(alumina, 2);
             craftEffect = Fx.pulverizeSmall;
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(sodiumHydroxide, 4f), new DrawDefault(), new DrawHeatInput());
-        }};
-
-        // Alumina + graphite anodes + lots of power -> hot aluminium (cooled in the vacuum freezer).
-        aluminiumSmelter = new GenericCrafter("aluminium-smelter"){{
-            requirements(Category.crafting, with(microchip, 15, Items.titanium, 60, Items.silicon, 50, Items.lead, 60, industrialBearing, 10));
-            size = 3;
-            health = 650;
-            itemCapacity = 20;
-            craftTime = 60f;
-            consumeItems(with(alumina, 2, Items.graphite, 1));
-            consumePower(5f);
-            outputItem = new ItemStack(hotAluminium, 1);
-            craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("9fd8ff"); }});
         }};
 
         // ---- advanced vanilla combinations ----

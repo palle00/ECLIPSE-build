@@ -8,6 +8,7 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
+import mindustry.ctype.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.ui.*;
@@ -43,6 +44,8 @@ import static mindustry.Vars.*;
  * </pre>
  * A full liquid output stops the machine (waste must be removed), like the other ECLIPSE chemistry.
  * Heat: {@code .heat(8f)} on a recipe makes it need that much heat from adjacent heaters; below it the machine stops.
+ * Liquid-only recipes pass {@code ItemStack.empty} and are named by their first liquid output. {@code .sides(1, 3, 0)} sends
+ * each liquid output out of a fixed side (1 left, 3 right, 0 front, relative to the machine's rotation).
  *
  * {@link #autoSelect}: with no recipe chosen, the machine runs whichever recipe its inputs complete, so a mixed belt never
  * jams it (e.g. the Vacuum Freezer cooling any hot metal that arrives).
@@ -71,14 +74,25 @@ public class RecipeCrafter extends GenericCrafter{
         public LiquidStack[] liquidInputs = {}, liquidOutputs = {};
         /** Heat needed from adjacent heaters (0: none). Below it the machine stops. */
         public float heat;
+        /** Side each liquid output leaves from (0 front, 1 left, 2 back, 3 right; -1 any), by output index. */
+        public int[] liquidSides = {};
 
         public Recipe(int tier, float time, ItemStack[] inputs, ItemStack[] outputs){
             if(tier < 1 || tier > maxTier) throw new IllegalArgumentException("recipe tier must be 1-" + maxTier + ", got " + tier);
-            if(outputs.length == 0) throw new IllegalArgumentException("recipe without outputs");
             this.tier = tier;
             this.time = time;
             this.inputs = inputs;
             this.outputs = outputs;
+        }
+
+        /** Fixed sides for the liquid outputs, in output order (0 front, 1 left, 2 back, 3 right). */
+        public Recipe sides(int... dirs){
+            liquidSides = dirs;
+            return this;
+        }
+
+        public int sideOf(int liquidOutput){
+            return liquidOutput < liquidSides.length ? liquidSides[liquidOutput] : -1;
         }
 
         /** Needs this much heat from adjacent heaters; the machine stops below it. */
@@ -107,9 +121,9 @@ public class RecipeCrafter extends GenericCrafter{
             return Structs.contains(liquidOutputs, s -> s.liquid == liquid);
         }
 
-        /** The item that names this recipe. */
-        public Item output(){
-            return outputs[0].item;
+        /** What names this recipe: its first item output, or its first liquid output for liquid-only recipes. */
+        public UnlockableContent output(){
+            return outputs.length > 0 ? outputs[0].item : liquidOutputs[0].liquid;
         }
 
         /** Power per tick at overclock 0. */
@@ -142,7 +156,8 @@ public class RecipeCrafter extends GenericCrafter{
         consumePowerDynamic((RecipeBuild b) -> b.powerUse());
 
         //logic and the recipe menu: pick by output item, keep the overclock level
-        config(Item.class, (RecipeBuild b, Item item) -> b.select(recipeFor(item), b.overclock));
+        config(Item.class, (RecipeBuild b, Item item) -> b.select(recipeFor(item), b.level));
+        config(Liquid.class, (RecipeBuild b, Liquid liquid) -> b.select(recipeFor(liquid), b.level));
         //schematics and copying: recipe and overclock packed together
         config(Integer.class, (RecipeBuild b, Integer v) -> b.select(unpackRecipe(v), v >> 8));
         configClear((RecipeBuild b) -> b.select(null, 0));
@@ -155,7 +170,7 @@ public class RecipeCrafter extends GenericCrafter{
         return r;
     }
 
-    public @Nullable Recipe recipeFor(@Nullable Item output){
+    public @Nullable Recipe recipeFor(@Nullable UnlockableContent output){
         return output == null ? null : recipes.find(r -> r.output() == output);
     }
 
@@ -189,8 +204,9 @@ public class RecipeCrafter extends GenericCrafter{
         if(recipes.isEmpty()) throw new IllegalStateException(name + " has no recipes");
         //every product, so generic code (wiki, augmentation filters, animations) sees what this machine can make
         Seq<ItemStack> outs = new Seq<>();
-        ObjectSet<Item> names = new ObjectSet<>();
+        ObjectSet<UnlockableContent> names = new ObjectSet<>();
         for(Recipe r : recipes){
+            if(r.outputs.length == 0 && r.liquidOutputs.length == 0) throw new IllegalStateException(name + " has a recipe without outputs");
             if(!names.add(r.output())) throw new IllegalStateException(name + " has two recipes for " + r.output().name);
             for(ItemStack s : r.outputs) if(!outs.contains(o -> o.item == s.item)) outs.add(s);
             for(ItemStack s : r.inputs) itemCapacity = Math.max(itemCapacity, s.amount * 2);
@@ -199,6 +215,11 @@ public class RecipeCrafter extends GenericCrafter{
         outputItems = outs.toArray(ItemStack.class);
         craftTime = recipes.first().time;
         usesHeat = recipes.contains(r -> r.heat > 0f);
+        //fixed liquid output sides turn with the machine (the sprite stays put)
+        if(recipes.contains(r -> r.liquidSides.length > 0)){
+            rotate = true;
+            rotateDraw = false;
+        }
         //liquid handling only for machines that have liquid recipes, so dry machines don't count as chemical plants
         if(recipes.contains(r -> r.liquidInputs.length > 0 || r.liquidOutputs.length > 0)){
             hasLiquids = true;
@@ -361,7 +382,7 @@ public class RecipeCrafter extends GenericCrafter{
                     handleLiquid(this, out.liquid, Math.min(out.amount * scale, liquidCapacity - liquids.get(out.liquid)));
                 }
             }
-            for(LiquidStack out : recipe.liquidOutputs) dumpLiquid(out.liquid, 2f);
+            for(int i = 0; i < recipe.liquidOutputs.length; i++) dumpLiquid(recipe.liquidOutputs[i].liquid, 2f, recipe.sideOf(i));
             //liquid left from a previous recipe leaves too
             if(hasLiquids){
                 liquids.each((liquid, amount) -> {
@@ -470,13 +491,14 @@ public class RecipeCrafter extends GenericCrafter{
 
         @Override
         public byte version(){
-            return 1;
+            return 2;
         }
 
         @Override
         public void write(Writes write){
             super.write(write);
             write.s(fixed == null ? -1 : fixed.output().id);
+            write.b(fixed != null && fixed.output() instanceof Liquid ? 1 : 0);
             write.b(level);
         }
 
@@ -485,9 +507,10 @@ public class RecipeCrafter extends GenericCrafter{
             super.read(read, revision);
             if(revision >= 1){
                 short id = read.s();
+                boolean liquid = revision >= 2 && read.b() == 1;
                 int lvl = read.b();
                 float saved = progress; //selecting resets progress; a loaded machine keeps it
-                select(id < 0 ? null : recipeFor(content.item(id)), lvl);
+                select(id < 0 ? null : recipeFor(liquid ? content.liquid(id) : content.item(id)), lvl);
                 progress = saved;
             }
         }

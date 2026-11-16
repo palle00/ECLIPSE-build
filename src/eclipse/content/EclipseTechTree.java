@@ -46,7 +46,7 @@ public class EclipseTechTree{
 
         //chemical industry
         TechNode treatment = child(find(Blocks.mechanicalPump), waterTreatmentPlant);
-        TechNode electrolysis = child(treatment, electrolysisPlant);
+        TechNode electrolysis = child(treatment, electrolyzer); //water, brine, alumina and scrap electrolysis
         child(electrolysis, hydrogenFuelCell);
         TechNode airSeparation = child(electrolysis, airSeparationUnit);
         TechNode haber = child(airSeparation, highPressureReactor);
@@ -55,7 +55,7 @@ public class EclipseTechTree{
         child(aquaRegiaNode, platinumRefinery);
         TechNode nitrate = child(nitric, ammoniumNitratePlant);
         child(nitrate, explosivesPlant);
-        TechNode chlorAlkali = child(treatment, chlorAlkaliCell);
+        TechNode chlorAlkali = electrolysis;
         child(chlorAlkali, catalystPlant);
         TechNode acid = child(chlorAlkali, acidSynthesizer);
         TechNode leaching = child(acid, acidLeachingVat);
@@ -196,7 +196,6 @@ public class EclipseTechTree{
         TechNode wall = child(find(Blocks.thoriumWall), superalloyWall);
         child(wall, superalloyWallLarge);
         TechNode refinery = child(chlorAlkali, aluminaRefinery);
-        TechNode smelter = child(refinery, aluminiumSmelter);
         child(airSeparation, cryogenicCondenser);
         child(find(Blocks.cryofluidMixer), vacuumFreezer); //every midgame furnace metal cools here
         TechNode surgeWall = child(find(Blocks.surgeWall), surgeSuperalloyWall);
@@ -331,7 +330,6 @@ public class EclipseTechTree{
         child(find(Blocks.siliconSmelter), siliconReductionFurnace);
         child(find(Blocks.graphitePress), methanePyrolysisReactor);
         child(find(Blocks.separator), chlorideTitaniumPlant);
-        child(find(Blocks.separator), electrowinningCell);
     }
 
     static void unitLine(Block factory, UnitType... tiers){

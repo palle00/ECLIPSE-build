@@ -17,10 +17,10 @@ import static mindustry.type.ItemStack.*;
 /** Inorganic chemical industry: water chemistry, chlor-alkali, acids, nitrogen chemistry, electrochemistry and waste treatment. */
 public class ChemicalBlocks{
     public static Block
-    waterTreatmentPlant, electrolysisPlant, chlorAlkaliCell, acidSynthesizer, acidLeachingVat,
+    waterTreatmentPlant, acidSynthesizer, acidLeachingVat,
     sulfuricAcidPlant, industrialNeutralizer,
     airSeparationUnit, highPressureReactor, cryogenicCondenser, nitricAcidPlant, aquaRegiaMixer, ammoniumNitratePlant, explosivesPlant,
-    industrialScrubber, gasSeparator, wastewaterTreatmentPlant, thermalWasteProcessor;
+    industrialScrubber, gasSeparator, wastewaterTreatmentPlant, thermalWasteProcessor, electrolyzer;
 
     public static void load(){
         // Water -> purified water + brine concentrate (reverse osmosis style).
@@ -38,38 +38,23 @@ public class ChemicalBlocks{
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 3f), new DrawDefault(), new DrawLiquidOutputs());
         }};
 
-        // Purified water -> hydrogen + oxygen (2:1).
-        electrolysisPlant = new GenericCrafter("electrolysis-plant"){{
+        // Electrolysis of every kind: water into hydrogen (left) and oxygen (right); brine into chlorine (left), hydrogen
+        // (right) and sodium hydroxide (front); alumina into hot aluminium with graphite anodes (Hall-Heroult); and copper
+        // and lead plated out of scrap dissolved in sulfuric acid (the spent acid leaves as acidic waste).
+        electrolyzer = new RecipeCrafter("electrolyzer"){{
             requirements(Category.crafting, with(Items.copper, 80, Items.lead, 60, Items.metaglass, 40, Items.silicon, 50, copperGear, 15, copperWire, 20));
             size = 3;
             health = 600;
-            rotate = true;
-            rotateDraw = false;
+            itemCapacity = 20;
             liquidCapacity = 40f;
-            consumeLiquid(purifiedWater, 12f / 60f);
-            consumePower(1.5f);
-            outputLiquids = LiquidStack.with(Liquids.hydrogen, 8f / 60f, oxygen, 4f / 60f);
-            liquidOutputDirections = new int[]{1, 3};
+            recipe(2, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(purifiedWater, 12f / 60f)
+                .liquidsOut(Liquids.hydrogen, 8f / 60f, oxygen, 4f / 60f).sides(1, 3);
+            recipe(2, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(brine, 6f / 60f)
+                .liquidsOut(chlorine, 3f / 60f, Liquids.hydrogen, 3f / 60f, sodiumHydroxide, 3f / 60f).sides(1, 3, 0);
+            recipe(3, 60f, with(alumina, 2, Items.graphite, 1), with(hotAluminium, 1));
+            recipe(2, 60f, with(Items.scrap, 2), with(Items.copper, 2, Items.lead, 1)).liquidsIn(sulfuricAcid, 4f / 60f).liquidsOut(acidicWaste, 1f / 60f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 4f),
-                new DrawBubbles(Color.valueOf("ffffff")){{ amount = 14; radius = 6f; spread = 10f; }},
-                new DrawDefault(), new DrawLiquidOutputs());
-        }};
-
-        // Brine -> chlorine + hydrogen + sodium hydroxide.
-        chlorAlkaliCell = new GenericCrafter("chlor-alkali-cell"){{
-            requirements(Category.crafting, with(Items.lead, 80, Items.metaglass, 50, Items.titanium, 40, Items.silicon, 60, pressureCasing, 10, copperWire, 20));
-            size = 3;
-            health = 600;
-            rotate = true;
-            rotateDraw = false;
-            liquidCapacity = 40f;
-            consumeLiquid(brine, 6f / 60f);
-            consumePower(2f);
-            outputLiquids = LiquidStack.with(chlorine, 3f / 60f, Liquids.hydrogen, 3f / 60f, sodiumHydroxide, 3f / 60f);
-            liquidOutputDirections = new int[]{1, 3, 0};
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(brine, 4f),
-                new DrawBubbles(Color.valueOf("d4ef7a")){{ amount = 10; radius = 5f; spread = 9f; }},
-                new DrawDefault(), new DrawLiquidOutputs());
+                new DrawBubbles(Color.valueOf("ffffff")){{ amount = 14; radius = 6f; spread = 10f; }}, new DrawDefault());
         }};
 
         // H2 + Cl2 -> HCl.

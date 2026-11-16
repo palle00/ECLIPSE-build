@@ -51,11 +51,9 @@ public class SpriteGen{
         nozzles("water-treatment-plant", 2, "eclipse-purified-water", 0x8fd3ff);
         nozzles("water-treatment-plant", 2, "eclipse-brine", 0xa7c9b4);
 
-        electrolysisPlant("electrolysis-plant");
         nozzles("electrolysis-plant", 3, "hydrogen", 0x9ab7ff);
         nozzles("electrolysis-plant", 3, "eclipse-oxygen", 0xd8efff);
 
-        chlorAlkali("chlor-alkali-cell");
         nozzles("chlor-alkali-cell", 3, "eclipse-chlorine", 0xb6dc4c);
         nozzles("chlor-alkali-cell", 3, "hydrogen", 0x9ab7ff);
 
@@ -242,7 +240,6 @@ public class SpriteGen{
 
         aluminaRefinery("alumina-refinery");
         edgeGlow("alumina-refinery-heat", 3);
-        aluminiumSmelter("aluminium-smelter");
         wallArt("surge-superalloy-wall", 1, 2);
         wallArt("surge-superalloy-wall-large", 2, 2);
 
@@ -331,6 +328,7 @@ public class SpriteGen{
         lathe("lathe");
         assemblerSprite("assembler");
         blastFurnace("blast-furnace");
+        electrolyzerSprite("electrolyzer");
         electricFurnace("electric-furnace");
         coreAssembler("experimental-core-assembler");
         componentDepotArt("component-depot");
@@ -383,7 +381,6 @@ public class SpriteGen{
         reductionFurnace("silicon-reduction-furnace");
         pyrolysisReactor("methane-pyrolysis-reactor");
         chloridePlant("chloride-titanium-plant");
-        electrowinningCell("electrowinning-cell");
 
         // ---- strategic defence and support ----
         scanner("wave-intelligence-scanner");
@@ -2943,6 +2940,32 @@ public class SpriteGen{
     }
 
     /**
+     * Electrolyzer (3×3): a row of electrolytic cells in a liquid bath (seen through the windows), each with its pair of
+     * electrodes, a bus bar across the top feeding them, and gas outlets on the sides.
+     */
+    static void electrolyzerSprite(String name) throws IOException{
+        int s = 3 * T;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 6, 5, metal);
+        for(int i = 0; i < 3; i++){
+            int x = 14 + i * 24;
+            r.fill(r.rect(x, 24, 20, 54), 8, steel, 2);
+            liquidWindow(r, r.rect(x + 3, 30, 14, 44), 9);
+            r.fill(r.rect(x + 4, 18, 3, 50), 11, dull(0x3a3a40), 1);
+            r.fill(r.rect(x + 13, 18, 3, 50), 11, copperGearM, 1);
+        }
+        r.fill(r.rect(8, 12, 80, 8), 13, copperGearM, 2);
+        r.fill(r.rect(44, 13, 8, 6), 14, lit(0xffe08a), 0);
+        for(int y : new int[]{40, 56}){
+            r.fill(r.rect(1, y, 6, 8), 9, steel, 1);
+            r.fill(r.rect(s - 7, y, 6, 8), 9, steel, 1);
+        }
+        save(r, name);
+        glowOf(r, name);
+        liquidBottom(name, s);
+    }
+
+    /**
      * Blast Furnace (3×3): a round refractory shaft with a glowing hearth, tuyeres around it where the heat goes in,
      * and a tapping spout at the bottom.
      */
@@ -4061,27 +4084,6 @@ public class SpriteGen{
         heatLayer(r, name, r.circle(30, 30, 12));
     }
 
-    /** Aluminium Smelter (3×3): a line of three reduction pots with carbon anodes, a copper bus bar, light aluminium out. */
-    static void aluminiumSmelter(String name) throws IOException{
-        int s = 3 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 5, metal);
-        r.fill(r.rect(6, 4, 66, 8), 13, copperGearM, 2);
-        for(int i = 0; i < 3; i++){
-            int y = 16 + i * 26;
-            r.fill(r.rect(6, y, 66, 22), 9, steel, 2);
-            r.fill(r.rect(10, y + 4, 58, 14), 3, deep, 0);
-            for(int x = 13; x < 64; x += 13) r.fill(r.rect(x, y + 5, 9, 12), 7, dull(0x3a3a40), 2);
-            r.fill(r.rect(14 + i * 6, y - 4, 4, 6), 12, copperGearM, 0);
-        }
-        //output section: cast aluminium
-        r.fill(r.rect(76, 14, 16, 70), 8, steel, 2);
-        for(int y = 20; y < 80; y += 14) r.fill(r.rect(79, y, 10, 9), 10, dull(0xd8dde3), 1);
-        r.fill(r.rect(36, 90, 6, 3), 12, lit(0x9fd8ff), 0);
-        save(r, name);
-        glowOf(r, name);
-    }
-
     /** Mineral Separator (2×2, slag window): a round separator bowl over the slag, paddles ("-rotator"), an acid tank, outlets. */
     static void mineralSeparator(String name) throws IOException{
         int s = 2 * T;
@@ -4122,23 +4124,6 @@ public class SpriteGen{
         save(r, name);
         glowOf(r, name);
         heatLayer(r, name, r.circle(54, 48, 17));
-    }
-
-    /** Electrowinning Cell (3×3, acid window): a long bath crossed by many parallel electrode plates between two bus bars. */
-    static void electrowinningCell(String name) throws IOException{
-        int s = 3 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 5, metal);
-        r.fill(r.rect(6, 14, 84, 68), 9, steel, 3);
-        liquidWindow(r, r.rect(12, 20, 72, 56), 10);
-        for(int i = 0; i < 9; i++){
-            int x = 15 + i * 8;
-            r.fill(r.rect(x, 18, 3, 60), 12, i % 2 == 0 ? copperGearM : dull(0x8c92ac), 1);
-        }
-        for(int y : new int[]{4, 84}) r.fill(r.rect(10, y, 76, 7), 13, copperGearM, 2);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
     }
 
     /** Ore Crusher (2×2): opposed crusher jaws ("-press") over a dark crushing gap, a feed hopper above, fragments below. */
@@ -4590,27 +4575,6 @@ public class SpriteGen{
         liquidBottom(name, s);
     }
 
-    static void electrolysisPlant(String name) throws IOException{
-        int s = 3 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 5, 5, metal);
-        //three cells with electrode plates; hydrogen housing (left) and oxygen housing (right) kept apart
-        for(int i = 0; i < 3; i++){
-            int x = 22 + i * 18;
-            r.fill(r.rect(x, 12, 14, 72), 9, steel, 2);
-            liquidWindow(r, r.rect(x + 3, 16, 8, 64), 10);
-            r.fill(r.rect(x + 6, 14, 2, 68), 11, dull(0x8c92ac), 0);
-        }
-        r.fill(r.oct(2, 30, 18, 36, 4), 11, metal, 3);
-        r.fill(r.rect(6, 42, 10, 12), 12, acc(0xe8edf0), 0);
-        r.fill(r.oct(76, 30, 18, 36, 4), 11, metal, 3);
-        r.fill(r.rect(80, 42, 10, 12), 12, acc(0xa9d8ff), 0);
-        r.fill(r.rect(22, 4, 52, 6), 12, copperGearM, 1);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
     static void airSeparation(String name) throws IOException{
         int s = 3 * T;
         R r = canvas(s);
@@ -4699,28 +4663,6 @@ public class SpriteGen{
         liquidWindow(r, r.circle(c, c, 10), 11);
         stub(r, 1, 26, 12, acc(0xd8eef7));
         stub(r, 3, 26, 12, acc(0xf0d98c));
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
-    static void chlorAlkali(String name) throws IOException{
-        int s = 3 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 5, 5, steel);
-        //a bank of membrane cells inside a separate frame; chlorine left, hydrogen right, caustic front
-        r.fill(r.rect(14, 10, 68, 70), 9, metal, 3);
-        for(int i = 0; i < 4; i++){
-            int y = 14 + i * 16;
-            liquidWindow(r, r.rect(20, y + 2, 56, 10), 10);
-            r.fill(r.rect(46, y, 4, 14), 11, dull(0xd8dde3), 0);
-        }
-        r.fill(r.rect(0, 38, 12, 20), 9, metal, 2);
-        r.fill(r.rect(2, 44, 6, 8), 10, acc(0xb6dc4c), 0);
-        r.fill(r.rect(84, 38, 12, 20), 9, metal, 2);
-        r.fill(r.rect(88, 44, 6, 8), 10, acc(0xe8edf0), 0);
-        r.fill(r.rect(38, 82, 20, 12), 9, metal, 2);
-        r.fill(r.rect(44, 86, 8, 6), 10, acc(0xd8dff0), 0);
         save(r, name);
         glowOf(r, name);
         liquidBottom(name, s);
