@@ -78,6 +78,12 @@ public class ChemicalBlocks{
             recipe(3, 90f, ItemStack.empty, with(magnesium, 1)).liquidsIn(brine, 6f / 60f, hydrochloricAcid, 2f / 60f)
                 .liquidsOut(chlorine, 2f / 60f).vented(); //Dow: magnesium chloride from brine, electrolysed molten (chlorine vented if unused)
             recipe(3, 60f, with(alumina, 2, petroleumCoke, 1), with(hotAluminium, 1)).liquidsOut(carbonDioxide, 1f / 60f).vented(); //the coke anodes burn to CO2
+            recipe(3, 120f, with(pentlandite, 4), with(nickel, 8, cobalt, 2, platinum, 1)).liquidsIn(sulfuricAcid, 4f / 60f).liquidsOut(acidicWaste, 2f / 60f); //leached and electrowon: x2
+            recipe(3, 120f, with(chromite, 4), with(chromium, 8)).liquidsIn(sulfuricAcid, 4f / 60f).liquidsOut(acidicWaste, 2f / 60f); //leached and electrowon: x2
+            recipe(3, 120f, with(cobaltite, 4), with(cobalt, 8, nickel, 2)).liquidsIn(sulfuricAcid, 4f / 60f).liquidsOut(acidicWaste, 2f / 60f); //leached and electrowon: x2
+            recipe(3, 120f, with(wolframite, 4), with(tungsten, 8, molybdenum, 2)).liquidsIn(sulfuricAcid, 4f / 60f).liquidsOut(acidicWaste, 2f / 60f); //leached and electrowon: x2
+            recipe(3, 120f, with(molybdenite, 4), with(molybdenum, 8, sulfur, 2)).liquidsIn(sulfuricAcid, 4f / 60f).liquidsOut(acidicWaste, 2f / 60f); //leached and electrowon: x2
+            recipe(3, 120f, with(sperrylite, 4), with(platinum, 8, nickel, 2)).liquidsIn(sulfuricAcid, 4f / 60f).liquidsOut(acidicWaste, 2f / 60f); //leached and electrowon: x2
             recipe(2, 60f, with(Items.scrap, 2), with(Items.copper, 2, Items.lead, 1)).liquidsIn(sulfuricAcid, 4f / 60f).liquidsOut(acidicWaste, 1f / 60f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 4f),
                 new DrawBubbles(Color.valueOf("ffffff")){{ amount = 14; radius = 6f; spread = 10f; }}, new DrawDefault());

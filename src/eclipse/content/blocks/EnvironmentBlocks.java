@@ -10,12 +10,12 @@ public class EnvironmentBlocks{
     public static Block oreNickel, oreChromium, oreCobalt, oreTungsten, oreMolybdenum, orePlatinum, oreAetherite, oreBauxite;
 
     public static void load(){
-        oreNickel = new OreBlock("ore-nickel", nickel);
-        oreChromium = new OreBlock("ore-chromium", chromium);
-        oreCobalt = new OreBlock("ore-cobalt", cobalt);
-        oreTungsten = new OreBlock("ore-tungsten", tungsten);
-        oreMolybdenum = new OreBlock("ore-molybdenum", molybdenum);
-        orePlatinum = new OreBlock("ore-platinum", platinum);
+        oreNickel = new OreBlock("ore-nickel", pentlandite); //nickel ore
+        oreChromium = new OreBlock("ore-chromium", chromite); //chromium ore
+        oreCobalt = new OreBlock("ore-cobalt", cobaltite); //cobalt ore
+        oreTungsten = new OreBlock("ore-tungsten", wolframite); //tungsten ore
+        oreMolybdenum = new OreBlock("ore-molybdenum", molybdenite); //molybdenum ore
+        orePlatinum = new OreBlock("ore-platinum", sperrylite); //platinum ore
         oreAetherite = new OreBlock("ore-aetherite", aetherite);
         oreBauxite = new OreBlock("ore-bauxite", bauxite);
     }

@@ -18,7 +18,8 @@ public class EclipseItems{
         tungstenRod, aluminiumWire, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, superalloyGear,
         magnetWire, resistor, capacitor, transistor, insulatedCable,
         electricMotor, permanentMagnetMotor, superconductingMotor, pumpUnit, piston, rotor, heatingCoil, sensor, emitter,
-        sodaAsh, petroleumCoke, magnesium, bauxite, redMud;
+        sodaAsh, petroleumCoke, magnesium, bauxite, redMud,
+        pentlandite, chromite, cobaltite, wolframite, molybdenite, sperrylite;
 
     public static void load(){
         sulfur = new Item("sulfur", Color.valueOf("e8d44d")){{
@@ -288,5 +289,13 @@ public class EclipseItems{
         bauxite = new Item("bauxite", Color.valueOf("c4875a")){{ hardness = 2; cost = 0.7f; }};
         //the Bayer residue: iron and titanium oxides; must be taken away, and its titanium can be smelted out
         redMud = new Item("red-mud", Color.valueOf("9c4632")){{ cost = 0.3f; }};
+
+        // ---- ore minerals: what the ECLIPSE veins really are; processed into metal (crushing x1, flotation x1.5, leaching x2) ----
+        pentlandite = new Item("pentlandite", Color.valueOf("b8a46a")){{ hardness = nickel.hardness; cost = nickel.cost * 0.6f; }};
+        chromite = new Item("chromite", Color.valueOf("4e4a52")){{ hardness = chromium.hardness; cost = chromium.cost * 0.6f; }};
+        cobaltite = new Item("cobaltite", Color.valueOf("8f95b8")){{ hardness = cobalt.hardness; cost = cobalt.cost * 0.6f; }};
+        wolframite = new Item("wolframite", Color.valueOf("3e3a38")){{ hardness = tungsten.hardness; cost = tungsten.cost * 0.6f; }};
+        molybdenite = new Item("molybdenite", Color.valueOf("6f7686")){{ hardness = molybdenum.hardness; cost = molybdenum.cost * 0.6f; }};
+        sperrylite = new Item("sperrylite", Color.valueOf("c8ccd2")){{ hardness = platinum.hardness; cost = platinum.cost * 0.6f; }};
     }
 }

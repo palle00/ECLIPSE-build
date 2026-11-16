@@ -18,7 +18,7 @@ public class MetallurgyBlocks{
     public static Block oreCrusher, oreWasher,
         mineralSeparator, platinumRefinery, lithiumExtractor, carbideDrill, superalloyWall, superalloyWallLarge,
         aluminaRefinery, surgeSuperalloyWall, surgeSuperalloyWallLarge, vacuumFreezer,
-        blastFurnace, electricFurnace;
+        blastFurnace, electricFurnace, flotationCell;
 
     public static void load(){
         // Slag + sulfuric acid -> trace metals. The metal source on maps without the new ores.
@@ -193,19 +193,40 @@ public class MetallurgyBlocks{
             lightningDamage = 30f;
         }};
     
-        // ---- ore processing: a steady scrap-to-metal route that needs no slag or acid ----
+        // ---- ore processing: ore minerals into metal (crushing x1, flotation x1.5, leaching x2), and scrap on any map ----
 
-        // Scrap -> crushed ore, with sand left over.
-        oreCrusher = new GenericCrafter("ore-crusher"){{
+        // Crushing: scrap into crushed ore for the washer, and ore minerals crushed and sorted into their metal (the plain route, x1).
+        oreCrusher = new RecipeCrafter("ore-crusher"){{
             requirements(Category.crafting, with(Items.copper, 60, Items.lead, 40, Items.graphite, 30, copperGear, 15, titaniumGear, 10));
             size = 2;
             health = 320;
             itemCapacity = 10;
-            craftTime = 60f;
-            consumeItem(Items.scrap, 3);
-            consumePower(0.8f);
-            outputItems = with(crushedOre, 2, Items.sand, 1);
+            recipe(1, 60f, with(Items.scrap, 3), with(crushedOre, 2, Items.sand, 1)); //scrap for the ore washer, on any map
+            recipe(2, 40f, with(pentlandite, 2), with(nickel, 2)); //crushed and sorted: x1
+            recipe(2, 40f, with(chromite, 2), with(chromium, 2)); //crushed and sorted: x1
+            recipe(2, 40f, with(cobaltite, 2), with(cobalt, 2)); //crushed and sorted: x1
+            recipe(2, 40f, with(wolframite, 2), with(tungsten, 2)); //crushed and sorted: x1
+            recipe(2, 40f, with(molybdenite, 2), with(molybdenum, 2)); //crushed and sorted: x1
+            recipe(2, 40f, with(sperrylite, 2), with(platinum, 2)); //crushed and sorted: x1
             craftEffect = Fx.pulverize;
+        }};
+
+        // Froth flotation: ore minerals ground in water, the valuable mineral floated off with the froth (x1.5), with the
+        // byproducts real deposits carry: cobalt with nickel, nickel with cobalt and platinum, molybdenum with tungsten,
+        // sulfur from molybdenite.
+        flotationCell = new RecipeCrafter("flotation-cell"){{
+            requirements(Category.crafting, with(Items.lead, 60, Items.titanium, 50, Items.metaglass, 30, pumpUnit, 2, rotor, 2));
+            size = 2;
+            health = 320;
+            itemCapacity = 20;
+            liquidCapacity = 30f;
+            recipe(2, 90f, with(pentlandite, 4), with(nickel, 6, cobalt, 1)).liquidsIn(Liquids.water, 6f / 60f);
+            recipe(2, 90f, with(chromite, 4), with(chromium, 6)).liquidsIn(Liquids.water, 6f / 60f);
+            recipe(2, 90f, with(cobaltite, 4), with(cobalt, 6, nickel, 1)).liquidsIn(Liquids.water, 6f / 60f);
+            recipe(2, 90f, with(wolframite, 4), with(tungsten, 6, molybdenum, 1)).liquidsIn(Liquids.water, 6f / 60f);
+            recipe(2, 90f, with(molybdenite, 4), with(molybdenum, 6, sulfur, 1)).liquidsIn(Liquids.water, 6f / 60f);
+            recipe(2, 90f, with(sperrylite, 4), with(platinum, 6, nickel, 1)).liquidsIn(Liquids.water, 6f / 60f);
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.water, 3f), new DrawDefault());
         }};
 
         // Crushed ore + water -> metals by density (jigs and flotation). Each craft yields one metal; rarely aetherite crystals.

@@ -187,6 +187,12 @@ public class SpriteGen{
         // ---- metallurgy ----
         chunks("nickel", 0xb4c2a6);
         chunks("bauxite", 0xc4875a);
+        chunks("pentlandite", 0xb8a46a);
+        chunks("chromite", 0x4e4a52);
+        chunks("cobaltite", 0x8f95b8);
+        chunks("wolframite", 0x3e3a38);
+        chunks("molybdenite", 0x6f7686);
+        chunks("sperrylite", 0xc8ccd2);
         chunks("red-mud", 0x9c4632);
         chunks("chromium", 0xc3cedb);
         chunks("cobalt", 0x4f6fd1);
@@ -317,6 +323,7 @@ public class SpriteGen{
         electrolyzerSprite("electrolyzer");
         chemicalReactorSprite("chemical-reactor");
         pressureReactor("pressure-reactor");
+        flotationCellSprite("flotation-cell");
         electricFurnace("electric-furnace");
         coreAssembler("experimental-core-assembler");
         componentDepotArt("component-depot");
@@ -2924,6 +2931,24 @@ public class SpriteGen{
         r.fill(r.rect(16, 49, 32, 9), 7, copperGearM, 1);
         save(r, name);
         glowOf(r, name);
+    }
+
+    /** Flotation Cell (2×2): a tank of churning water with froth spilling into a launder along the edge, and the agitator drive. */
+    static void flotationCellSprite(String name) throws IOException{
+        int s = 2 * T;
+        float c = s / 2f;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 4, 5, metal);
+        r.fill(r.rect(6, 6, 46, 52), 8, steel, 2);
+        liquidWindow(r, r.rect(10, 10, 38, 44), 9);
+        for(int i = 0; i < 5; i++) r.fill(r.circle(16 + i * 7, 14 + (i % 2) * 3, 3), 10, dull(0xd8d2c4), 0);
+        r.fill(r.rect(54, 8, 7, 48), 9, steel, 1);
+        r.fill(r.rect(56, 10, 3, 44), 10, dull(0xb8a46a), 0);
+        r.fill(r.circle(c - 3, c + 4, 6), 12, metal, 2);
+        r.fill(r.bar(c - 3, c + 4, 0, 10, 2, 45), 13, steel, 0);
+        save(r, name);
+        glowOf(r, name);
+        liquidBottom(name, s);
     }
 
     /** Pressure Reactor (3×3): a forged vessel held by four locking clamps, a window onto its contents, a pressure gauge. */

@@ -44,7 +44,7 @@ public class Polish{
         kind(Kind.reactor, "fission-reactor");
         kind(Kind.cryo, "hydrogen-fuel-cell", "air-separation-unit", "cryogenic-condenser", "gas-separator", "vacuum-freezer");
         kind(Kind.press, "gear-press", "extruder", "metal-press", "composite-press");
-        kind(Kind.grind, "ore-crusher", "ore-washer", "lathe");
+        kind(Kind.grind, "ore-crusher", "flotation-cell", "ore-washer", "lathe");
         kind(Kind.electronics, "circuit-assembler", "chip-fabricator", "experimental-core-assembler", "silicon-refinery");
         kind(Kind.bio, "biomass-cultivator", "algae-photobioreactor", "enzyme-extractor", "biochemical-fermenter", "anaerobic-digester");
         kind(Kind.assembler, "assembler", "basic-module-assembler", "advanced-module-assembler", "experimental-augmentation-facility", "aetherite-module-forge", "module-recycling-facility");

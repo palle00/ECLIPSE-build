@@ -262,7 +262,9 @@ public class EclipseTechTree{
 
         //electronics, ore processing, heat storage and cooling
         child(find(extruder), circuitAssembler);
-        child(child(find(Blocks.pulverizer), oreCrusher), oreWasher);
+        TechNode crusher = child(find(Blocks.pulverizer), oreCrusher);
+        child(crusher, oreWasher);
+        child(crusher, flotationCell);
         child(find(heatExchanger), thermalStorage);
         child(find(waterTreatmentPlant), coolingTower);
         child(child(child(find(copperGear), copperWire), circuitBoard), controlUnit);
