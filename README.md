@@ -4,12 +4,13 @@
 
 <p align="center">
   <b>A Mindustry mod that turns Serpulo into a deep industrial game.</b><br>
-  Real machine parts, chemistry that bites back, new metals, upgrade modules you manufacture yourself,
+  Universal machines on power tiers, machine parts built from bolts and motors, real chemistry, new metals,
+  upgrade modules you manufacture yourself,
   robots, smarter logistics, 14 new turrets and two enemy factions that join your waves.
 </p>
 
 <p align="center">
-  <b>154 buildings · 14 turrets · 46 new materials · 24 liquids and gases · 70 upgrade modules · 20 units · 7 ores</b>
+  <b>127 buildings · 14 turrets · 94 new materials · 26 liquids and gases · 70 upgrade modules · 20 units · 8 ores</b>
 </p>
 
 <p align="center">
@@ -36,11 +37,14 @@ Every ECLIPSE sprite is drawn in vanilla's own pixel style, and every machine is
 
 ## Industry with depth
 
-- **Mechanical components.** Advanced buildings need gears, titanium rods, bearings, pressure casings, superalloy frames, precision parts and experimental cores, each tier made on its own production line. A Component Depot keeps your core stocked so you can always build.
-- **Chemistry.** Water treatment, electrolysis, chlor-alkali, oil distillation, acids, polymers, fertilizer, explosives, carbon fibre and superconductors. Machines with several outputs send each liquid out of a fixed side.
+- **Universal machines.** One Gear Press makes every gear, one Assembler every part, one Electrolyzer every electrolysis. Tap a machine to pick a recipe; hover a choice to see what it needs.
+- **Power tiers and overclocking.** Every recipe needs its tier's power in full (30 to 7680 power/s) or the machine stops. Overclock a machine for double, quadruple or eight times the speed, at a steep power price.
+- **Crafting depth.** Metal is pressed into plates, extruded into rods and wire, turned into bolts, rings and springs, and assembled with resistors and transistors into motors, pumps, pistons and sensors, before it becomes the pressure casings, bearings and frames buildings are made of. A Component Depot keeps your core stocked so you can always build.
+- **Real chemistry.** Haber-Bosch, Ostwald, chlor-alkali, Bayer, Hall-Héroult, Kroll and more, with real ratios and byproducts: neutralized acid becomes brine for the electrolyzer, captured CO₂ becomes soda ash for glass. Machines with several outputs send each liquid out of a fixed side.
+- **Hot metals.** Metal and glass from the furnaces come out glowing and must be cooled in a Vacuum Freezer before use.
 - **Corrosion.** Acids and chlorine eat through ordinary conduits. Pipe them in polymer or metal conduits, and deal with your waste, or it stalls production.
 - **Heat.** Furnaces and reactors need heat from heaters, geothermal taps or a fission reactor. Route it with heat exchangers and buffer it in thermal storage.
-- **New metals.** Nickel, chromium, cobalt, tungsten, molybdenum and platinum. Mine them, or wash them out of scrap on any map. Smelt superalloy, tungsten carbide and surge superalloy.
+- **New metals.** The veins hold real ore minerals (pentlandite, chromite, cobaltite, wolframite, molybdenite, sperrylite, bauxite). Crush them for 1 metal per ore, float them for 1.5 with byproducts, or leach them for 2, with cobalt and platinum out of nickel ore. Or wash metals out of scrap on any map. Smelt superalloy, tungsten carbide and surge superalloy.
 - **Power.** Fuel cells, methane turbines, biofuel engines, steam turbines on a fission reactor, four kinds of batteries, and the World Engine, a five-stage megaproject.
 - **Lattice Drill.** An endgame drill that outlines its whole ore patch and mines all of it through one building. Pipe in coolant to speed it up, up to 2.65x with liquid nitrogen.
 
@@ -101,7 +105,9 @@ Custom games with waves get two factions on top of the map's own waves: **the Sw
 
 - **ECLIPSE Wiki** in the pause menu: a step-by-step Getting Started guide, guides for every system and an entry for every block, material and unit. Press **I** over any ECLIPSE block to open its page.
 - **Animated setup pictures:** every machine's wiki page shows a small working setup built from its real recipe.
-- Machines tell you **why they stopped** ("Brine has nowhere to go", "No heat").
+- Every item page has a **recipe tree**: the whole chain for 1 per second, down to raw materials, with how many machines it takes.
+- Machines tell you **why they stopped** ("Brine has nowhere to go", "No heat", "Underpowered: needs 480/s").
+- A **search box** above the build menu finds any block by name.
 - Placement hints show liquid output sides and how much heat a heater delivers.
 - **Upgrade Section:** hold Alt with a better belt, conduit or wall selected to upgrade a whole connected line at once.
 - A new **ECLIPSE main menu**: a dusk landscape under the eclipse.
@@ -114,7 +120,7 @@ Custom games with waves get two factions on top of the map's own waves: **the Sw
 ## Everything in the mod
 
 <details>
-<summary>Show all 321 items, liquids, blocks and units</summary>
+<summary>Show all 345 items, liquids, blocks and units</summary>
 
 ![All ECLIPSE content](docs/images/content.png)
 

@@ -3067,19 +3067,32 @@ public class SpriteGen{
         int s = 3 * T;
         R r = canvas(s);
         slab(r, 0, 0, s, s, 5, 5, steel);
-        //part trays along the top and left
-        for(int i = 0; i < 4; i++) r.fill(r.rect(10 + i * 20, 4, 16, 10), 7, metal, 1);
-        for(int i = 0; i < 3; i++) r.fill(r.rect(4, 22 + i * 20, 10, 16), 7, metal, 1);
-        //the work table with a motor on it
-        r.fill(r.oct(28, 30, 50, 44, 5), 8, metal, 2);
-        r.fill(r.oct(34, 36, 38, 32, 3), 6, deep, 0);
-        r.cylH(40, 44, 22, 14, 7, 5, acc(0x7a8a9c));
-        //robot arm: base, two links, gripper
-        r.fill(r.circle(80, 80, 10), 11, steel, 3);
-        r.fill(r.bar(80, 80, 0, 26, 7, 225), 13, metal, 2);
-        r.fill(r.circle(62, 62, 5), 14, steel, 2);
-        r.fill(r.bar(62, 62, 0, 14, 5, 200), 15, metal, 1);
-        r.fill(r.rect(46, 55, 6, 4), 15.5f, lit(0xffb46b), 0);
+        //sunken floor of the cell
+        r.fill(r.oct(18, 18, 72, 72, 6), 3, deep, 1);
+        //part bins along the top and left, each holding parts
+        int[] parts = {0xd99d73, 0x8da1e3, 0x7a8a9c, 0x5f8fb0};
+        for(int i = 0; i < 4; i++){
+            r.fill(r.rect(10 + i * 20, 3, 17, 12), 8, metal, 2);
+            r.fill(r.rect(13 + i * 20, 6, 11, 6), 6, deep, 0);
+            r.fill(r.circle(18 + i * 20, 9, 2.5f), 7, acc(parts[i]), 0);
+        }
+        for(int i = 0; i < 3; i++){
+            r.fill(r.rect(3, 22 + i * 20, 12, 17), 8, metal, 2);
+            r.fill(r.rect(6, 25 + i * 20, 6, 11), 6, deep, 0);
+            r.fill(r.circle(9, 30 + i * 20, 2.5f), 7, acc(parts[i + 1]), 0);
+        }
+        //the work table with a motor being assembled
+        r.fill(r.oct(26, 28, 46, 40, 5), 9, metal, 3);
+        r.fill(r.oct(31, 33, 36, 30, 3), 7, steel, 1);
+        r.cylH(36, 40, 24, 16, 9, 6, acc(0x7a8a9c));
+        r.fill(r.oct(58, 42, 6, 12, 1), 10, copperGearM, 1);
+        //robot arm: a heavy base, two thick links, a gripper with a welding tip
+        r.fill(r.circle(80, 80, 13), 12, steel, 3);
+        r.fill(r.circle(80, 80, 6), 13, metal, 2);
+        r.fill(r.bar(80, 80, 0, 26, 10, 225), 14, metal, 3);
+        r.fill(r.circle(62, 62, 7), 15, steel, 2);
+        r.fill(r.bar(62, 62, 0, 16, 7, 200), 16, metal, 2);
+        r.fill(r.rect(44, 54, 7, 5), 16.5f, lit(0xffb46b), 0);
         save(r, name);
         glowOf(r, name);
     }
@@ -3092,14 +3105,25 @@ public class SpriteGen{
         int s = 2 * T;
         R r = canvas(s);
         slab(r, 0, 0, s, s, 3, 4, steel);
-        r.fill(r.rect(4, 36, 56, 10), 7, metal, 2);
-        r.fill(r.oct(2, 10, 18, 40, 3), 12, steel, 3);
-        r.fill(r.circle(20, 29, 8), 14, metal, 2);
-        r.fill(r.circle(20, 29, 3), 15, deep, 0);
-        r.cylH(20, 26, 30, 6, 9, 3, titaniumM);
-        r.fill(r.oct(48, 18, 12, 22, 2), 11, steel, 2);
-        r.fill(r.oct(31, 37, 11, 11, 2), 12, metal, 2);
-        r.fill(r.rect(35, 32, 3, 5), 13, lit(0xffb46b), 0);
+        //sunken chip tray under the whole work area
+        r.fill(r.rect(18, 14, 42, 38), 3, deep, 1);
+        for(int x = 22; x < 58; x += 6) r.fill(r.rect(x, 44, 3, 2), 4, dull(0x8da1e3), 0);
+        //the bed rails
+        r.fill(r.rect(4, 40, 56, 8), 8, metal, 2);
+        r.fill(r.rect(4, 16, 56, 6), 8, metal, 2);
+        //headstock with a big chuck and three jaws
+        r.fill(r.oct(2, 8, 20, 46, 3), 12, steel, 3);
+        r.fill(r.circle(21, 30, 11), 14, metal, 3);
+        for(int i = 0; i < 3; i++) r.fill(r.bar(21, 30, 4, 6, 4, i * 120 + 30), 15, steel, 1);
+        r.fill(r.circle(21, 30, 3), 16, deep, 0);
+        //the work rod to the tailstock
+        r.cylH(28, 26, 22, 8, 9, 4, titaniumM);
+        r.fill(r.oct(48, 18, 14, 26, 3), 12, steel, 3);
+        r.fill(r.circle(50, 30, 3), 13, metal, 1);
+        //carriage and tool post cutting the rod, sparks at the cut
+        r.fill(r.oct(30, 36, 14, 14, 3), 12, metal, 2);
+        r.fill(r.rect(35, 32, 4, 6), 13, steel, 1);
+        r.fill(r.rect(34, 33, 6, 2), 14, lit(0xffb46b), 0);
         save(r, name);
         glowOf(r, name);
     }
@@ -5646,10 +5670,11 @@ public class SpriteGen{
     static void boltIcon(String name, int rgb, boolean thread) throws IOException{
         R r = new R(T);
         Mat m = acc(rgb);
-        r.fill(r.bar(17, 17, 0, 22, 5, 45), 4, m, 1);
-        if(thread) for(int i = 0; i < 4; i++) r.raise(r.bar(13 + i * 4, 13 + i * 4, 0, 6, 1, -45), 1f);
-        r.fill(r.oct(3, 3, 11, 11, 3), 7, m, 2);
-        r.fill(r.rect(7, 7, 3, 3), 8, deep, 0);
+        //the shaft runs from the head (lower left) up to the right; the head sits on its start
+        r.fill(r.bar(10, 22, 0, 20, 5, 45), 4, m, 1);
+        if(thread) for(int i = 0; i < 4; i++) r.raise(r.bar(14 + i * 3.5f, 18 - i * 3.5f, 0, 6, 1.2f, -45), 1.2f);
+        r.fill(r.oct(4, 16, 12, 12, 3), 7, m, 2);
+        r.fill(r.rect(8, 20, 4, 4), 8, deep, 0);
         save(r, name);
     }
 
@@ -5666,7 +5691,15 @@ public class SpriteGen{
     static void springIcon(String name, int rgb) throws IOException{
         R r = new R(T);
         Mat m = acc(rgb);
-        for(int i = 0; i < 6; i++) r.fill(r.bar(16, 5 + i * 4.4f, 0, 18, 2.5f, i % 2 == 0 ? 18 : -18), 4, m, 1);
+        //a helix seen from the side: front turns drawn over the back ones, darker
+        for(int pass = 0; pass < 2; pass++){
+            for(float t = 0; t < Math.PI * 2 * 5; t += 0.12f){
+                boolean front = Math.cos(t) > 0;
+                if(front != (pass == 1)) continue;
+                float x = 16 + (float)Math.sin(t) * 9, y = 4 + t / (float)(Math.PI * 2 * 5) * 24;
+                r.fill(r.circle(x, y, 1.9f), front ? 5 : 3, front ? m : deep, front ? 1 : 0);
+            }
+        }
         save(r, name);
     }
 
