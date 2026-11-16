@@ -202,6 +202,7 @@ public class EclipseTechTree{
         TechNode smelter = child(refinery, aluminiumSmelter);
         child(heater, glassKiln);
         child(airSeparation, cryogenicCondenser);
+        child(find(Blocks.cryofluidMixer), vacuumFreezer); //every midgame furnace metal cools here
         child(smelter, arcFurnace);
         TechNode surgeWall = child(find(Blocks.surgeWall), surgeSuperalloyWall);
         child(surgeWall, surgeSuperalloyWallLarge);

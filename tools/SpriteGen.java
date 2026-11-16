@@ -225,6 +225,11 @@ public class SpriteGen{
         chip("microchip", 0x3f9a5c);
         pane("reinforced-glass", 0x9fc7d6);
         ingot("surge-superalloy", 0xf2c45a);
+        //hot metals: the same ingots glowing from the furnace
+        hotIngot("hot-superalloy", 0xcdb98a);
+        hotIngot("hot-tungsten-carbide", 0x50525e);
+        hotIngot("hot-aluminium", 0xb9c4cf);
+        hotIngot("hot-surge-superalloy", 0xf2c45a);
         gas("steam", 0xe8edf0);
         liquid("liquid-nitrogen", 0xbfe3ff);
 
@@ -243,6 +248,7 @@ public class SpriteGen{
         wallArt("surge-superalloy-wall-large", 2, 2);
 
         cryoCondenser("cryogenic-condenser");
+        vacuumFreezer("vacuum-freezer");
         siliconRefinery("silicon-refinery");
         chipFabricator("chip-fabricator");
 
@@ -4784,6 +4790,34 @@ public class SpriteGen{
         liquidBottom(name, s);
     }
 
+    /**
+     * Vacuum Freezer (3×3): a thick insulated vacuum chamber with a frosted door and a cryofluid window, cooling coils
+     * round it, a hot-metal feed chute on the left and the cooled-metal outlet on the right.
+     */
+    static void vacuumFreezer(String name) throws IOException{
+        int s = 3 * T;
+        float c = s / 2f;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 8, 5, steel);
+        //insulation jacket and the chamber
+        r.fill(r.oct(10, 10, s - 20, s - 20, 10), 9, metal, 3);
+        r.fill(r.oct(16, 16, s - 32, s - 32, 8), 6, deep, 0);
+        r.fill(r.oct(20, 20, s - 40, s - 40, 6), 10, dull(0xc9dde8), 2);
+        //cooling coils round the chamber
+        r.fill(r.ring(c, c, 33, 36), 11, dull(0x6ecbe6), 1);
+        //cryofluid window in the door
+        liquidWindow(r, r.circle(c, c, 11), 12);
+        for(int i = 0; i < 4; i++) r.fill(r.bar(c, c, 12, 5, 3, i * 90), 13, metal, 0);
+        //hot feed chute (left), cold outlet (right)
+        r.fill(r.rect(1, (int)c - 7, 9, 14), 8, steel, 1);
+        r.fill(r.rect(3, (int)c - 3, 4, 6), 9, lit(0xff9a4a), 0);
+        r.fill(r.rect(s - 10, (int)c - 7, 9, 14), 8, steel, 1);
+        r.fill(r.rect(s - 7, (int)c - 3, 4, 6), 9, dull(0xb9c4cf), 0);
+        save(r, name);
+        glowOf(r, name);
+        liquidBottom(name, s);
+    }
+
     static void pressureReactor(String name) throws IOException{
         int s = 3 * T;
         float c = s / 2f;
@@ -5923,6 +5957,15 @@ public class SpriteGen{
         Mat m = acc(rgb);
         r.fill(r.oct(3, 8, 26, 17, 4), 7, m, 4);
         r.raise(r.rect(9, 15, 14, 2), -1.5f);
+        save(r, name);
+    }
+
+    /** A metal ingot still glowing from the furnace: its own colour pushed towards orange, a bright seam. */
+    static void hotIngot(String name, int rgb) throws IOException{
+        R r = new R(T);
+        int hot = mixi(rgb, 0xff7a2a, 0.6f);
+        r.fill(r.oct(3, 8, 26, 17, 4), 7, lit(hot), 4);
+        r.fill(r.rect(9, 15, 14, 2), 8, lit(0xffe2a0), 0);
         save(r, name);
     }
 

@@ -7,6 +7,7 @@ public class EclipseItems{
     public static Item sulfur, polyethylene, leadAcidCell, polymerCatalyst, ammoniumNitrate,
         nickel, chromium, cobalt, tungsten, lithium, superalloy, tungstenCarbide,
         alumina, aluminium, highPuritySilicon, microchip, reinforcedGlass, surgeSuperalloy,
+        hotSuperalloy, hotTungstenCarbide, hotAluminium, hotSurgeSuperalloy,
         molybdenum, vanadium, platinum, thoriumFuelRod, spentFuelRod, industrialSludge,
         syntheticRubber, epoxyResin, carbonFiber, carbonComposite,
         biomass, fertilizer, enzymeExtract,
@@ -102,6 +103,24 @@ public class EclipseItems{
         }};
 
         surgeSuperalloy = new Item("surge-superalloy", Color.valueOf("f2c45a")){{
+            cost = 2f;
+            charge = 0.5f;
+        }};
+
+        // ---- hot metals: fresh out of a furnace, cooled in the vacuum freezer before they can be used ----
+        hotSuperalloy = new Item("hot-superalloy", Color.valueOf("ff9a4a")){{
+            cost = 1.6f;
+        }};
+
+        hotTungstenCarbide = new Item("hot-tungsten-carbide", Color.valueOf("e0623a")){{
+            cost = 1.6f;
+        }};
+
+        hotAluminium = new Item("hot-aluminium", Color.valueOf("ffb27a")){{
+            cost = 1.1f;
+        }};
+
+        hotSurgeSuperalloy = new Item("hot-surge-superalloy", Color.valueOf("ffc04a")){{
             cost = 2f;
             charge = 0.5f;
         }};

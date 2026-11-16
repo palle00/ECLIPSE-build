@@ -17,7 +17,7 @@ import static mindustry.type.ItemStack.*;
 public class MetallurgyBlocks{
     public static Block oreCrusher, oreWasher, inductionFurnace,
         mineralSeparator, platinumRefinery, lithiumExtractor, alloyFurnace, sinteringFurnace, carbideDrill, superalloyWall, superalloyWallLarge,
-        aluminaRefinery, aluminiumSmelter, glassKiln, arcFurnace, surgeSuperalloyWall, surgeSuperalloyWallLarge;
+        aluminaRefinery, aluminiumSmelter, glassKiln, arcFurnace, surgeSuperalloyWall, surgeSuperalloyWallLarge, vacuumFreezer;
 
     public static void load(){
         // Slag + sulfuric acid -> trace metals. The metal source on maps without the new ores.
@@ -66,7 +66,7 @@ public class MetallurgyBlocks{
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(brine, 3f), new DrawDefault());
         }};
 
-        // Nickel + chromium + cobalt + heat -> superalloy.
+        // Nickel + chromium + cobalt + heat -> hot superalloy (cooled in the vacuum freezer).
         alloyFurnace = new HeatCrafter("alloy-furnace"){{
             requirements(Category.crafting, with(Items.lead, 80, Items.titanium, 80, Items.silicon, 60, Items.graphite, 60, titaniumRod, 20, industrialBearing, 5));
             size = 3;
@@ -77,12 +77,12 @@ public class MetallurgyBlocks{
             maxEfficiency = 2f;
             consumeItems(with(nickel, 2, chromium, 1, cobalt, 1));
             consumePower(1f);
-            outputItem = new ItemStack(superalloy, 1);
+            outputItem = new ItemStack(hotSuperalloy, 1);
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ffb46b"); }}, new DrawHeatInput());
         }};
 
-        // Tungsten + graphite -> tungsten carbide (powder metallurgy).
+        // Tungsten + graphite -> hot tungsten carbide (powder metallurgy; cooled in the vacuum freezer).
         sinteringFurnace = new GenericCrafter("sintering-furnace"){{
             requirements(Category.crafting, with(Items.lead, 60, Items.titanium, 50, Items.silicon, 40, Items.graphite, 40, titaniumRod, 10, industrialBearing, 5));
             size = 2;
@@ -91,7 +91,7 @@ public class MetallurgyBlocks{
             craftTime = 60f;
             consumeItems(with(tungsten, 1, Items.graphite, 1));
             consumePower(2f);
-            outputItem = new ItemStack(tungstenCarbide, 1);
+            outputItem = new ItemStack(hotTungstenCarbide, 1);
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff6a3d"); }});
         }};
@@ -144,7 +144,7 @@ public class MetallurgyBlocks{
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(sodiumHydroxide, 4f), new DrawDefault(), new DrawHeatInput());
         }};
 
-        // Alumina + graphite anodes + lots of power -> aluminium.
+        // Alumina + graphite anodes + lots of power -> hot aluminium (cooled in the vacuum freezer).
         aluminiumSmelter = new GenericCrafter("aluminium-smelter"){{
             requirements(Category.crafting, with(microchip, 15, Items.titanium, 60, Items.silicon, 50, Items.lead, 60, industrialBearing, 10));
             size = 3;
@@ -153,7 +153,7 @@ public class MetallurgyBlocks{
             craftTime = 60f;
             consumeItems(with(alumina, 2, Items.graphite, 1));
             consumePower(5f);
-            outputItem = new ItemStack(aluminium, 1);
+            outputItem = new ItemStack(hotAluminium, 1);
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("9fd8ff"); }});
         }};
@@ -175,7 +175,23 @@ public class MetallurgyBlocks{
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("9fd6ff"); }}, new DrawHeatInput());
         }};
 
-        // Surge alloy + superalloy -> surge superalloy.
+        // Hot metal + cryofluid -> usable metal. Every midgame and later furnace metal cools here before use.
+        // Its cost must not need any of the metals it cools.
+        vacuumFreezer = new RecipeCrafter("vacuum-freezer"){{
+            requirements(Category.crafting, with(Items.titanium, 80, Items.lead, 60, Items.metaglass, 40, Items.silicon, 40, pressureCasing, 10, industrialBearing, 5));
+            size = 3;
+            health = 650;
+            itemCapacity = 20;
+            liquidCapacity = 30f;
+            recipe(3, 30f, with(hotSuperalloy, 1), with(superalloy, 1)).liquidsIn(Liquids.cryofluid, 3f / 60f);
+            recipe(3, 30f, with(hotTungstenCarbide, 1), with(tungstenCarbide, 1)).liquidsIn(Liquids.cryofluid, 3f / 60f);
+            recipe(3, 30f, with(hotAluminium, 1), with(aluminium, 1)).liquidsIn(Liquids.cryofluid, 2f / 60f);
+            recipe(5, 60f, with(hotSurgeSuperalloy, 1), with(surgeSuperalloy, 1)).liquidsIn(Liquids.cryofluid, 6f / 60f);
+            craftEffect = Fx.freezing;
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.cryofluid, 4f), new DrawDefault());
+        }};
+
+        // Surge alloy + superalloy -> hot surge superalloy (cooled in the vacuum freezer).
         arcFurnace = new GenericCrafter("arc-furnace"){{
             requirements(Category.crafting, with(superalloy, 40, tungstenCarbide, 30, microchip, 20, Items.titanium, 80, Items.silicon, 60, superalloyFrame, 10, precisionComponent, 5, tungsten, 20));
             size = 3;
@@ -184,7 +200,7 @@ public class MetallurgyBlocks{
             craftTime = 120f;
             consumeItems(with(Items.surgeAlloy, 1, superalloy, 2));
             consumePower(8f);
-            outputItem = new ItemStack(surgeSuperalloy, 1);
+            outputItem = new ItemStack(hotSurgeSuperalloy, 1);
             craftEffect = Fx.lightningShoot;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("f2e878"); }});
         }};

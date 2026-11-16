@@ -96,7 +96,7 @@ public class MenuOrder{
         after(Blocks.surgeSmelter, alloyFurnace, inductionFurnace, arcFurnace);
         after(Blocks.pulverizer, oreCrusher, oreWasher);
         after(Blocks.cryofluidMixer, //water -> chemical industry
-            coolingTower, waterTreatmentPlant, electrolysisPlant, airSeparationUnit, cryogenicCondenser, highPressureReactor, nitricAcidPlant,
+            coolingTower, waterTreatmentPlant, electrolysisPlant, airSeparationUnit, cryogenicCondenser, vacuumFreezer, highPressureReactor, nitricAcidPlant,
             chlorAlkaliCell, acidSynthesizer, acidLeachingVat, industrialNeutralizer, industrialScrubber, gasSeparator,
             wastewaterTreatmentPlant, thermalWasteProcessor, lithiumExtractor, aluminaRefinery, aluminiumSmelter,
             aquaRegiaMixer, platinumRefinery, synthesisComplex);
@@ -112,12 +112,12 @@ public class MenuOrder{
         after(Items.metaglass, reinforcedGlass);
         after(Items.coal, sulfur);
         after(Items.copper, copperGear, copperWire);
-        after(Items.titanium, titaniumRod, titaniumGear, pressureCasing, industrialBearing, nickel, chromium, cobalt, molybdenum, vanadium, tungsten, tungstenCarbide, alumina, aluminium, lithium, superalloy, superalloyFrame, alnicoMagnet, platinum);
+        after(Items.titanium, titaniumRod, titaniumGear, pressureCasing, industrialBearing, nickel, chromium, cobalt, molybdenum, vanadium, tungsten, hotTungstenCarbide, tungstenCarbide, alumina, hotAluminium, aluminium, lithium, hotSuperalloy, superalloy, superalloyFrame, alnicoMagnet, platinum);
         after(Items.thorium, thoriumFuelRod, spentFuelRod);
         after(Items.scrap, crushedOre, industrialSludge);
         after(Items.silicon, highPuritySilicon, microchip, circuitBoard, precisionComponent, controlUnit);
         after(Items.plastanium, polyethylene, polymerCatalyst, leadAcidCell, syntheticRubber, epoxyResin, carbonFiber, carbonComposite);
-        after(Items.surgeAlloy, surgeSuperalloy, experimentalCore);
+        after(Items.surgeAlloy, hotSurgeSuperalloy, surgeSuperalloy, experimentalCore);
         after(Items.phaseFabric, aetherite, superconductor);
         after(Items.sporePod, biomass, fertilizer, enzymeExtract);
         after(Items.blastCompound, ammoniumNitrate);

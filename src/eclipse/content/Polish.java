@@ -45,7 +45,7 @@ public class Polish{
         kind(Kind.steam, "industrial-boiler", "steam-turbine", "cooling-tower", "steam-cracker", "geothermal-heat-tap");
         kind(Kind.combustion, "industrial-heater", "methane-turbine", "biofuel-engine");
         kind(Kind.reactor, "fission-reactor");
-        kind(Kind.cryo, "hydrogen-fuel-cell", "air-separation-unit", "cryogenic-condenser", "gas-separator");
+        kind(Kind.cryo, "hydrogen-fuel-cell", "air-separation-unit", "cryogenic-condenser", "gas-separator", "vacuum-freezer");
         kind(Kind.press, "gear-press", "metal-extruder", "wire-drawing-machine", "bearing-press", "composite-press",
             "battery-assembly-plant", "explosives-plant");
         kind(Kind.grind, "ore-crusher", "ore-washer");
