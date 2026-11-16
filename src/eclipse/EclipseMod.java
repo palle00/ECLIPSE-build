@@ -40,6 +40,7 @@ public class EclipseMod extends Mod{
             EclipseWiki.install();
             MenuBackdrop.install();
             LiveMap.install(); //the map screen (M) turns into the live game when zoomed in
+            BlockSearch.install(); //search box above the build menu
         });
 
         //developer convenience: showcase.ps1 -Open drops this one-shot flag to jump straight into the showcase map
