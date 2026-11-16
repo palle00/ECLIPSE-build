@@ -186,6 +186,8 @@ public class SpriteGen{
 
         // ---- metallurgy ----
         chunks("nickel", 0xb4c2a6);
+        chunks("bauxite", 0xc4875a);
+        chunks("red-mud", 0x9c4632);
         chunks("chromium", 0xc3cedb);
         chunks("cobalt", 0x4f6fd1);
         chunks("tungsten", 0x8a8c96);
@@ -375,6 +377,7 @@ public class SpriteGen{
         // ---- endgame & aetherite ----
         sulfurIcon("aetherite", 0x7fe0ff);
         ore("ore-aetherite", 0x5f8fae);
+        ore("ore-bauxite", 0xb87850);
         aetheriteForge("aetherite-module-forge");
         aetheriteCapacitor("aetherite-capacitor");
         geothermalTap("geothermal-heat-tap");

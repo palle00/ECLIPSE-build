@@ -31,7 +31,7 @@ public class EclipseSerpuloGenerator extends SerpuloPlanetGenerator{
         for(Tile t : world.tiles){
             Block o = t.overlay();
             seed = seed * 31 + o.id;
-            if(o == oreNickel || o == oreChromium || o == oreCobalt || o == oreTungsten || o == oreMolybdenum || o == orePlatinum || o == oreAetherite) return;
+            if(o == oreNickel || o == oreChromium || o == oreCobalt || o == oreTungsten || o == oreMolybdenum || o == orePlatinum || o == oreAetherite || o == oreBauxite) return;
             if(o == Blocks.oreCopper || o == Blocks.oreLead || o == Blocks.oreTitanium || o == Blocks.oreCoal || o == Blocks.oreThorium || o == Blocks.oreScrap) vanillaOre = true;
         }
         if(vanillaOre) addOres(world.tiles, seed);
@@ -51,6 +51,7 @@ public class EclipseSerpuloGenerator extends SerpuloPlanetGenerator{
             {oreMolybdenum, 22f, 0.86f, 0.81f, 0.15f},
             {orePlatinum, 16f, 0.89f, 0.84f, 0.45f},
             {oreAetherite, 14f, 0.91f, 0.86f, 0.55f},
+            {oreBauxite, 25f, 0.845f, 0.795f, 0.05f}, //aluminium is a mid-game staple: fairly common
         };
 
         Tile core = null;

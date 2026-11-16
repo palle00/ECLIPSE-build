@@ -98,7 +98,7 @@ public class MetallurgyBlocks{
 
         // ---- aluminium (Bayer + Hall-Heroult) ----
 
-        // Sand + sodium hydroxide + heat -> alumina.
+        // Bauxite + hot sodium hydroxide -> alumina, leaving red mud (Bayer process).
         aluminaRefinery = new HeatCrafter("alumina-refinery"){{
             requirements(Category.crafting, with(Items.lead, 80, Items.titanium, 60, Items.silicon, 40, Items.metaglass, 40, pressureCasing, 10, titaniumGear, 5));
             size = 3;
@@ -108,10 +108,10 @@ public class MetallurgyBlocks{
             craftTime = 60f;
             heatRequirement = 6f;
             maxEfficiency = 2f;
-            consumeItem(Items.sand, 3);
+            consumeItem(bauxite, 3);
             consumeLiquid(sodiumHydroxide, 4f / 60f);
             consumePower(0.5f);
-            outputItem = new ItemStack(alumina, 2);
+            outputItems = with(alumina, 2, redMud, 1); //Bayer: the residue leaves as red mud
             craftEffect = Fx.pulverizeSmall;
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(sodiumHydroxide, 4f), new DrawDefault(), new DrawHeatInput());
         }};
@@ -148,6 +148,8 @@ public class MetallurgyBlocks{
             recipe(2, 60f, with(Items.sand, 2, Items.graphite, 1), with(hotSilicon, 2)).liquidsOut(carbonDioxide, 1f / 60f).vented(); //SiO2 + C in the arc
             recipe(5, 120f, with(Items.surgeAlloy, 1, superalloy, 2), with(hotSurgeSuperalloy, 1)).liquidsIn(argon, 1f / 60f); //arc under argon
             recipe(3, 120f, with(petroleumCoke, 2), with(Items.graphite, 2)); //coke graphitized in the electric furnace
+            recipe(3, 90f, with(Items.scrap, 4), with(hotAluminium, 1)); //secondary aluminium: remelted scrap, aluminium on any map
+            recipe(3, 120f, with(redMud, 4), with(hotTitanium, 1)); //titanium smelted out of Bayer red mud
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff6a3d"); }});
         }};

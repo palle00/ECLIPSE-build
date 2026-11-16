@@ -7,7 +7,7 @@ import static eclipse.content.EclipseItems.*;
 
 /** Ores. Generated on new Serpulo sectors (see EclipseSerpuloGenerator) and placeable in the map editor. */
 public class EnvironmentBlocks{
-    public static Block oreNickel, oreChromium, oreCobalt, oreTungsten, oreMolybdenum, orePlatinum, oreAetherite;
+    public static Block oreNickel, oreChromium, oreCobalt, oreTungsten, oreMolybdenum, orePlatinum, oreAetherite, oreBauxite;
 
     public static void load(){
         oreNickel = new OreBlock("ore-nickel", nickel);
@@ -17,5 +17,6 @@ public class EnvironmentBlocks{
         oreMolybdenum = new OreBlock("ore-molybdenum", molybdenum);
         orePlatinum = new OreBlock("ore-platinum", platinum);
         oreAetherite = new OreBlock("ore-aetherite", aetherite);
+        oreBauxite = new OreBlock("ore-bauxite", bauxite);
     }
 }

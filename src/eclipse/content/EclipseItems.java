@@ -18,7 +18,7 @@ public class EclipseItems{
         tungstenRod, aluminiumWire, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, superalloyGear,
         magnetWire, resistor, capacitor, transistor, insulatedCable,
         electricMotor, permanentMagnetMotor, superconductingMotor, pumpUnit, piston, rotor, heatingCoil, sensor, emitter,
-        sodaAsh, petroleumCoke, magnesium;
+        sodaAsh, petroleumCoke, magnesium, bauxite, redMud;
 
     public static void load(){
         sulfur = new Item("sulfur", Color.valueOf("e8d44d")){{
@@ -284,5 +284,9 @@ public class EclipseItems{
         petroleumCoke = new Item("petroleum-coke", Color.valueOf("33333a")){{ cost = 0.7f; flammability = 0.8f; }};
         //won from brine (Dow process): reduces titanium chloride to titanium (Kroll), and burns fiercely
         magnesium = new Item("magnesium", Color.valueOf("d2d7dc")){{ cost = 1f; flammability = 0.6f; explosiveness = 0.2f; }};
+        //aluminium ore (gibbsite and boehmite): refined into alumina with hot sodium hydroxide (Bayer)
+        bauxite = new Item("bauxite", Color.valueOf("c4875a")){{ hardness = 2; cost = 0.7f; }};
+        //the Bayer residue: iron and titanium oxides; must be taken away, and its titanium can be smelted out
+        redMud = new Item("red-mud", Color.valueOf("9c4632")){{ cost = 0.3f; }};
     }
 }

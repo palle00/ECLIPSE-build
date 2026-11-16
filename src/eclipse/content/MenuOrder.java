@@ -102,7 +102,7 @@ public class MenuOrder{
         after(Blocks.incinerator, basicModuleAssembler, advancedModuleAssembler, experimentalFacility, aetheriteForge, moduleRecycler); //augmentation section
 
         //---- environment (map editor) ----
-        after(Blocks.oreThorium, oreNickel, oreChromium, oreCobalt, oreTungsten, oreMolybdenum, orePlatinum, oreAetherite);
+        after(Blocks.oreThorium, oreNickel, oreChromium, oreCobalt, oreTungsten, oreMolybdenum, orePlatinum, oreAetherite, oreBauxite);
 
         //---- items (core inventory, item pickers); augmentation modules stay at the end as their own group ----
         after(Items.metaglass, hotMetaglass, hotReinforcedGlass, reinforcedGlass);
@@ -110,7 +110,7 @@ public class MenuOrder{
         after(Items.coal, sulfur, petroleumCoke);
         after(Items.copper, copperGear, copperWire, magnetWire, insulatedCable, copperPlate, copperFoil);
         after(Items.lead, leadPlate);
-        after(Items.titanium, hotTitanium, titaniumRod, titaniumGear, titaniumPlate, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, rotor, electricMotor, pumpUnit, piston, pressureCasing, industrialBearing, nickel, chromium, cobalt, molybdenum, vanadium, tungsten, tungstenPlate, tungstenRod, hotTungstenCarbide, tungstenCarbide, alumina, hotAluminium, aluminium, aluminiumPlate, aluminiumFoil, aluminiumWire, magnesium, lithium, hotSuperalloy, superalloy, superalloyPlate, superalloyGear, superalloyFrame, alnicoMagnet, permanentMagnetMotor, heatingCoil, platinum);
+        after(Items.titanium, hotTitanium, titaniumRod, titaniumGear, titaniumPlate, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, rotor, electricMotor, pumpUnit, piston, pressureCasing, industrialBearing, nickel, chromium, cobalt, molybdenum, vanadium, tungsten, tungstenPlate, tungstenRod, hotTungstenCarbide, tungstenCarbide, bauxite, redMud, alumina, hotAluminium, aluminium, aluminiumPlate, aluminiumFoil, aluminiumWire, magnesium, lithium, hotSuperalloy, superalloy, superalloyPlate, superalloyGear, superalloyFrame, alnicoMagnet, permanentMagnetMotor, heatingCoil, platinum);
         after(Items.thorium, thoriumFuelRod, spentFuelRod);
         after(Items.scrap, crushedOre, industrialSludge);
         after(Items.silicon, hotSilicon, highPuritySilicon, resistor, capacitor, transistor, sensor, emitter, microchip, circuitBoard, precisionComponent, controlUnit);
