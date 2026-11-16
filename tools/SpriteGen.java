@@ -230,6 +230,10 @@ public class SpriteGen{
         hotIngot("hot-tungsten-carbide", 0x50525e);
         hotIngot("hot-aluminium", 0xb9c4cf);
         hotIngot("hot-surge-superalloy", 0xf2c45a);
+        hotIngot("hot-titanium", 0x8da1e3);
+        hotIngot("hot-silicon", 0x53565c);
+        hotIngot("hot-metaglass", 0xebeef5);
+        hotIngot("hot-reinforced-glass", 0x9fc7d6);
         gas("steam", 0xe8edf0);
         liquid("liquid-nitrogen", 0xbfe3ff);
 

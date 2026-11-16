@@ -40,6 +40,9 @@ import static mindustry.Vars.*;
  *         .liquidsIn(hydrochloricAcid, 2f / 60f).liquidsOut(acidicWaste, 1f / 60f);
  * </pre>
  * A full liquid output stops the machine (waste must be removed), like the other ECLIPSE chemistry.
+ *
+ * {@link #autoSelect}: with no recipe chosen, the machine runs whichever recipe its inputs complete, so a mixed belt never
+ * jams it (e.g. the Vacuum Freezer cooling any hot metal that arrives).
  */
 public class RecipeCrafter extends GenericCrafter{
     /** Power per tick while running, by tier (index = tier): 30, 120, 480, 1920 and 7680 per second. */
@@ -51,6 +54,8 @@ public class RecipeCrafter extends GenericCrafter{
     public static float minSatisfaction = 0.999f;
 
     public final Seq<Recipe> recipes = new Seq<>();
+    /** With no recipe chosen, accept every recipe's inputs and run whichever recipe they complete. */
+    public boolean autoSelect = false;
 
     public static class Recipe{
         public final int tier;
@@ -214,23 +219,48 @@ public class RecipeCrafter extends GenericCrafter{
     }
 
     public class RecipeBuild extends GenericCrafterBuild{
+        /** The recipe the player chose (null: none, or automatic on autoSelect machines). */
+        public @Nullable Recipe fixed;
+        /** The recipe running now: the chosen one, or the one picked automatically. */
         public @Nullable Recipe recipe;
-        public int overclock;
+        /** Overclock level the player chose (0-III), and the level in effect for the running recipe (capped by its tier). */
+        public int level, overclock;
         /** The recipe's liquid inputs scaled by the overclock speed (what the liquid consumer takes per tick). */
         public LiquidStack[] liquidInputs = {};
 
-        public void select(@Nullable Recipe r, int level){
-            if(r != recipe) progress = 0f;
-            set(r, level);
+        public void select(@Nullable Recipe r, int lvl){
+            fixed = r;
+            level = Math.max(0, Math.min(lvl, overclockSpeed.length - 1));
+            activate(r);
         }
 
-        void set(@Nullable Recipe r, int level){
+        /** Whether the machine picks its recipe from its inputs right now. */
+        public boolean auto(){
+            return autoSelect && fixed == null;
+        }
+
+        void activate(@Nullable Recipe r){
+            if(r != recipe) progress = 0f;
             recipe = r;
-            overclock = r == null ? 0 : Math.max(0, Math.min(level, r.maxOverclock()));
+            overclock = r == null ? 0 : Math.min(level, r.maxOverclock());
             liquidInputs = r == null ? new LiquidStack[0] : new LiquidStack[r.liquidInputs.length];
             for(int i = 0; i < liquidInputs.length; i++){
                 liquidInputs[i] = new LiquidStack(r.liquidInputs[i].liquid, r.liquidInputs[i].amount * overclockSpeed[overclock]);
             }
+        }
+
+        boolean ready(Recipe r){
+            return items.has(r.inputs);
+        }
+
+        /** The next recipe after the running one that has its inputs (round robin, so no input waits forever). */
+        @Nullable Recipe nextReady(){
+            int start = recipe == null ? -1 : recipes.indexOf(recipe);
+            for(int i = 1; i <= recipes.size; i++){
+                Recipe r = recipes.get((start + i) % recipes.size);
+                if(ready(r)) return r;
+            }
+            return null;
         }
 
         /** Power per tick wanted right now: the recipe's tier power times the overclock factor. */
@@ -263,6 +293,11 @@ public class RecipeCrafter extends GenericCrafter{
 
         @Override
         public void updateTile(){
+            //automatic: keep the running recipe while it has its inputs, otherwise switch to one that does
+            if(auto() && (recipe == null || !ready(recipe))){
+                Recipe next = nextReady();
+                if(next != null) activate(next);
+            }
             super.updateTile();
             if(recipe == null) return;
             if(efficiency > 0f){
@@ -275,14 +310,16 @@ public class RecipeCrafter extends GenericCrafter{
             //liquid left from a previous recipe leaves too
             if(hasLiquids){
                 liquids.each((liquid, amount) -> {
-                    if(amount > 0.001f && !recipe.usesLiquid(liquid) && !recipe.makesLiquid(liquid)) dumpLiquid(liquid, 2f);
+                    boolean needed = auto() ? usesLiquid(liquid) : recipe.usesLiquid(liquid);
+                    if(amount > 0.001f && !needed && !recipe.makesLiquid(liquid)) dumpLiquid(liquid, 2f);
                 });
             }
         }
 
         @Override
         public boolean acceptLiquid(Building source, Liquid liquid){
-            return recipe != null && recipe.usesLiquid(liquid) && liquids.get(liquid) < liquidCapacity;
+            boolean wanted = auto() ? usesLiquid(liquid) : recipe != null && recipe.usesLiquid(liquid);
+            return wanted && liquids.get(liquid) < liquidCapacity;
         }
 
         @Override
@@ -292,7 +329,8 @@ public class RecipeCrafter extends GenericCrafter{
 
         @Override
         public boolean acceptItem(Building source, Item item){
-            return recipe != null && recipe.uses(item) && items.get(item) < itemCapacity;
+            boolean wanted = auto() ? usesItem(item) : recipe != null && recipe.uses(item);
+            return wanted && items.get(item) < itemCapacity;
         }
 
         @Override
@@ -302,6 +340,11 @@ public class RecipeCrafter extends GenericCrafter{
             for(ItemStack out : recipe.outputs) for(int i = 0; i < out.amount; i++) offload(out.item);
             if(wasVisible) craftEffect.at(x, y);
             progress %= 1f;
+            //automatic: take turns, so one busy input can't starve the others
+            if(auto()){
+                Recipe next = nextReady();
+                if(next != null) activate(next);
+            }
         }
 
         /** Products leave; so do leftovers from a previous recipe, so a recipe change never jams the machine. */
@@ -312,21 +355,24 @@ public class RecipeCrafter extends GenericCrafter{
 
         @Override
         public boolean canDump(Building to, Item item){
-            return recipe == null || !recipe.uses(item);
+            return auto() ? !usesItem(item) : recipe == null || !recipe.uses(item);
         }
 
         @Override
         public void buildConfiguration(Table table){
             Seq<Item> outputs = recipes.select(Recipe::available).map(Recipe::output);
-            ItemSelection.buildTable(RecipeCrafter.this, table, outputs, () -> recipe == null ? null : recipe.output(),
-                item -> configure(item == null ? null : pack(recipeFor(item), overclock, RecipeCrafter.this)));
+            ItemSelection.buildTable(RecipeCrafter.this, table, outputs, () -> fixed == null ? null : fixed.output(),
+                item -> configure(pack(recipeFor(item), level, RecipeCrafter.this)));
             table.row();
             table.table(Styles.black6, t -> {
+                if(autoSelect){
+                    t.add("[lightgray]" + Core.bundle.get("eclipse-recipe.auto")).colspan(overclockSpeed.length + 1).left().wrap().width(240f).row();
+                }
                 t.add(Core.bundle.get("eclipse-recipe.overclock")).padRight(6f);
                 for(int i = 0; i < overclockSpeed.length; i++){
-                    int level = i;
-                    t.button(roman(level), Styles.flatTogglet, () -> configure(pack(recipe, level, RecipeCrafter.this))).size(40f)
-                        .disabled(b -> recipe == null || level > recipe.maxOverclock()).checked(b -> overclock == level);
+                    int lvl = i;
+                    t.button(roman(lvl), Styles.flatTogglet, () -> configure(pack(fixed, lvl, RecipeCrafter.this))).size(40f)
+                        .disabled(b -> fixed == null ? !autoSelect : lvl > fixed.maxOverclock()).checked(b -> level == lvl);
                 }
                 t.row();
                 t.label(() -> recipe == null ? "" : Core.bundle.format("eclipse-recipe.overclock-info", Strings.autoFixed(overclockSpeed[overclock], 1),
@@ -336,7 +382,7 @@ public class RecipeCrafter extends GenericCrafter{
 
         @Override
         public Object config(){
-            return recipe == null ? null : pack(recipe, overclock, RecipeCrafter.this);
+            return fixed == null && level == 0 ? null : pack(fixed, level, RecipeCrafter.this);
         }
 
         @Override
@@ -353,8 +399,8 @@ public class RecipeCrafter extends GenericCrafter{
         @Override
         public void write(Writes write){
             super.write(write);
-            write.s(recipe == null ? -1 : recipe.output().id);
-            write.b(overclock);
+            write.s(fixed == null ? -1 : fixed.output().id);
+            write.b(level);
         }
 
         @Override
@@ -362,8 +408,10 @@ public class RecipeCrafter extends GenericCrafter{
             super.read(read, revision);
             if(revision >= 1){
                 short id = read.s();
-                int level = read.b();
-                set(id < 0 ? null : recipeFor(content.item(id)), level);
+                int lvl = read.b();
+                float saved = progress; //selecting resets progress; a loaded machine keeps it
+                select(id < 0 ? null : recipeFor(content.item(id)), lvl);
+                progress = saved;
             }
         }
     }

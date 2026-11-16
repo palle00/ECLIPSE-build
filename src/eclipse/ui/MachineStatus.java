@@ -25,7 +25,7 @@ import static mindustry.Vars.*;
  * stall on a full waste output, missing heat, a missing catalyst or pressure.
  */
 public class MachineStatus{
-    public enum Kind{working, disabled, outputFull, noPower, missing, noCatalyst, noHeat, pressurizing, lowHeat, noRecipe, underpowered}
+    public enum Kind{working, disabled, outputFull, noPower, missing, noCatalyst, noHeat, pressurizing, lowHeat, noRecipe, autoWaiting, underpowered}
 
     public static class Status{
         public Kind kind = Kind.working;
@@ -59,6 +59,7 @@ public class MachineStatus{
                 case pressurizing -> Core.bundle.format("eclipse-status.pressurizing", Math.round(value * 100));
                 case lowHeat -> Core.bundle.format("eclipse-status.low-heat", Math.round(value * 100));
                 case noRecipe -> Core.bundle.get("eclipse-status.no-recipe");
+                case autoWaiting -> Core.bundle.get("eclipse-status.auto-waiting");
                 case underpowered -> Core.bundle.format("eclipse-status.underpowered", Strings.autoFixed(need, 1), (int)(value * 100));
             };
         }
@@ -75,7 +76,7 @@ public class MachineStatus{
 
         //universal machines: a recipe must be chosen, and only its own outputs can block it
         if(b instanceof RecipeBuild r){
-            if(r.recipe == null) return s.set(Kind.noRecipe, null, 0f);
+            if(r.recipe == null) return s.set(r.auto() ? Kind.autoWaiting : Kind.noRecipe, null, 0f);
             for(ItemStack out : r.recipe.outputs) if(b.items.get(out.item) + out.amount > b.block.itemCapacity) return s.set(Kind.outputFull, out.item, 0f);
             for(LiquidStack out : r.recipe.liquidOutputs) if(b.liquids.get(out.liquid) >= b.block.liquidCapacity - 0.001f) return s.set(Kind.outputFull, out.liquid, 0f);
         }

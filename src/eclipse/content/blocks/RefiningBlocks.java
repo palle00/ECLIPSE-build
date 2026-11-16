@@ -33,7 +33,7 @@ public class RefiningBlocks{
             consumeItem(Items.sand, 4);
             consumeLiquid(methane, 3f / 60f);
             consumePower(1f);
-            outputItem = new ItemStack(Items.silicon, 4);
+            outputItem = new ItemStack(hotSilicon, 4); //cooled in the vacuum freezer
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ffb46b"); }}, new DrawHeatInput());
         }};
@@ -69,7 +69,7 @@ public class RefiningBlocks{
             consumeItem(Items.sand, 3);
             consumeLiquid(sodiumHydroxide, 2f / 60f);
             consumePower(0.4f);
-            outputItem = new ItemStack(Items.metaglass, 3);
+            outputItem = new ItemStack(hotMetaglass, 3); //cooled in the vacuum freezer
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("9fd6ff"); }}, new DrawHeatInput());
         }};
@@ -87,7 +87,7 @@ public class RefiningBlocks{
             consumeItems(with(Items.sand, 4, Items.coal, 2));
             consumeLiquid(chlorine, 4f / 60f);
             consumePower(2f);
-            outputItem = new ItemStack(Items.titanium, 2);
+            outputItem = new ItemStack(hotTitanium, 2); //cooled in the vacuum freezer
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("8da1e3"); }}, new DrawHeatInput());
         }};

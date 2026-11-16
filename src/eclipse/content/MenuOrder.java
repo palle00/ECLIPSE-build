@@ -109,13 +109,13 @@ public class MenuOrder{
         after(Blocks.oreThorium, oreNickel, oreChromium, oreCobalt, oreTungsten, oreMolybdenum, orePlatinum, oreAetherite);
 
         //---- items (core inventory, item pickers); augmentation modules stay at the end as their own group ----
-        after(Items.metaglass, reinforcedGlass);
+        after(Items.metaglass, hotMetaglass, hotReinforcedGlass, reinforcedGlass);
         after(Items.coal, sulfur);
         after(Items.copper, copperGear, copperWire);
-        after(Items.titanium, titaniumRod, titaniumGear, pressureCasing, industrialBearing, nickel, chromium, cobalt, molybdenum, vanadium, tungsten, hotTungstenCarbide, tungstenCarbide, alumina, hotAluminium, aluminium, lithium, hotSuperalloy, superalloy, superalloyFrame, alnicoMagnet, platinum);
+        after(Items.titanium, hotTitanium, titaniumRod, titaniumGear, pressureCasing, industrialBearing, nickel, chromium, cobalt, molybdenum, vanadium, tungsten, hotTungstenCarbide, tungstenCarbide, alumina, hotAluminium, aluminium, lithium, hotSuperalloy, superalloy, superalloyFrame, alnicoMagnet, platinum);
         after(Items.thorium, thoriumFuelRod, spentFuelRod);
         after(Items.scrap, crushedOre, industrialSludge);
-        after(Items.silicon, highPuritySilicon, microchip, circuitBoard, precisionComponent, controlUnit);
+        after(Items.silicon, hotSilicon, highPuritySilicon, microchip, circuitBoard, precisionComponent, controlUnit);
         after(Items.plastanium, polyethylene, polymerCatalyst, leadAcidCell, syntheticRubber, epoxyResin, carbonFiber, carbonComposite);
         after(Items.surgeAlloy, hotSurgeSuperalloy, surgeSuperalloy, experimentalCore);
         after(Items.phaseFabric, aetherite, superconductor);

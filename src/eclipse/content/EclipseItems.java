@@ -7,7 +7,7 @@ public class EclipseItems{
     public static Item sulfur, polyethylene, leadAcidCell, polymerCatalyst, ammoniumNitrate,
         nickel, chromium, cobalt, tungsten, lithium, superalloy, tungstenCarbide,
         alumina, aluminium, highPuritySilicon, microchip, reinforcedGlass, surgeSuperalloy,
-        hotSuperalloy, hotTungstenCarbide, hotAluminium, hotSurgeSuperalloy,
+        hotSuperalloy, hotTungstenCarbide, hotAluminium, hotSurgeSuperalloy, hotTitanium, hotSilicon, hotMetaglass, hotReinforcedGlass,
         molybdenum, vanadium, platinum, thoriumFuelRod, spentFuelRod, industrialSludge,
         syntheticRubber, epoxyResin, carbonFiber, carbonComposite,
         biomass, fertilizer, enzymeExtract,
@@ -123,6 +123,23 @@ public class EclipseItems{
         hotSurgeSuperalloy = new Item("hot-surge-superalloy", Color.valueOf("ffc04a")){{
             cost = 2f;
             charge = 0.5f;
+        }};
+
+        //tier II: only the ECLIPSE routes make these hot; vanilla titanium, silicon and metaglass stay as they are
+        hotTitanium = new Item("hot-titanium", Color.valueOf("e8906a")){{
+            cost = 1f;
+        }};
+
+        hotSilicon = new Item("hot-silicon", Color.valueOf("c8704a")){{
+            cost = 0.8f;
+        }};
+
+        hotMetaglass = new Item("hot-metaglass", Color.valueOf("ffc89a")){{
+            cost = 1.5f;
+        }};
+
+        hotReinforcedGlass = new Item("hot-reinforced-glass", Color.valueOf("f0aa7a")){{
+            cost = 1.2f;
         }};
 
         // ---- more metals ----

@@ -170,7 +170,7 @@ public class MetallurgyBlocks{
             heatRequirement = 5f;
             maxEfficiency = 2f;
             consumeItems(with(Items.metaglass, 2, Items.titanium, 1));
-            outputItem = new ItemStack(reinforcedGlass, 1);
+            outputItem = new ItemStack(hotReinforcedGlass, 1); //cooled in the vacuum freezer
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("9fd6ff"); }}, new DrawHeatInput());
         }};
@@ -183,10 +183,16 @@ public class MetallurgyBlocks{
             health = 650;
             itemCapacity = 20;
             liquidCapacity = 30f;
+            autoSelect = true; //nothing selected: cools whatever hot metal arrives, so a mixed belt never jams it
             recipe(3, 30f, with(hotSuperalloy, 1), with(superalloy, 1)).liquidsIn(Liquids.cryofluid, 3f / 60f);
             recipe(3, 30f, with(hotTungstenCarbide, 1), with(tungstenCarbide, 1)).liquidsIn(Liquids.cryofluid, 3f / 60f);
             recipe(3, 30f, with(hotAluminium, 1), with(aluminium, 1)).liquidsIn(Liquids.cryofluid, 2f / 60f);
             recipe(5, 60f, with(hotSurgeSuperalloy, 1), with(surgeSuperalloy, 1)).liquidsIn(Liquids.cryofluid, 6f / 60f);
+            //tier II: the ECLIPSE routes to vanilla materials
+            recipe(2, 30f, with(hotTitanium, 2), with(Items.titanium, 2)).liquidsIn(Liquids.cryofluid, 1f / 60f);
+            recipe(2, 30f, with(hotSilicon, 4), with(Items.silicon, 4)).liquidsIn(Liquids.cryofluid, 1f / 60f);
+            recipe(2, 30f, with(hotMetaglass, 3), with(Items.metaglass, 3)).liquidsIn(Liquids.cryofluid, 1f / 60f);
+            recipe(2, 30f, with(hotReinforcedGlass, 1), with(reinforcedGlass, 1)).liquidsIn(Liquids.cryofluid, 1f / 60f);
             craftEffect = Fx.freezing;
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.cryofluid, 4f), new DrawDefault());
         }};
