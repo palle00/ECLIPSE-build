@@ -2,6 +2,8 @@ package eclipse.world.blocks;
 
 import arc.*;
 import arc.graphics.g2d.*;
+import arc.scene.style.*;
+import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
@@ -9,7 +11,6 @@ import arc.util.io.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.ui.*;
-import mindustry.world.blocks.*;
 import mindustry.world.blocks.production.*;
 import mindustry.world.consumers.*;
 import mindustry.world.meta.*;
@@ -218,6 +219,26 @@ public class RecipeCrafter extends GenericCrafter{
         });
     }
 
+    /** One recipe as icons: inputs -> outputs on the first line; tier, power and time on the second. */
+    public static Table recipeLine(Recipe r){
+        Table t = new Table();
+        t.table(row -> {
+            for(ItemStack s : r.inputs) stack(row, s.item.uiIcon, s.amount + " " + s.item.localizedName);
+            for(LiquidStack s : r.liquidInputs) stack(row, s.liquid.uiIcon, Strings.autoFixed(s.amount * 60f, 1) + "/s " + s.liquid.localizedName);
+            row.add("->").padLeft(2f).padRight(8f);
+            for(ItemStack s : r.outputs) stack(row, s.item.uiIcon, s.amount + " " + s.item.localizedName);
+            for(LiquidStack s : r.liquidOutputs) stack(row, s.liquid.uiIcon, Strings.autoFixed(s.amount * 60f, 1) + "/s " + s.liquid.localizedName);
+        }).left().row();
+        t.add("[lightgray]" + Core.bundle.format("eclipse-recipe.tier", roman(r.tier), Strings.autoFixed(r.power() * 60f, 1))
+            + ", " + Core.bundle.format("eclipse-recipe.time", Strings.autoFixed(r.time / 60f, 2))).left().padTop(2f);
+        return t;
+    }
+
+    static void stack(Table row, TextureRegion icon, String text){
+        row.image(icon).size(24f);
+        row.add(text).padLeft(3f).padRight(8f);
+    }
+
     public class RecipeBuild extends GenericCrafterBuild{
         /** The recipe the player chose (null: none, or automatic on autoSelect machines). */
         public @Nullable Recipe fixed;
@@ -360,9 +381,31 @@ public class RecipeCrafter extends GenericCrafter{
 
         @Override
         public void buildConfiguration(Table table){
-            Seq<Item> outputs = recipes.select(Recipe::available).map(Recipe::output);
-            ItemSelection.buildTable(RecipeCrafter.this, table, outputs, () -> fixed == null ? null : fixed.output(),
-                item -> configure(pack(recipeFor(item), level, RecipeCrafter.this)));
+            //one button per recipe, showing its product; hover for the whole recipe. Tapping the chosen one again clears it.
+            Table grid = new Table();
+            int n = 0;
+            for(Recipe r : recipes.select(Recipe::available)){
+                ImageButton button = grid.button(Tex.whiteui, Styles.clearNoneTogglei, 32f,
+                    () -> configure(pack(fixed == r ? null : r, level, RecipeCrafter.this))).size(46f).get();
+                button.getStyle().imageUp = new TextureRegionDrawable(r.output().uiIcon);
+                button.update(() -> button.setChecked(fixed == r));
+                button.addListener(new Tooltip(t -> t.background(Styles.black8).margin(8f).add(recipeLine(r))));
+                if(++n % 4 == 0) grid.row();
+            }
+            table.table(Styles.black6, t -> t.pane(Styles.smallPane, grid).maxHeight(46f * 5f)).left();
+            table.row();
+            //the chosen recipe in full (touch screens have no hover)
+            Table chosen = new Table();
+            Recipe[] shown = {null};
+            boolean[] first = {true};
+            chosen.update(() -> {
+                if(!first[0] && shown[0] == fixed) return;
+                first[0] = false;
+                shown[0] = fixed;
+                chosen.clear();
+                if(fixed != null) chosen.add(recipeLine(fixed)).left();
+            });
+            table.table(Styles.black6, t -> t.add(chosen).left().pad(4f)).growX();
             table.row();
             table.table(Styles.black6, t -> {
                 if(autoSelect){
