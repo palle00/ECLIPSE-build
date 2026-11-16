@@ -34,7 +34,12 @@ import static mindustry.Vars.*;
  *     recipe(2, 60f, with(Items.titanium, 3), with(titaniumGear, 2));
  * }};
  * </pre>
- * Each recipe's first output names it and must be unique within the machine.
+ * Each recipe's first output names it and must be unique within the machine. Liquids, per tick like vanilla consumeLiquid:
+ * <pre>
+ *     recipe(3, 60f, with(copperWire, 2, polyethylene, 1), with(circuitBoard, 1))
+ *         .liquidsIn(hydrochloricAcid, 2f / 60f).liquidsOut(acidicWaste, 1f / 60f);
+ * </pre>
+ * A full liquid output stops the machine (waste must be removed), like the other ECLIPSE chemistry.
  */
 public class RecipeCrafter extends GenericCrafter{
     /** Power per tick while running, by tier (index = tier): 30, 120, 480, 1920 and 7680 per second. */
@@ -52,6 +57,8 @@ public class RecipeCrafter extends GenericCrafter{
         /** Ticks per craft at overclock 0. */
         public final float time;
         public final ItemStack[] inputs, outputs;
+        /** Liquids per tick at overclock 0. */
+        public LiquidStack[] liquidInputs = {}, liquidOutputs = {};
 
         public Recipe(int tier, float time, ItemStack[] inputs, ItemStack[] outputs){
             if(tier < 1 || tier > maxTier) throw new IllegalArgumentException("recipe tier must be 1-" + maxTier + ", got " + tier);
@@ -60,6 +67,26 @@ public class RecipeCrafter extends GenericCrafter{
             this.time = time;
             this.inputs = inputs;
             this.outputs = outputs;
+        }
+
+        /** Liquid inputs as liquid/amount-per-tick pairs. */
+        public Recipe liquidsIn(Object... stacks){
+            liquidInputs = LiquidStack.with(stacks);
+            return this;
+        }
+
+        /** Liquid outputs as liquid/amount-per-tick pairs. */
+        public Recipe liquidsOut(Object... stacks){
+            liquidOutputs = LiquidStack.with(stacks);
+            return this;
+        }
+
+        public boolean usesLiquid(Liquid liquid){
+            return Structs.contains(liquidInputs, s -> s.liquid == liquid);
+        }
+
+        public boolean makesLiquid(Liquid liquid){
+            return Structs.contains(liquidOutputs, s -> s.liquid == liquid);
         }
 
         /** The item that names this recipe. */
@@ -118,6 +145,14 @@ public class RecipeCrafter extends GenericCrafter{
         return recipes.contains(r -> r.uses(item));
     }
 
+    public boolean usesLiquid(Liquid liquid){
+        return recipes.contains(r -> r.usesLiquid(liquid));
+    }
+
+    public boolean makesLiquid(Liquid liquid){
+        return recipes.contains(r -> r.makesLiquid(liquid));
+    }
+
     public static int pack(@Nullable Recipe r, int overclock, RecipeCrafter block){
         return (overclock << 8) | (r == null ? 0 : block.recipes.indexOf(r) + 1);
     }
@@ -145,6 +180,12 @@ public class RecipeCrafter extends GenericCrafter{
         }
         outputItems = outs.toArray(ItemStack.class);
         craftTime = recipes.first().time;
+        //liquid handling only for machines that have liquid recipes, so dry machines don't count as chemical plants
+        if(recipes.contains(r -> r.liquidInputs.length > 0 || r.liquidOutputs.length > 0)){
+            hasLiquids = true;
+            outputsLiquid = recipes.contains(r -> r.liquidOutputs.length > 0);
+            consume(new ConsumeLiquidsDynamic((RecipeBuild b) -> b.liquidInputs));
+        }
         super.init();
     }
 
@@ -159,10 +200,12 @@ public class RecipeCrafter extends GenericCrafter{
                 table.table(Styles.grayPanel, t -> {
                     t.table(in -> {
                         for(ItemStack s : r.inputs) in.add(StatValues.displayItem(s.item, s.amount, r.time, true)).pad(2f);
+                        for(LiquidStack s : r.liquidInputs) in.add(StatValues.displayLiquid(s.liquid, s.amount * 60f, true)).pad(2f);
                     }).left();
                     t.add(" -> ").pad(4f);
                     t.table(out -> {
                         for(ItemStack s : r.outputs) out.add(StatValues.displayItem(s.item, s.amount, r.time, true)).pad(2f);
+                        for(LiquidStack s : r.liquidOutputs) out.add(StatValues.displayLiquid(s.liquid, s.amount * 60f, true)).pad(2f);
                     }).left().growX();
                     t.add(Core.bundle.format("eclipse-recipe.tier", roman(r.tier), Strings.autoFixed(r.power() * 60f, 1))).right().pad(4f);
                 }).growX().pad(4f).row();
@@ -173,11 +216,21 @@ public class RecipeCrafter extends GenericCrafter{
     public class RecipeBuild extends GenericCrafterBuild{
         public @Nullable Recipe recipe;
         public int overclock;
+        /** The recipe's liquid inputs scaled by the overclock speed (what the liquid consumer takes per tick). */
+        public LiquidStack[] liquidInputs = {};
 
         public void select(@Nullable Recipe r, int level){
             if(r != recipe) progress = 0f;
+            set(r, level);
+        }
+
+        void set(@Nullable Recipe r, int level){
             recipe = r;
             overclock = r == null ? 0 : Math.max(0, Math.min(level, r.maxOverclock()));
+            liquidInputs = r == null ? new LiquidStack[0] : new LiquidStack[r.liquidInputs.length];
+            for(int i = 0; i < liquidInputs.length; i++){
+                liquidInputs[i] = new LiquidStack(r.liquidInputs[i].liquid, r.liquidInputs[i].amount * overclockSpeed[overclock]);
+            }
         }
 
         /** Power per tick wanted right now: the recipe's tier power times the overclock factor. */
@@ -204,7 +257,32 @@ public class RecipeCrafter extends GenericCrafter{
         public boolean shouldConsume(){
             if(recipe == null || !enabled) return false;
             for(ItemStack out : recipe.outputs) if(items.get(out.item) + out.amount > itemCapacity) return false;
+            for(LiquidStack out : recipe.liquidOutputs) if(liquids.get(out.liquid) >= liquidCapacity - 0.001f) return false;
             return true;
+        }
+
+        @Override
+        public void updateTile(){
+            super.updateTile();
+            if(recipe == null) return;
+            if(efficiency > 0f){
+                float scale = edelta() * overclockSpeed[overclock];
+                for(LiquidStack out : recipe.liquidOutputs){
+                    handleLiquid(this, out.liquid, Math.min(out.amount * scale, liquidCapacity - liquids.get(out.liquid)));
+                }
+            }
+            for(LiquidStack out : recipe.liquidOutputs) dumpLiquid(out.liquid, 2f);
+            //liquid left from a previous recipe leaves too
+            if(hasLiquids){
+                liquids.each((liquid, amount) -> {
+                    if(amount > 0.001f && !recipe.usesLiquid(liquid) && !recipe.makesLiquid(liquid)) dumpLiquid(liquid, 2f);
+                });
+            }
+        }
+
+        @Override
+        public boolean acceptLiquid(Building source, Liquid liquid){
+            return recipe != null && recipe.usesLiquid(liquid) && liquids.get(liquid) < liquidCapacity;
         }
 
         @Override
@@ -285,9 +363,7 @@ public class RecipeCrafter extends GenericCrafter{
             if(revision >= 1){
                 short id = read.s();
                 int level = read.b();
-                Recipe r = id < 0 ? null : recipeFor(content.item(id));
-                recipe = r;
-                overclock = r == null ? 0 : Math.max(0, Math.min(level, r.maxOverclock()));
+                set(id < 0 ? null : recipeFor(content.item(id)), level);
             }
         }
     }

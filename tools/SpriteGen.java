@@ -338,8 +338,7 @@ public class SpriteGen{
         chunks("crushed-ore", 0x8a7f72);
         liquid("chilled-water", 0x7fd8ff);
         wireDrawer("wire-drawing-machine");
-        boardPrinter("circuit-board-printer");
-        controlAssembler("control-unit-assembler");
+        boardPrinter("circuit-assembler");
         oreCrusher("ore-crusher");
         oreWasher("ore-washer");
         inductionFurnace("induction-furnace");
@@ -4380,26 +4379,6 @@ public class SpriteGen{
         save(r, name);
         glowOf(r, name);
         liquidBottom(name, s);
-    }
-
-    static void controlAssembler(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 6, metal);
-        //chip, board and magnet bays down the left
-        int[] bay = {0x6dd0f0, 0x2f6b45, 0xb05454};
-        for(int i = 0; i < 3; i++){
-            r.fill(r.rect(3, 6 + i * 18, 14, 14), 9, steel, 2);
-            r.fill(r.rect(6, 9 + i * 18, 8, 8), 5, dull(bay[i]), 1);
-        }
-        //the controller housing with its drive motor
-        r.fill(r.oct(22, 8, 38, 48, 5), 11, steel, 3);
-        r.fill(r.rect(27, 14, 28, 20), 13, metal, 2);
-        r.fill(r.circle(41, 45, 7), 13, metal, 2);
-        r.fill(r.circle(41, 45, 3), 14, copperGearM, 1);
-        for(int x = 30; x < 52; x += 6) r.fill(r.rect(x, 22, 3, 4), 14, lit(0x5ab8ff), 0);
-        save(r, name);
-        glowOf(r, name);
     }
 
     // §5.4 heat

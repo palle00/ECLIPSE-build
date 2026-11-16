@@ -274,7 +274,7 @@ public class EclipseTechTree{
 
         //electronics, ore processing, heat storage and cooling
         TechNode wire = child(find(gearPress), wireDrawer);
-        child(child(wire, circuitPrinter), controlUnitAssembler);
+        child(wire, circuitAssembler);
         child(child(find(Blocks.pulverizer), oreCrusher), oreWasher);
         child(find(alloyFurnace), inductionFurnace);
         child(find(heatExchanger), thermalStorage);

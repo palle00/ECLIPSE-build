@@ -382,8 +382,10 @@ public class EclipseWiki extends BaseDialog{
             float seconds = r.time / 60f;
             Table row = new Table().left();
             for(ItemStack s : r.inputs) link(row, s.item, perCraft(s.amount, seconds));
+            for(LiquidStack s : r.liquidInputs) link(row, s.liquid, perSecond(s.amount * 60f));
             row.add(" -> ").padRight(4f);
             for(ItemStack s : r.outputs) link(row, s.item, perCraft(s.amount, seconds));
+            for(LiquidStack s : r.liquidOutputs) link(row, s.liquid, perSecond(s.amount * 60f));
             page.add(row).left().row();
             page.add("[lightgray]" + Core.bundle.format("eclipse-recipe.tier", RecipeCrafter.roman(r.tier), Strings.autoFixed(r.power() * 60f, 1))).left().row();
             page.add(new SetupDiagram(rc, r)).left().padBottom(8f).row();
@@ -491,6 +493,7 @@ public class EclipseWiki extends BaseDialog{
             if(g.outputLiquids != null) for(LiquidStack s : g.outputLiquids) if(s.liquid == mat) return true;
         }
         if(b instanceof Separator sep) for(ItemStack s : sep.results) if(s.item == mat) return true;
+        if(b instanceof RecipeCrafter rc && mat instanceof Liquid l && rc.makesLiquid(l)) return true;
         if(b instanceof OreBlock ore) return ore.itemDrop == mat;
         if(b instanceof ModuleAssembler a && mat instanceof AugmentModule m) return a.canMake(m);
         return false;
@@ -506,6 +509,7 @@ public class EclipseWiki extends BaseDialog{
         }
         if(b instanceof eclipse.world.blocks.ChemicalReactor r && r.catalyst == mat) return true;
         if(b instanceof RecipeCrafter rc && mat instanceof Item i && rc.usesItem(i)) return true;
+        if(b instanceof RecipeCrafter rc && mat instanceof Liquid l && rc.usesLiquid(l)) return true;
         if(b instanceof ItemTurret it && mat instanceof Item i && it.ammoTypes.containsKey(i)) return true;
         if(b instanceof LiquidTurret lt && mat instanceof Liquid l && lt.ammoTypes.containsKey(l)) return true;
         return false;

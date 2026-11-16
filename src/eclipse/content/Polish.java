@@ -49,7 +49,7 @@ public class Polish{
         kind(Kind.press, "gear-press", "metal-extruder", "wire-drawing-machine", "bearing-press", "composite-press",
             "battery-assembly-plant", "explosives-plant");
         kind(Kind.grind, "ore-crusher", "ore-washer");
-        kind(Kind.electronics, "circuit-board-printer", "chip-fabricator", "control-unit-assembler", "precision-assembler", "experimental-core-assembler", "silicon-refinery");
+        kind(Kind.electronics, "circuit-assembler", "chip-fabricator", "precision-assembler", "experimental-core-assembler", "silicon-refinery");
         kind(Kind.bio, "biomass-cultivator", "algae-photobioreactor", "enzyme-extractor", "biochemical-fermenter", "anaerobic-digester");
         kind(Kind.assembler, "basic-module-assembler", "advanced-module-assembler", "experimental-augmentation-facility", "aetherite-module-forge", "module-recycling-facility");
     }

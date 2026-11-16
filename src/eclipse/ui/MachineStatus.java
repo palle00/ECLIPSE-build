@@ -77,6 +77,7 @@ public class MachineStatus{
         if(b instanceof RecipeBuild r){
             if(r.recipe == null) return s.set(Kind.noRecipe, null, 0f);
             for(ItemStack out : r.recipe.outputs) if(b.items.get(out.item) + out.amount > b.block.itemCapacity) return s.set(Kind.outputFull, out.item, 0f);
+            for(LiquidStack out : r.recipe.liquidOutputs) if(b.liquids.get(out.liquid) >= b.block.liquidCapacity - 0.001f) return s.set(Kind.outputFull, out.liquid, 0f);
         }
 
         //outputs that have nowhere to go stop the machine
@@ -130,6 +131,9 @@ public class MachineStatus{
         }
         if(c instanceof ConsumeItemDynamic cd){
             for(ItemStack st : cd.items.get(b)) if(b.items.get(st.item) < st.amount) return st.item;
+        }
+        if(c instanceof ConsumeLiquidsDynamic cd){
+            for(LiquidStack st : cd.liquids.get(b)) if(b.liquids.get(st.liquid) < st.amount) return st.liquid;
         }
         if(c instanceof ConsumeLiquid cl) return cl.liquid;
         if(c instanceof ConsumeLiquids cls){

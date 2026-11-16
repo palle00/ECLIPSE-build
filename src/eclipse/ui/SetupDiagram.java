@@ -82,12 +82,14 @@ public class SetupDiagram extends Element{
         }
         if(recipe != null){
             for(ItemStack s : recipe.inputs) itemsIn.addUnique(s.item);
+            for(LiquidStack s : recipe.liquidInputs) liquidsIn.addUnique(s.liquid);
             power = true;
         }
         Seq<LiquidStack> liquidsOut = new Seq<>();
         int[] dirs = null;
         if(recipe != null){
             for(ItemStack s : recipe.outputs) itemsOut.addUnique(s.item);
+            liquidsOut.addAll(recipe.liquidOutputs);
         }else if(b instanceof GenericCrafter g){
             if(g.outputItems != null) for(ItemStack s : g.outputItems) itemsOut.addUnique(s.item);
             if(g.outputLiquids != null) liquidsOut.addAll(g.outputLiquids);

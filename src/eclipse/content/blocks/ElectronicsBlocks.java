@@ -1,6 +1,7 @@
 package eclipse.content.blocks;
 
 import arc.graphics.*;
+import eclipse.world.blocks.*;
 import mindustry.content.*;
 import mindustry.type.*;
 import mindustry.world.*;
@@ -13,7 +14,7 @@ import static mindustry.type.ItemStack.*;
 
 /** Semiconductors. */
 public class ElectronicsBlocks{
-    public static Block siliconRefinery, chipFabricator, wireDrawer, circuitPrinter, controlUnitAssembler;
+    public static Block siliconRefinery, chipFabricator, wireDrawer, circuitAssembler;
 
     public static void load(){
         // Silicon + HCl + H2 -> high-purity silicon (Siemens process).
@@ -60,33 +61,19 @@ public class ElectronicsBlocks{
             outputItem = new ItemStack(copperWire, 2);
         }};
 
-        // Copper wire traces on a polyethylene substrate, etched in hydrochloric acid -> circuit boards. The spent etchant leaves as acidic waste.
-        circuitPrinter = new GenericCrafter("circuit-board-printer"){{
+        // Every circuit: circuit boards (copper wire traces on polyethylene, etched in hydrochloric acid; the spent
+        // etchant leaves as acidic waste) and control units (microchip + circuit boards + an AlNiCo motor magnet).
+        // Its cost must not include circuit boards or later components (no circular costs).
+        circuitAssembler = new RecipeCrafter("circuit-assembler"){{
             requirements(Category.crafting, with(Items.lead, 60, Items.silicon, 40, Items.metaglass, 20, titaniumGear, 5, pressureCasing, 5));
-            size = 2;
-            health = 280;
-            itemCapacity = 10;
-            liquidCapacity = 20f;
-            craftTime = 60f;
-            consumeItems(with(copperWire, 2, polyethylene, 1));
-            consumeLiquid(hydrochloricAcid, 2f / 60f);
-            consumePower(0.6f);
-            outputItem = new ItemStack(circuitBoard, 1);
-            outputLiquid = new LiquidStack(acidicWaste, 1f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(hydrochloricAcid, 3f), new DrawDefault());
-        }};
-
-        // Microchip + circuit boards + an AlNiCo motor magnet -> control unit for automated machinery.
-        controlUnitAssembler = new GenericCrafter("control-unit-assembler"){{
-            requirements(Category.crafting, with(Items.titanium, 60, Items.silicon, 50, Items.lead, 40, precisionComponent, 10, industrialBearing, 10, circuitBoard, 10));
             size = 2;
             health = 300;
             itemCapacity = 10;
-            craftTime = 90f;
-            consumeItems(with(microchip, 1, circuitBoard, 2, alnicoMagnet, 1));
-            consumePower(2f);
-            outputItem = new ItemStack(controlUnit, 1);
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("5ab8ff"); }});
+            liquidCapacity = 20f;
+            recipe(3, 60f, with(copperWire, 2, polyethylene, 1), with(circuitBoard, 1))
+                .liquidsIn(hydrochloricAcid, 2f / 60f).liquidsOut(acidicWaste, 1f / 60f);
+            recipe(4, 90f, with(microchip, 1, circuitBoard, 2, alnicoMagnet, 1), with(controlUnit, 1));
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(hydrochloricAcid, 3f), new DrawDefault());
         }};
 }
 }
