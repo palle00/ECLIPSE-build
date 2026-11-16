@@ -15,7 +15,9 @@ public class EclipseItems{
         copperWire, circuitBoard, controlUnit, alnicoMagnet, crushedOre,
         aetherite, superconductor,
         copperPlate, leadPlate, titaniumPlate, aluminiumPlate, superalloyPlate, tungstenPlate, copperFoil, aluminiumFoil,
-        tungstenRod, aluminiumWire, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, superalloyGear;
+        tungstenRod, aluminiumWire, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, superalloyGear,
+        magnetWire, resistor, capacitor, transistor, insulatedCable,
+        electricMotor, permanentMagnetMotor, superconductingMotor, pumpUnit, piston, rotor, heatingCoil, sensor, emitter;
 
     public static void load(){
         sulfur = new Item("sulfur", Color.valueOf("e8d44d")){{
@@ -255,5 +257,23 @@ public class EclipseItems{
         titaniumRing = new Item("titanium-ring", Color.valueOf("8da1e3")){{ cost = 1f; }};
         titaniumSpring = new Item("titanium-spring", Color.valueOf("9aaee8")){{ cost = 1f; }};
         superalloyGear = new Item("superalloy-gear", Color.valueOf("cdb98a")){{ cost = 1.8f; }};
+
+        // ---- electronic parts (Circuit Assembler) and magnet wire (Extruder) ----
+        magnetWire = new Item("magnet-wire", Color.valueOf("c4703a")){{ cost = 1f; }};
+        resistor = new Item("resistor", Color.valueOf("d8c08a")){{ cost = 0.8f; }};
+        capacitor = new Item("capacitor", Color.valueOf("5a7ab0")){{ cost = 1.2f; }};
+        transistor = new Item("transistor", Color.valueOf("3a3c44")){{ cost = 1.4f; }};
+        insulatedCable = new Item("insulated-cable", Color.valueOf("33333b")){{ cost = 1f; }};
+
+        // ---- parts (Assembler): what machines are built from ----
+        electricMotor = new Item("electric-motor", Color.valueOf("7a8a9c")){{ cost = 1.6f; }};
+        permanentMagnetMotor = new Item("permanent-magnet-motor", Color.valueOf("b05454")){{ cost = 2.2f; }};
+        superconductingMotor = new Item("superconducting-motor", Color.valueOf("8fd0ff")){{ cost = 3.5f; }};
+        pumpUnit = new Item("pump-unit", Color.valueOf("5f8fb0")){{ cost = 1.8f; }};
+        piston = new Item("piston", Color.valueOf("9aa3ad")){{ cost = 1.6f; }};
+        rotor = new Item("rotor", Color.valueOf("8da1e3")){{ cost = 1.4f; }};
+        heatingCoil = new Item("heating-coil", Color.valueOf("ff8a4a")){{ cost = 1.8f; }};
+        sensor = new Item("sensor", Color.valueOf("6dd0f0")){{ cost = 2f; }};
+        emitter = new Item("emitter", Color.valueOf("ff5a5a")){{ cost = 2.6f; }};
     }
 }

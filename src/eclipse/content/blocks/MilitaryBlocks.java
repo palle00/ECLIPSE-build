@@ -101,7 +101,7 @@ public class MilitaryBlocks{
         }};
 
         jammer = new Jammer("jammer"){{
-            requirements(Category.turret, with(Items.silicon, 80, Items.lead, 60, Items.titanium, 40, circuitBoard, 6, copperWire, 20, alnicoMagnet, 4));
+            requirements(Category.turret, with(Items.silicon, 80, Items.lead, 60, Items.titanium, 40, circuitBoard, 6, insulatedCable, 10, emitter, 2));
             size = 2;
             health = 600;
             status = Munitions.jammed;
@@ -112,7 +112,7 @@ public class MilitaryBlocks{
 
         //Piledriver: a slow carbide slug that punches through up to three ground units in a line; no splash, no air
         piledriver = new ItemTurret("piledriver"){{
-            requirements(Category.turret, with(Items.titanium, 160, Items.graphite, 120, tungstenPlate, 40, tungstenCarbide, 60, superalloyFrame, 6, industrialBearing, 8));
+            requirements(Category.turret, with(Items.titanium, 160, Items.graphite, 120, tungstenPlate, 40, tungstenCarbide, 60, superalloyFrame, 6, piston, 4));
             size = 3;
             health = 2400;
             range = 240f;
@@ -263,7 +263,7 @@ public class MilitaryBlocks{
 
         //T3 Tremor: a powered ground shockwave around itself; knocks ground units back and slows them
         tremor = new PowerTurret("tremor"){{
-            requirements(Category.turret, with(Items.titanium, 120, Items.silicon, 60, Items.lead, 80, Items.thorium, 40, industrialBearing, 8, pressureCasing, 4));
+            requirements(Category.turret, with(Items.titanium, 120, Items.silicon, 60, Items.lead, 80, Items.thorium, 40, piston, 4, pressureCasing, 4));
             size = 3;
             health = 1900;
             range = 120f;

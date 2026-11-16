@@ -89,7 +89,6 @@ public class SpriteGen{
         sulfuricPlant("sulfuric-acid-plant");
         neutralizer("industrial-neutralizer");
 
-        batteryPlant("battery-assembly-plant");
         methaneTurbine("methane-turbine");
         industrialBattery("industrial-battery");
         combustionHeater("industrial-heater");
@@ -270,7 +269,6 @@ public class SpriteGen{
         platinumRefinery("platinum-refinery");
         electricHeater("electric-heater");
         flowBattery("flow-battery");
-        fuelRodFabricator("fuel-rod-fabricator");
         fissionReactor("fission-reactor");
         reprocessingPlant("reprocessing-plant");
 
@@ -335,10 +333,8 @@ public class SpriteGen{
         metalExtruder("extruder");
         metalPress("metal-press");
         lathe("lathe");
-        casingForge("casing-forge");
-        bearingPress("bearing-press");
+        assemblerSprite("assembler");
         frameForge("frame-forge");
-        precisionAssembler("precision-assembler");
         coreAssembler("experimental-core-assembler");
         componentDepotArt("component-depot");
 
@@ -360,6 +356,21 @@ public class SpriteGen{
         partRingIcon("titanium-ring", 0x8da1e3);
         springIcon("titanium-spring", 0x9aaee8);
         gearIcon("superalloy-gear", 0xcdb98a);
+        //electronic parts and machine parts (Circuit Assembler, Assembler)
+        coilIcon("magnet-wire", 0xc4703a);
+        resistorIcon("resistor");
+        capacitorIcon("capacitor");
+        transistorIcon("transistor");
+        cableIcon("insulated-cable");
+        motorIcon("electric-motor", 0x7a8a9c, 0xd99d73);
+        motorIcon("permanent-magnet-motor", 0xb05454, 0xd8c27a);
+        motorIcon("superconducting-motor", 0x8fd0ff, 0x8fd0ff);
+        pumpIcon("pump-unit");
+        pistonIcon("piston");
+        rotorIcon("rotor");
+        heatingCoilIcon("heating-coil");
+        sensorIcon("sensor");
+        emitterIcon("emitter");
         boardIcon("circuit-board", 0x3f9a5c);
         chip("control-unit", 0x5ab8ff);
         magnetIcon("alnico-magnet", 0xc04a4a);
@@ -2937,6 +2948,31 @@ public class SpriteGen{
     }
 
     /**
+     * Assembler (3×3): a work table with a part being put together, a robot arm reaching over it from its base, and
+     * part trays along the edges.
+     */
+    static void assemblerSprite(String name) throws IOException{
+        int s = 3 * T;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 5, 5, steel);
+        //part trays along the top and left
+        for(int i = 0; i < 4; i++) r.fill(r.rect(10 + i * 20, 4, 16, 10), 7, metal, 1);
+        for(int i = 0; i < 3; i++) r.fill(r.rect(4, 22 + i * 20, 10, 16), 7, metal, 1);
+        //the work table with a motor on it
+        r.fill(r.oct(28, 30, 50, 44, 5), 8, metal, 2);
+        r.fill(r.oct(34, 36, 38, 32, 3), 6, deep, 0);
+        r.cylH(40, 44, 22, 14, 7, 5, acc(0x7a8a9c));
+        //robot arm: base, two links, gripper
+        r.fill(r.circle(80, 80, 10), 11, steel, 3);
+        r.fill(r.bar(80, 80, 0, 26, 7, 225), 13, metal, 2);
+        r.fill(r.circle(62, 62, 5), 14, steel, 2);
+        r.fill(r.bar(62, 62, 0, 14, 5, 200), 15, metal, 1);
+        r.fill(r.rect(46, 55, 6, 4), 15.5f, lit(0xffb46b), 0);
+        save(r, name);
+        glowOf(r, name);
+    }
+
+    /**
      * Lathe (2×2): a horizontal bed with the headstock and its chuck on the left, the work rod running to the
      * tailstock on the right, and the tool post cutting it in the middle.
      */
@@ -2954,109 +2990,6 @@ public class SpriteGen{
         r.fill(r.rect(35, 32, 3, 5), 13, lit(0xffb46b), 0);
         save(r, name);
         glowOf(r, name);
-    }
-
-    /**
-     * Casing Forge (2×2): a closed forming chamber. A capsule-shaped mould (the pressure casing being formed, with its
-     * seam), two clamp halves ("-press") closing on it, a metaglass window and two small feed slots on top.
-     */
-    static void casingForge(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 3, 6, metal);
-        r.fill(r.oct(8, 12, 48, 44, 4), 3, steel, 2);
-        //the mould cavity and the casing inside it
-        r.fill(r.oct(18, 18, 28, 34, 10), 2, deep, 1);
-        r.fill(r.oct(22, 22, 20, 26, 8), 5, dull(0x9ab0b8), 2);
-        r.fill(r.rect(31, 22, 2, 26), 4, dull(0x6e7f86), 0);
-        //metaglass window and feed slots
-        r.fill(r.rect(4, 3, 14, 7), 8, metal, 1);
-        r.fill(r.rect(6, 4, 10, 4), 7, glass(0xc8e6f0), 0);
-        for(int x : new int[]{26, 42}){
-            r.fill(r.rect(x, 2, 10, 7), 8, steel, 1);
-            r.fill(r.rect(x + 2, 3, 6, 4), 3, deep, 0);
-        }
-        r.fill(r.rect(48, 58, 10, 2), 7, lit(0x9ab0b8), 0);
-        save(r, name);
-        glowOf(r, name);
-
-        //clamp halves, left and right of the mould
-        R p = canvas(s);
-        for(int x : new int[]{8, 44}){
-            p.fill(p.oct(x, 16, 12, 38, 3), 12, metal, 3);
-            p.fill(p.rect(x + 3, 22, 6, 26), 13, steel, 1);
-        }
-        save(p, name + "-press");
-    }
-
-    /**
-     * Bearing Press (2×2): a precision forming unit with a round silhouette. A heavy outer race, the copper cage with its
-     * balls ("-rotator", turning while it presses), three alignment guides and a short feed slot.
-     */
-    static void bearingPress(String name) throws IOException{
-        int s = 2 * T;
-        float c = s / 2f;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 3, 3, steel);
-        slab(r, 2, 2, s - 4, s - 4, 14, 6, metal);
-        r.fill(r.circle(c, c, 25), 9, steel, 3);
-        r.fill(r.circle(c, c, 19), 4, deep, 1);
-        r.fill(r.circle(c, c, 7), 7, metal, 2);
-        r.fill(r.circle(c, c, 3), 5, deep, 0);
-        //alignment guides
-        for(int i = 0; i < 3; i++) r.fill(r.bar(c, c, 23, 6, 6, i * 120 + 90), 11, metal, 1);
-        //feed slot, bottom left
-        r.fill(r.bar(c, c, 24, 8, 8, 225), 8, steel, 1);
-        r.fill(r.rect(1, s - 6, 3, 3), 10, lit(0xb8bcc4), 0);
-        save(r, name);
-        glowOf(r, name);
-
-        //the cage: a copper ring holding eight balls
-        R rot = canvas(s);
-        rot.fill(rot.ring(c, c, 11, 16), 6, copperGearM, 1);
-        for(int i = 0; i < 8; i++){
-            double a = Math.toRadians(i * 45 + 22.5);
-            rot.dome(rot.circle(c + (float)Math.cos(a) * 13.5f, c + (float)Math.sin(a) * 13.5f, 2.6f), 7, 2, metal);
-        }
-        save(rot, name + "-rotator");
-    }
-
-    /**
-     * Precision Assembler (2×2): a clean, light assembly bed. Three component bays along the bottom (titanium gear,
-     * silicon, high-purity silicon), an articulated arm with a tool head ("-rotator") over the bed, the finished part
-     * leaving on the right, and small cyan indicators.
-     */
-    static void precisionAssembler(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 3, 6, metal);
-        r.fill(r.rect(6, 6, 44, 38), 4, steel, 2);
-        //component bays
-        int[] bay = {0x8da1e3, 0x53565f, 0x3d4a5c};
-        for(int i = 0; i < 3; i++){
-            int x = 6 + i * 15;
-            r.fill(r.rect(x, 47, 14, 14), 8, metal, 2);
-            r.fill(r.rect(x + 3, 50, 8, 8), 3, deep, 0);
-            r.fill(r.rect(x + 4, 51, 6, 6), 4, dull(bay[i]), 0);
-        }
-        //output edge (right)
-        r.fill(r.rect(52, 14, 10, 22), 7, steel, 1);
-        r.fill(r.rect(54, 18, 6, 14), 3, deep, 0);
-        for(int y : new int[]{8, 40}) r.fill(r.rect(56, y, 3, 2), 9, lit(0x6dd0f0), 0);
-        //pivot of the arm
-        r.fill(r.circle(32, 32, 6), 9, steel, 2);
-        save(r, name);
-        glowOf(r, name);
-
-        //the arm: two segments from the pivot to a small tool head
-        R rot = canvas(s);
-        rot.fill(rot.bar(32, 32, 0, 15, 7, 300), 11, metal, 2);
-        rot.fill(rot.circle(39.5f, 19, 5), 12, steel, 1);
-        rot.fill(rot.bar(39.5f, 19, 0, 11, 6, 20), 12, metal, 2);
-        rot.fill(rot.circle(50, 23, 5), 13, steel, 2);
-        rot.fill(rot.circle(50, 23, 2), 14, lit(0x6dd0f0), 0);
-        rot.fill(rot.circle(32, 32, 4), 12, metal, 1);
-        save(rot, name + "-rotator");
     }
 
     /**
@@ -4409,18 +4342,27 @@ public class SpriteGen{
         glowOf(r, name);
     }
 
+    /**
+     * Circuit Assembler (3×3): a circuit board on the bed with copper traces and parts placed on it (resistors,
+     * a capacitor, a chip), and the placing head on a gantry over it.
+     */
     static void boardPrinter(String name) throws IOException{
-        int s = 2 * T;
+        int s = 3 * T;
         R r = canvas(s);
-        slab(r, 0, 0, s, s, 3, 5, metal);
-        r.fill(r.rect(8, 14, 48, 36), 4, deep, 1);
-        r.fill(r.rect(12, 18, 40, 28), 5, dull(0x2f6b45), 1);
-        for(int[] t : new int[][]{{16, 22, 18, 3}, {32, 22, 3, 14}, {16, 38, 30, 3}, {44, 26, 3, 15}}) r.fill(r.rect(t[0], t[1], t[2], t[3]), 6, copperGearM, 0);
-        //print head on its rail
-        for(int x : new int[]{2, 56}) r.fill(r.rect(x, 8, 6, 48), 10, steel, 2);
-        r.fill(r.rect(2, 26, 60, 6), 12, metal, 2);
-        r.fill(r.oct(36, 22, 12, 14, 3), 14, steel, 2);
-        r.fill(r.rect(41, 33, 2, 2), 15, lit(0x3f9a5c), 0);
+        slab(r, 0, 0, s, s, 4, 5, metal);
+        r.fill(r.rect(12, 21, 72, 54), 4, deep, 1);
+        r.fill(r.rect(18, 27, 60, 42), 5, dull(0x2f6b45), 1);
+        for(int[] t : new int[][]{{24, 33, 27, 4}, {48, 33, 4, 21}, {24, 57, 45, 4}, {66, 39, 4, 22}}) r.fill(r.rect(t[0], t[1], t[2], t[3]), 6, copperGearM, 0);
+        //parts on the board: two resistors, a capacitor, a chip
+        r.fill(r.rect(26, 41, 9, 3), 7, dull(0xd8c08a), 0);
+        r.fill(r.rect(26, 47, 9, 3), 7, dull(0xd8c08a), 0);
+        r.fill(r.circle(58, 46, 3.5f), 8, dull(0x5a7ab0), 1);
+        r.fill(r.rect(38, 39, 8, 8), 7, dull(0x3a3c44), 0);
+        //placing head on its gantry
+        for(int x : new int[]{3, 84}) r.fill(r.rect(x, 12, 9, 72), 10, steel, 2);
+        r.fill(r.rect(3, 63, 90, 9), 12, metal, 2);
+        r.fill(r.oct(54, 57, 18, 21, 4), 14, steel, 2);
+        r.fill(r.rect(61, 73, 3, 3), 15, lit(0x3f9a5c), 0);
         save(r, name);
         glowOf(r, name);
         liquidBottom(name, s);
@@ -4687,38 +4629,6 @@ public class SpriteGen{
         save(r, name);
         heatParts(name, 2, 0xe8b84a);
         liquidBottom(name, s);
-    }
-
-    static void batteryPlant(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 3, 5, metal);
-        //a row of cells being filled: lead plates in sealed cases, the electrolyte liner along the top
-        r.fill(r.rect(6, 4, 52, 10), 10, steel, 2);
-        r.fill(r.rect(9, 7, 46, 4), 11, acc(0xe8d44d), 0);
-        for(int i = 0; i < 4; i++){
-            int x = 6 + i * 13;
-            r.fill(r.rect(x, 20, 11, 36), 9, dull(0x3d4048), 2);
-            for(int y = 24; y < 52; y += 5) r.fill(r.rect(x + 2, y, 7, 2), 10, dull(0x8c92ac), 0);
-        }
-        r.fill(r.rect(28, 58, 8, 3), 11, lit(0xb7e07a), 0);
-        save(r, name);
-        glowOf(r, name);
-    }
-
-    static void fuelRodFabricator(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 3, 6, steel);
-        //a straight rod channel through a cladding head
-        r.fill(r.rect(2, 26, 60, 12), 6, deep, 1);
-        r.fill(r.rect(4, 30, 22, 4), 7, dull(0x9a9e5a), 0);
-        r.fill(r.rect(38, 30, 22, 4), 7, dull(0x9fa8b0), 1);
-        r.fill(r.oct(22, 12, 20, 40, 4), 12, metal, 3);
-        r.fill(r.rect(27, 28, 10, 8), 13, lit(0xff7ad1), 0);
-        for(int y : new int[]{4, 52}) r.fill(r.rect(8, y, 48, 8), 9, metal, 2);
-        save(r, name);
-        glowOf(r, name);
     }
 
     static void reprocessingPlant(String name) throws IOException{
@@ -6138,6 +6048,108 @@ public class SpriteGen{
         R r = new R(T);
         Mat m = acc(rgb);
         for(int i = 0; i < 6; i++) r.fill(r.bar(16, 5 + i * 4.4f, 0, 18, 2.5f, i % 2 == 0 ? 18 : -18), 4, m, 1);
+        save(r, name);
+    }
+
+    /** A resistor: a tan body with colour bands and a lead out of each end. */
+    static void resistorIcon(String name) throws IOException{
+        R r = new R(T);
+        r.fill(r.rect(2, 15, 28, 2), 2, metal, 0);
+        r.cylH(8, 11, 16, 10, 3, 3, acc(0xd8c08a));
+        for(int[] b : new int[][]{{11, 0xb05454}, {15, 0x6a5acd}, {19, 0x3a3c44}}) r.fill(r.rect(b[0], 11, 2, 10), 6.5f, dull(b[1]), 0);
+        save(r, name);
+    }
+
+    /** An electrolytic capacitor: a blue can with a stripe and two legs. */
+    static void capacitorIcon(String name) throws IOException{
+        R r = new R(T);
+        for(int x : new int[]{12, 18}) r.fill(r.rect(x, 24, 2, 7), 2, metal, 0);
+        r.cylV(9, 4, 14, 21, 3, 4, acc(0x5a7ab0));
+        r.fill(r.rect(19, 6, 2, 17), 7.5f, dull(0xd6dde3), 0);
+        save(r, name);
+    }
+
+    /** A transistor: a black body with three legs. */
+    static void transistorIcon(String name) throws IOException{
+        R r = new R(T);
+        for(int x : new int[]{10, 15, 20}) r.fill(r.rect(x, 18, 2, 12), 2, metal, 0);
+        r.fill(r.oct(7, 5, 18, 15, 4), 6, dull(0x3a3c44), 2);
+        r.fill(r.rect(7, 5, 18, 3), 7, steel, 0);
+        save(r, name);
+    }
+
+    /** A coil of rubber-insulated cable with a copper end showing. */
+    static void cableIcon(String name) throws IOException{
+        R r = new R(T);
+        r.fill(r.ring(16, 16, 6, 13), 5, rubber, 2);
+        r.raise(r.ring(16, 16, 9, 10), -1f);
+        r.fill(r.rect(22, 22, 8, 4), 6, rubber, 1);
+        r.fill(r.rect(28, 23, 3, 2), 6.5f, copperGearM, 0);
+        save(r, name);
+    }
+
+    /** An electric motor: a finned body, an end cap in the accent colour and the shaft. */
+    static void motorIcon(String name, int body, int accent) throws IOException{
+        R r = new R(T);
+        r.cylH(4, 8, 20, 16, 3, 6, acc(body));
+        for(int x = 7; x < 22; x += 3) r.raise(r.rect(x, 8, 1, 16), 0.8f);
+        r.fill(r.oct(22, 10, 4, 12, 1), 6, acc(accent), 1);
+        r.cylH(26, 14, 5, 4, 3, 2, metal);
+        save(r, name);
+    }
+
+    /** A pump: a round volute casing with its outlet and the motor behind it. */
+    static void pumpIcon(String name) throws IOException{
+        R r = new R(T);
+        r.cylH(2, 18, 12, 10, 3, 4, acc(0x7a8a9c));
+        r.fill(r.circle(20, 14, 10), 6, acc(0x5f8fb0), 2);
+        r.fill(r.circle(20, 14, 3), 7, metal, 1);
+        r.fill(r.rect(17, 1, 6, 5), 5, steel, 1);
+        save(r, name);
+    }
+
+    /** A piston: a cylinder with the rod and eye sticking out. */
+    static void pistonIcon(String name) throws IOException{
+        R r = new R(T);
+        r.cylV(9, 12, 14, 18, 3, 5, acc(0x9aa3ad));
+        r.cylV(14, 2, 4, 12, 3, 3, metal);
+        r.fill(r.ring(16, 4, 1.5f, 3.5f), 4, steel, 1);
+        save(r, name);
+    }
+
+    /** A rotor: a hub with four blades. */
+    static void rotorIcon(String name) throws IOException{
+        R r = new R(T);
+        Mat m = acc(0x8da1e3);
+        for(int i = 0; i < 4; i++) r.fill(r.bar(16, 16, 4, 11, 6, i * 90 + 20), 4, m, 1);
+        r.fill(r.circle(16, 16, 5), 6, metal, 2);
+        r.fill(r.circle(16, 16, 2), 7, deep, 0);
+        save(r, name);
+    }
+
+    /** A glowing heating element coiled between two terminals. */
+    static void heatingCoilIcon(String name) throws IOException{
+        R r = new R(T);
+        for(int y : new int[]{3, 26}) r.fill(r.rect(6, y, 20, 3), 5, steel, 1);
+        for(int i = 0; i < 5; i++) r.fill(r.bar(16, 8 + i * 4, 0, 18, 2, i % 2 == 0 ? 12 : -12), 4, lit(0xff8a4a), 0);
+        save(r, name);
+    }
+
+    /** A sensor: a small board with a round lens. */
+    static void sensorIcon(String name) throws IOException{
+        R r = new R(T);
+        r.fill(r.oct(4, 6, 24, 20, 3), 3, dull(0x2f6b45), 1);
+        r.fill(r.circle(16, 16, 7), 6, steel, 2);
+        r.fill(r.circle(16, 16, 4.5f), 7, glass(0x6dd0f0), 1);
+        save(r, name);
+    }
+
+    /** An emitter: a laser tube with a glowing red lens. */
+    static void emitterIcon(String name) throws IOException{
+        R r = new R(T);
+        r.cylH(3, 10, 20, 12, 3, 5, acc(0x7a8a9c));
+        r.fill(r.circle(25, 16, 5), 6, steel, 1);
+        r.fill(r.circle(25, 16, 3), 7, lit(0xff5a5a), 0);
         save(r, name);
     }
 

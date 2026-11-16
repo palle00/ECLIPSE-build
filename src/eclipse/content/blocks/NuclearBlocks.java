@@ -15,23 +15,9 @@ import static mindustry.type.ItemStack.*;
 
 /** Nuclear fuel cycle: fabrication -> fission heat -> reprocessing. */
 public class NuclearBlocks{
-    public static Block fuelRodFabricator, fissionReactor, reprocessingPlant;
+    public static Block fissionReactor, reprocessingPlant;
 
     public static void load(){
-        // Thorium pellets sealed in superalloy cladding.
-        fuelRodFabricator = new GenericCrafter("fuel-rod-fabricator"){{
-            requirements(Category.crafting, with(Items.titanium, 80, Items.silicon, 60, Items.lead, 80, superalloy, 20, titaniumGear, 10, superalloyFrame, 5));
-            size = 2;
-            health = 400;
-            itemCapacity = 20;
-            craftTime = 120f;
-            consumeItems(with(Items.thorium, 4, superalloy, 1));
-            consumePower(1.5f);
-            outputItem = new ItemStack(thoriumFuelRod, 1);
-            craftEffect = Fx.pulverizeSmall;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff7ad1"); }});
-        }};
-
         // Fuel rods -> a large amount of heat out of the front (drives the boiler / steam turbine chain).
         fissionReactor = new HeatProducer("fission-reactor"){{
             requirements(Category.power, with(reinforcedGlass, 60, superalloyPlate, 30, Items.thorium, 80, Items.lead, 200, Items.silicon, 100, microchip, 20, superalloyFrame, 30, pressureCasing, 30, precisionComponent, 10, carbonComposite, 20, tungstenPlate, 20, controlUnit, 10));

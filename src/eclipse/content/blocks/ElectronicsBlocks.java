@@ -50,17 +50,22 @@ public class ElectronicsBlocks{
         // ---- wiring and control (wire comes from the Extruder) ----
 
         // Every circuit: circuit boards (copper-foil-clad polyethylene etched in hydrochloric acid; the spent
-        // etchant leaves as acidic waste) and control units (microchip + circuit boards + an AlNiCo motor magnet).
+        // etchant leaves as acidic waste) and control units (microchip + circuit boards + an electric motor), and the electronic
+        // parts that go on boards: resistors, capacitors, transistors, and insulated cable.
         // Its cost must not include circuit boards or later components (no circular costs).
         circuitAssembler = new RecipeCrafter("circuit-assembler"){{
-            requirements(Category.crafting, with(Items.lead, 60, Items.silicon, 40, Items.metaglass, 20, titaniumGear, 5, pressureCasing, 5));
-            size = 2;
-            health = 300;
-            itemCapacity = 10;
+            requirements(Category.crafting, with(Items.lead, 80, Items.silicon, 60, Items.metaglass, 30, titaniumGear, 8, pressureCasing, 5));
+            size = 3;
+            health = 500;
+            itemCapacity = 20;
             liquidCapacity = 20f;
-            recipe(3, 60f, with(copperFoil, 2, polyethylene, 1), with(circuitBoard, 1))
+            recipe(2, 30f, with(Items.graphite, 1, copperWire, 1), with(resistor, 2));
+            recipe(3, 30f, with(aluminiumFoil, 2, polyethylene, 1), with(capacitor, 2));
+            recipe(3, 40f, with(highPuritySilicon, 1, copperWire, 1, polyethylene, 1), with(transistor, 2));
+            recipe(3, 30f, with(copperWire, 2, syntheticRubber, 1), with(insulatedCable, 2));
+            recipe(3, 60f, with(copperFoil, 2, polyethylene, 1, resistor, 2, capacitor, 1, transistor, 1), with(circuitBoard, 1))
                 .liquidsIn(hydrochloricAcid, 2f / 60f).liquidsOut(acidicWaste, 1f / 60f);
-            recipe(4, 90f, with(microchip, 1, circuitBoard, 2, alnicoMagnet, 1, titaniumScrew, 2), with(controlUnit, 1));
+            recipe(4, 90f, with(microchip, 1, circuitBoard, 2, electricMotor, 1, titaniumScrew, 2), with(controlUnit, 1));
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(hydrochloricAcid, 3f), new DrawDefault());
         }};
 }

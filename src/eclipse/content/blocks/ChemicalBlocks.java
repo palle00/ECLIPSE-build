@@ -18,7 +18,7 @@ import static mindustry.type.ItemStack.*;
 public class ChemicalBlocks{
     public static Block
     waterTreatmentPlant, electrolysisPlant, chlorAlkaliCell, acidSynthesizer, acidLeachingVat,
-    sulfuricAcidPlant, batteryAssemblyPlant, industrialNeutralizer,
+    sulfuricAcidPlant, industrialNeutralizer,
     airSeparationUnit, highPressureReactor, cryogenicCondenser, nitricAcidPlant, aquaRegiaMixer, ammoniumNitratePlant, explosivesPlant,
     industrialScrubber, gasSeparator, wastewaterTreatmentPlant, thermalWasteProcessor;
 
@@ -120,22 +120,6 @@ public class ChemicalBlocks{
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(sulfuricAcid, 3f), new DrawDefault(), new DrawHeatOutput());
         }};
 
-        // Lead + polyethylene casing + sulfuric acid electrolyte -> lead-acid cell.
-        batteryAssemblyPlant = new GenericCrafter("battery-assembly-plant"){{
-            requirements(Category.crafting, with(Items.copper, 80, Items.lead, 60, Items.silicon, 60, Items.graphite, 40, copperGear, 15, titaniumGear, 5));
-            size = 2;
-            health = 320;
-            liquidCapacity = 20f;
-            itemCapacity = 10;
-            craftTime = 90f;
-            consumeItems(with(leadPlate, 2, polyethylene, 1));
-            consumeLiquid(sulfuricAcid, 3f / 60f);
-            consumePower(1f);
-            outputItem = new ItemStack(leadAcidCell, 1);
-            craftEffect = Fx.pulverizeSmall;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("b7e07a"); }});
-        }};
-
         // Acidic waste + sodium hydroxide -> water.
         industrialNeutralizer = new GenericCrafter("industrial-neutralizer"){{
             requirements(Category.crafting, with(Items.lead, 50, Items.titanium, 30, Items.metaglass, 40, pressureCasing, 5));
@@ -152,7 +136,7 @@ public class ChemicalBlocks{
 
         // Air + cryogenic cooling -> nitrogen + oxygen.
         airSeparationUnit = new GenericCrafter("air-separation-unit"){{
-            requirements(Category.crafting, with(Items.lead, 100, Items.titanium, 80, Items.silicon, 60, reinforcedGlass, 30, Items.graphite, 40, industrialBearing, 10, pressureCasing, 10));
+            requirements(Category.crafting, with(Items.lead, 100, Items.titanium, 80, Items.silicon, 60, reinforcedGlass, 30, Items.graphite, 40, pumpUnit, 4, pressureCasing, 10));
             size = 3;
             health = 700;
             rotate = true;

@@ -105,7 +105,7 @@ public class MilitaryEndgame{
 
         titanComplex = new TitanComplex("titan-manufacturing-complex"){{
             requirements(Category.units, with(Items.thorium, 1000, Items.plastanium, 500, Items.phaseFabric, 200, surgeSuperalloy, 300,
-                superalloyFrame, 200, industrialBearing, 100, precisionComponent, 100, controlUnit, 50, experimentalCore, 20));
+                superalloyFrame, 200, superconductingMotor, 20, precisionComponent, 100, controlUnit, 50, experimentalCore, 20));
             size = 7;
             health = 12000;
             plans.add(new UnitPlan(dreadnought, 60f * 240f, with(Items.phaseFabric, 150, surgeSuperalloy, 200, tungstenCarbide, 400,

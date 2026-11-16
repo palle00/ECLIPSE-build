@@ -98,7 +98,7 @@ public class MetallurgyBlocks{
 
         // Faster than the laser drill at the same size.
         carbideDrill = new Drill("carbide-drill"){{
-            requirements(Category.production, with(tungstenCarbide, 30, Items.titanium, 40, Items.silicon, 40, Items.graphite, 30, superalloyGear, 10, industrialBearing, 10, controlUnit, 5));
+            requirements(Category.production, with(tungstenCarbide, 30, Items.titanium, 40, Items.silicon, 40, Items.graphite, 30, superalloyGear, 10, permanentMagnetMotor, 3, controlUnit, 5));
             size = 3;
             health = 600;
             tier = 4;
@@ -260,7 +260,7 @@ public class MetallurgyBlocks{
 
         // Aluminium + nickel + cobalt melted electrically -> AlNiCo permanent magnets. Needs no heat network.
         inductionFurnace = new GenericCrafter("induction-furnace"){{
-            requirements(Category.crafting, with(Items.titanium, 60, Items.silicon, 50, copperWire, 40, industrialBearing, 5));
+            requirements(Category.crafting, with(Items.titanium, 60, Items.silicon, 50, heatingCoil, 4, industrialBearing, 5));
             size = 2;
             health = 340;
             itemCapacity = 10;

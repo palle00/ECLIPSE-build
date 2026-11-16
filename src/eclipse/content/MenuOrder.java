@@ -84,15 +84,15 @@ public class MenuOrder{
         after(Blocks.overdriveDome, augmentationCoupler, advancedCoupler, chemicalInterface, militaryInterface, augmentationHub);
 
         //---- crafting: each ECLIPSE production chain follows the vanilla machine it grows out of ----
-        after(Blocks.multiPress, methanePyrolysisReactor, gearPress, extruder, metalPress, lathe, casingForge, bearingPress, frameForge,
-            precisionAssembler, coreAssembler); //mechanical manufacturing
+        after(Blocks.multiPress, methanePyrolysisReactor, gearPress, extruder, metalPress, lathe, assembler, frameForge,
+            coreAssembler); //mechanical manufacturing
         after(Blocks.siliconSmelter, siliconReductionFurnace, siliconRefinery, chipFabricator, circuitAssembler);
         after(Blocks.kiln, sodaGlassFurnace, glassKiln);
         after(Blocks.plastaniumCompressor, //oil -> petrochemicals and heat
             distillationColumn, industrialHeater, electricHeater, geothermalHeatTap, heatExchanger, thermalStorage, steamCracker, catalystPlant,
             polymerizationReactor, methanolSynthesizer, olefinReactor, epoxyPlant, rubberPlant, acrylonitrileReactor,
-            carbonFiberFurnace, compositePress, sulfuricAcidPlant, batteryAssemblyPlant);
-        after(Blocks.phaseWeaver, fuelRodFabricator, reprocessingPlant); //thorium -> nuclear fuel
+            carbonFiberFurnace, compositePress, sulfuricAcidPlant);
+        after(Blocks.phaseWeaver, reprocessingPlant); //thorium -> nuclear fuel
         after(Blocks.surgeSmelter, alloyFurnace, inductionFurnace, arcFurnace);
         after(Blocks.pulverizer, oreCrusher, oreWasher);
         after(Blocks.cryofluidMixer, //water -> chemical industry
@@ -111,15 +111,15 @@ public class MenuOrder{
         //---- items (core inventory, item pickers); augmentation modules stay at the end as their own group ----
         after(Items.metaglass, hotMetaglass, hotReinforcedGlass, reinforcedGlass);
         after(Items.coal, sulfur);
-        after(Items.copper, copperGear, copperWire, copperPlate, copperFoil);
+        after(Items.copper, copperGear, copperWire, magnetWire, insulatedCable, copperPlate, copperFoil);
         after(Items.lead, leadPlate);
-        after(Items.titanium, hotTitanium, titaniumRod, titaniumGear, titaniumPlate, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, pressureCasing, industrialBearing, nickel, chromium, cobalt, molybdenum, vanadium, tungsten, tungstenPlate, tungstenRod, hotTungstenCarbide, tungstenCarbide, alumina, hotAluminium, aluminium, aluminiumPlate, aluminiumFoil, aluminiumWire, lithium, hotSuperalloy, superalloy, superalloyPlate, superalloyGear, superalloyFrame, alnicoMagnet, platinum);
+        after(Items.titanium, hotTitanium, titaniumRod, titaniumGear, titaniumPlate, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, rotor, electricMotor, pumpUnit, piston, pressureCasing, industrialBearing, nickel, chromium, cobalt, molybdenum, vanadium, tungsten, tungstenPlate, tungstenRod, hotTungstenCarbide, tungstenCarbide, alumina, hotAluminium, aluminium, aluminiumPlate, aluminiumFoil, aluminiumWire, lithium, hotSuperalloy, superalloy, superalloyPlate, superalloyGear, superalloyFrame, alnicoMagnet, permanentMagnetMotor, heatingCoil, platinum);
         after(Items.thorium, thoriumFuelRod, spentFuelRod);
         after(Items.scrap, crushedOre, industrialSludge);
-        after(Items.silicon, hotSilicon, highPuritySilicon, microchip, circuitBoard, precisionComponent, controlUnit);
+        after(Items.silicon, hotSilicon, highPuritySilicon, resistor, capacitor, transistor, sensor, emitter, microchip, circuitBoard, precisionComponent, controlUnit);
         after(Items.plastanium, polyethylene, polymerCatalyst, leadAcidCell, syntheticRubber, epoxyResin, carbonFiber, carbonComposite);
         after(Items.surgeAlloy, hotSurgeSuperalloy, surgeSuperalloy, experimentalCore);
-        after(Items.phaseFabric, aetherite, superconductor);
+        after(Items.phaseFabric, aetherite, superconductor, superconductingMotor);
         after(Items.sporePod, biomass, fertilizer, enzymeExtract);
         after(Items.blastCompound, ammoniumNitrate);
 

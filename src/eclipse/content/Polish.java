@@ -35,8 +35,7 @@ public class Polish{
 
     static{
         kind(Kind.furnace, "alloy-furnace", "sintering-furnace", "glass-kiln", "soda-glass-furnace", "silicon-reduction-furnace", "frame-forge",
-            "casing-forge", "carbon-fiber-furnace", "thermal-waste-processor", "chloride-titanium-plant", "alumina-refinery", "methane-pyrolysis-reactor",
-            "fuel-rod-fabricator");
+            "carbon-fiber-furnace", "thermal-waste-processor", "chloride-titanium-plant", "alumina-refinery", "methane-pyrolysis-reactor");
         kind(Kind.electric, "electrolysis-plant", "chlor-alkali-cell", "electrowinning-cell", "induction-furnace", "aluminium-smelter", "arc-furnace", "electric-heater");
         kind(Kind.chemical, "acid-synthesizer", "acid-leaching-vat", "sulfuric-acid-plant", "nitric-acid-plant", "aqua-regia-mixer", "platinum-refinery",
             "ammonium-nitrate-plant", "catalyst-plant", "polymerization-reactor", "rubber-plant", "acrylonitrile-reactor", "epoxy-plant", "olefin-reactor",
@@ -46,12 +45,11 @@ public class Polish{
         kind(Kind.combustion, "industrial-heater", "methane-turbine", "biofuel-engine");
         kind(Kind.reactor, "fission-reactor");
         kind(Kind.cryo, "hydrogen-fuel-cell", "air-separation-unit", "cryogenic-condenser", "gas-separator", "vacuum-freezer");
-        kind(Kind.press, "gear-press", "extruder", "metal-press", "bearing-press", "composite-press",
-            "battery-assembly-plant", "explosives-plant");
+        kind(Kind.press, "gear-press", "extruder", "metal-press", "composite-press", "explosives-plant");
         kind(Kind.grind, "ore-crusher", "ore-washer", "lathe");
-        kind(Kind.electronics, "circuit-assembler", "chip-fabricator", "precision-assembler", "experimental-core-assembler", "silicon-refinery");
+        kind(Kind.electronics, "circuit-assembler", "chip-fabricator", "experimental-core-assembler", "silicon-refinery");
         kind(Kind.bio, "biomass-cultivator", "algae-photobioreactor", "enzyme-extractor", "biochemical-fermenter", "anaerobic-digester");
-        kind(Kind.assembler, "basic-module-assembler", "advanced-module-assembler", "experimental-augmentation-facility", "aetherite-module-forge", "module-recycling-facility");
+        kind(Kind.assembler, "assembler", "basic-module-assembler", "advanced-module-assembler", "experimental-augmentation-facility", "aetherite-module-forge", "module-recycling-facility");
     }
 
     public static @Nullable Kind kindOf(Block b){

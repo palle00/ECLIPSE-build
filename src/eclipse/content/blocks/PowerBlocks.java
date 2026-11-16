@@ -35,7 +35,7 @@ public class PowerBlocks{
 
         // Heat + purified water -> steam.
         industrialBoiler = new HeatCrafter("industrial-boiler"){{
-            requirements(Category.power, with(reinforcedGlass, 30, Items.titanium, 60, Items.lead, 60, Items.graphite, 40, pressureCasing, 15));
+            requirements(Category.power, with(reinforcedGlass, 30, Items.titanium, 60, pumpUnit, 2, Items.graphite, 40, pressureCasing, 15));
             size = 3;
             health = 650;
             liquidCapacity = 60f;
@@ -50,7 +50,7 @@ public class PowerBlocks{
 
         // Power -> heat through molybdenum disilicide elements. No fuel needed, but costs a lot of power.
         electricHeater = new HeatProducer("electric-heater"){{
-            requirements(Category.crafting, with(molybdenum, 20, Items.silicon, 30, Items.lead, 30, Items.graphite, 20, tungstenRod, 10, copperWire, 20));
+            requirements(Category.crafting, with(molybdenum, 20, Items.silicon, 30, Items.lead, 30, Items.graphite, 20, heatingCoil, 4, copperWire, 20));
             size = 2;
             health = 300;
             heatOutput = 4f;
@@ -70,7 +70,7 @@ public class PowerBlocks{
 
         // Steam -> power; condensate is returned as purified water.
         steamTurbine = new ConsumeGenerator("steam-turbine"){{
-            requirements(Category.power, with(aluminium, 60, microchip, 10, titaniumRing, 20, Items.silicon, 40, industrialBearing, 20, superalloyFrame, 5, cobalt, 20, alnicoMagnet, 10));
+            requirements(Category.power, with(aluminium, 60, microchip, 10, titaniumRing, 20, Items.silicon, 40, industrialBearing, 20, superalloyFrame, 5, cobalt, 20, permanentMagnetMotor, 4));
             size = 3;
             health = 600;
             liquidCapacity = 40f;
@@ -97,7 +97,7 @@ public class PowerBlocks{
 
         // Methane -> power.
         methaneTurbine = new ConsumeGenerator("methane-turbine"){{
-            requirements(Category.power, with(Items.copper, 60, Items.lead, 50, Items.titanium, 40, Items.silicon, 30, Items.graphite, 30, industrialBearing, 10, titaniumGear, 5));
+            requirements(Category.power, with(magnetWire, 20, Items.lead, 50, Items.titanium, 40, Items.silicon, 30, Items.graphite, 30, industrialBearing, 10, rotor, 4));
             size = 2;
             health = 320;
             liquidCapacity = 20f;
@@ -111,7 +111,7 @@ public class PowerBlocks{
 
         // Lead-acid bank: better storage density than the large battery, costs processed cells.
         industrialBattery = new Battery("industrial-battery"){{
-            requirements(Category.power, with(leadAcidCell, 20, Items.lead, 40, Items.titanium, 20, Items.silicon, 10, titaniumRod, 5, copperWire, 10));
+            requirements(Category.power, with(leadAcidCell, 20, Items.lead, 40, Items.titanium, 20, Items.silicon, 10, titaniumRod, 5, insulatedCable, 10));
             size = 2;
             health = 400;
             consumePowerBuffered(25000f);
@@ -161,7 +161,7 @@ public class PowerBlocks{
             baseEfficiency = 1f;
             boostScale = 0.15f;
             maxBoost = 0.6f;
-            requirements(Category.crafting, with(Items.copper, 60, Items.lead, 60, Items.metaglass, 40, copperGear, 15, titaniumRod, 10));
+            requirements(Category.crafting, with(Items.copper, 60, Items.lead, 60, Items.metaglass, 40, copperGear, 15, rotor, 2));
             size = 3;
             health = 500;
             liquidCapacity = 40f;

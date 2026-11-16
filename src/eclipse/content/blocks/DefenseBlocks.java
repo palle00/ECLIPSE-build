@@ -15,7 +15,7 @@ public class DefenseBlocks{
     public static void load(){
         // Stage 4-5: wave intelligence.
         waveScanner = new WaveScanner("wave-intelligence-scanner"){{
-            requirements(Category.logic, with(Items.silicon, 60, Items.titanium, 40, reinforcedGlass, 20, circuitBoard, 5, copperWire, 20));
+            requirements(Category.logic, with(Items.silicon, 60, Items.titanium, 40, reinforcedGlass, 20, circuitBoard, 5, sensor, 4));
             size = 2;
             health = 300;
             consumePower(0.5f);
@@ -23,7 +23,7 @@ public class DefenseBlocks{
 
         // Stage 6-7: one controlled wave delay per lockout.
         waveDisruptionArray = new WaveDisruptionArray("wave-disruption-array"){{
-            requirements(Category.effect, with(microchip, 30, aluminium, 60, leadAcidCell, 20, reinforcedGlass, 40, controlUnit, 5, superalloyFrame, 5));
+            requirements(Category.effect, with(microchip, 30, emitter, 4, leadAcidCell, 20, reinforcedGlass, 40, controlUnit, 5, superalloyFrame, 5));
             size = 3;
             health = 800;
             consumePower(4f);

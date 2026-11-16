@@ -34,10 +34,9 @@ public class EclipseTechTree{
         TechNode rods = child(gears, extruder);
         child(gears, metalPress);
         child(rods, lathe);
-        child(rods, casingForge);
-        TechNode bearings = child(rods, bearingPress);
-        child(bearings, frameForge);
-        child(child(bearings, precisionAssembler), coreAssembler);
+        TechNode parts = child(rods, assembler);
+        child(parts, frameForge);
+        child(parts, coreAssembler);
         child(rods, componentDepot);
         TechNode gearItem = child(find(Items.copper), copperGear);
         TechNode rodItem = child(find(Items.titanium), titaniumRod);
@@ -160,8 +159,7 @@ public class EclipseTechTree{
         child(pipe, polymerBridgeConduit);
         child(pipe, polymerLiquidTank);
         TechNode sulfuric = child(distillation, sulfuricAcidPlant);
-        TechNode batteryPlant = child(sulfuric, batteryAssemblyPlant);
-        TechNode industrialBatteryNode = child(batteryPlant, industrialBattery);
+        TechNode industrialBatteryNode = child(sulfuric, industrialBattery); //lead-acid cells come from the Assembler
         TechNode lithiumBatteryNode = child(industrialBatteryNode, lithiumBattery);
         child(lithiumBatteryNode, flowBattery);
         child(heater, electricHeater);
@@ -188,8 +186,7 @@ public class EclipseTechTree{
         child(wastewaterNode, anaerobicDigester);
 
         //nuclear
-        TechNode fab = child(find(Blocks.thoriumReactor), fuelRodFabricator);
-        TechNode fission = child(fab, fissionReactor);
+        TechNode fission = child(find(Blocks.thoriumReactor), fissionReactor); //fuel rods come from the Assembler
         child(fission, reprocessingPlant);
 
         //metallurgy
