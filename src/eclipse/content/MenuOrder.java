@@ -89,13 +89,12 @@ public class MenuOrder{
         after(Blocks.siliconSmelter, siliconReductionFurnace, siliconRefinery, chipFabricator, circuitAssembler);
         after(Blocks.plastaniumCompressor, //oil -> petrochemicals and heat
             distillationColumn, industrialHeater, electricHeater, geothermalHeatTap, heatExchanger, thermalStorage, steamCracker,
-            polymerizationReactor, methanolSynthesizer, olefinReactor, rubberPlant, acrylonitrileReactor,
             carbonFiberFurnace, compositePress, sulfuricAcidPlant);
         after(Blocks.phaseWeaver, reprocessingPlant); //thorium -> nuclear fuel
         after(Blocks.surgeSmelter, blastFurnace, electricFurnace);
         after(Blocks.pulverizer, oreCrusher, oreWasher);
         after(Blocks.cryofluidMixer, //water -> chemical industry
-            coolingTower, waterTreatmentPlant, electrolyzer, chemicalReactor, airSeparationUnit, cryogenicCondenser, vacuumFreezer, highPressureReactor, nitricAcidPlant, acidLeachingVat, industrialScrubber, gasSeparator,
+            coolingTower, waterTreatmentPlant, electrolyzer, chemicalReactor, pressureReactor, airSeparationUnit, cryogenicCondenser, vacuumFreezer, acidLeachingVat, industrialScrubber, gasSeparator,
             wastewaterTreatmentPlant, thermalWasteProcessor, lithiumExtractor, aluminaRefinery, platinumRefinery, synthesisComplex);
         after(Blocks.blastMixer);
         after(Blocks.separator, chlorideTitaniumPlant, mineralSeparator);

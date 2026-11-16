@@ -82,7 +82,6 @@ public class SpriteGen{
         steamCracker("steam-cracker");
         edgeGlow("steam-cracker-heat", 3);
 
-        polymerizationReactor("polymerization-reactor");
         sulfuricPlant("sulfuric-acid-plant");
 
         methaneTurbine("methane-turbine");
@@ -98,8 +97,6 @@ public class SpriteGen{
         airSeparation("air-separation-unit");
         nozzles("air-separation-unit", 3, "nitrogen", 0xefefef);
         nozzles("air-separation-unit", 3, "eclipse-oxygen", 0xd8efff);
-        pressureReactor("high-pressure-reactor");
-        nitricPlant("nitric-acid-plant");
 
         // ---- polymer transport assets ----
         for(int i = 0; i < 5; i++) polymer("conduit-top-" + i, "polymer-conduit-top-" + i);
@@ -279,12 +276,8 @@ public class SpriteGen{
         sulfurIcon("epoxy-resin", 0xe0a94a);
         pane("carbon-fiber", 0x2b2d33);
         ingot("carbon-composite", 0x4a5260);
-        methanolSynthesizer("methanol-synthesizer");
-        olefinReactor("olefin-reactor");
         nozzles("olefin-reactor", 3, "eclipse-propylene", 0xe6d3a8);
         nozzles("olefin-reactor", 3, "eclipse-wastewater", 0x6f7f5a);
-        rubberPlant("rubber-plant");
-        acrylonitrileReactor("acrylonitrile-reactor");
         carbonFiberFurnace("carbon-fiber-furnace");
         compositePress("composite-press");
         wallArt("composite-wall", 1, 1);
@@ -322,6 +315,7 @@ public class SpriteGen{
         blastFurnace("blast-furnace");
         electrolyzerSprite("electrolyzer");
         chemicalReactorSprite("chemical-reactor");
+        pressureReactor("pressure-reactor");
         electricFurnace("electric-furnace");
         coreAssembler("experimental-core-assembler");
         componentDepotArt("component-depot");
@@ -2932,6 +2926,23 @@ public class SpriteGen{
         glowOf(r, name);
     }
 
+    /** Pressure Reactor (3×3): a forged vessel held by four locking clamps, a window onto its contents, a pressure gauge. */
+    static void pressureReactor(String name) throws IOException{
+        int s = 3 * T;
+        float c = s / 2f;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 8, 5, steel);
+        r.fill(r.circle(c, c, 38), 11, metal, 5);
+        for(int i = 0; i < 4; i++) r.fill(r.bar(c, c, 30, 14, 14, i * 90 + 45), 14, steel, 3);
+        r.fill(r.circle(c, c, 24), 13, steel, 3);
+        liquidWindow(r, r.circle(c, c, 12), 14);
+        r.fill(r.circle(84, 12, 7), 12, metal, 2);
+        r.fill(r.circle(84, 12, 3), 13, lit(0xff5a5a), 0);
+        save(r, name);
+        glowOf(r, name);
+        liquidBottom(name, s);
+    }
+
     /**
      * Chemical Reactor (2×2): a round stirred vessel with a window onto its contents, the stirrer drive on top and feed
      * and outlet nozzles round it.
@@ -4364,94 +4375,6 @@ public class SpriteGen{
         heatLayer(r, name, r.rect(24, 22, 48, 52));
     }
 
-    static void polymerizationReactor(String name) throws IOException{
-        int s = 3 * T;
-        float c = s / 2f;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 10, 5, steel);
-        //sealed pressure housing with bolted ring, catalyst service hatch
-        r.fill(r.circle(c, c, 40), 10, metal, 4);
-        for(int i = 0; i < 12; i++) r.fill(r.bar(c, c, 34, 4, 4, i * 30), 12, steel, 0);
-        r.fill(r.circle(c, c, 26), 12, steel, 3);
-        liquidWindow(r, r.circle(c, c, 15), 13);
-        r.fill(r.rect(72, 72, 20, 20), 11, metal, 2);
-        r.fill(r.rect(77, 77, 10, 10), 12, acc(0xb07ad6), 1);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
-    static void methanolSynthesizer(String name) throws IOException{
-        int s = 3 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 5, 5, metal);
-        //a thick horizontal pressure vessel with domed ends and two gas inlets
-        r.fill(r.oct(8, 28, 80, 40, 18), 12, steel, 4);
-        r.fill(r.oct(14, 34, 68, 28, 13), 13, metal, 3);
-        liquidWindow(r, r.rect(32, 42, 32, 12), 14);
-        stub(r, 1, 18, 14, acc(0xb6dc4c));
-        stub(r, 1, 64, 14, acc(0xe8edf0));
-        //pressure lock and gauge
-        r.fill(r.rect(36, 76, 24, 14), 11, steel, 2);
-        r.fill(r.circle(48, 83, 4), 12, lit(0xff5a5a), 0);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
-    static void olefinReactor(String name) throws IOException{
-        int s = 3 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 5, 5, metal);
-        //conversion chamber, propylene out left, wastewater out right
-        r.fill(r.rect(0, 38, 20, 20), 9, steel, 2);
-        r.fill(r.rect(76, 38, 20, 20), 9, steel, 2);
-        r.fill(r.rect(2, 44, 8, 8), 10, acc(0xe6d3a8), 0);
-        r.fill(r.rect(86, 44, 8, 8), 10, acc(0x6f7f5a), 0);
-        r.fill(r.oct(18, 14, 60, 68, 10), 12, steel, 3);
-        liquidWindow(r, r.rect(26, 24, 44, 26), 13);
-        for(int x = 30; x < 68; x += 8) r.fill(r.rect(x, 56, 4, 18), 13, metal, 1);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
-    static void rubberPlant(String name) throws IOException{
-        int s = 3 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 5, 5, metal);
-        //mixing chamber (top left), long processing channel, heated curing area (right), rubber out
-        vessel(r, 24, 24, 18, 11, steel);
-        r.fill(r.rect(8, 48, 80, 14), 9, steel, 2);
-        liquidWindow(r, r.rect(12, 52, 52, 6), 10);
-        r.fill(r.oct(56, 8, 34, 36, 5), 12, steel, 3);
-        r.fill(r.rect(62, 14, 22, 24), 4, deep, 0);
-        for(int y = 17; y < 36; y += 6) r.fill(r.rect(64, y, 18, 2), 5, molten, 0);
-        r.fill(r.rect(64, 70, 26, 20), 9, metal, 2);
-        r.fill(r.rect(68, 74, 18, 12), 10, dull(0x2a2a30), 1);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
-    static void acrylonitrileReactor(String name) throws IOException{
-        int s = 3 * T;
-        float c = s / 2f;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 6, 5, steel);
-        //three feed connections into the main reactor, catalyst service bay below it
-        for(int x : new int[]{14, 40, 66}) r.fill(r.rect(x, 0, 16, 18), 10, metal, 2);
-        int[] feeds = {0xb5a8d8, 0xd8eef7, 0xe8edf0};
-        for(int i = 0; i < 3; i++) r.fill(r.rect(18 + i * 26, 4, 8, 8), 11, acc(feeds[i]), 0);
-        r.fill(r.circle(c, 50, 30), 12, metal, 4);
-        liquidWindow(r, r.circle(c, 50, 16), 13);
-        r.fill(r.rect(30, 80, 36, 12), 10, metal, 2);
-        r.fill(r.rect(36, 83, 24, 6), 11, acc(0xc9b8e8), 1);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
     static void carbonFiberFurnace(String name) throws IOException{
         int s = 3 * T;
         R r = canvas(s);
@@ -4611,39 +4534,6 @@ public class SpriteGen{
         r.fill(r.rect(3, (int)c - 3, 4, 6), 9, lit(0xff9a4a), 0);
         r.fill(r.rect(s - 10, (int)c - 7, 9, 14), 8, steel, 1);
         r.fill(r.rect(s - 7, (int)c - 3, 4, 6), 9, dull(0xb9c4cf), 0);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
-    static void pressureReactor(String name) throws IOException{
-        int s = 3 * T;
-        float c = s / 2f;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 8, 5, steel);
-        //a forged vessel held by four locking clamps, a pressure gauge
-        r.fill(r.circle(c, c, 38), 11, metal, 5);
-        for(int i = 0; i < 4; i++) r.fill(r.bar(c, c, 30, 14, 14, i * 90 + 45), 14, steel, 3);
-        r.fill(r.circle(c, c, 24), 13, steel, 3);
-        liquidWindow(r, r.circle(c, c, 12), 14);
-        r.fill(r.circle(84, 12, 7), 12, metal, 2);
-        r.fill(r.circle(84, 12, 3), 13, lit(0xff5a5a), 0);
-        save(r, name);
-        glowOf(r, name);
-        liquidBottom(name, s);
-    }
-
-    static void nitricPlant(String name) throws IOException{
-        int s = 2 * T;
-        float c = s / 2f;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 5, metal);
-        //oxidation vessel with a gauze ring, gas in at the top, acid out at the bottom
-        r.fill(r.circle(c, c, 22), 10, steel, 3);
-        r.fill(r.ring(c, c, 12, 16), 11, dull(0xe4e6ea), 1);
-        liquidWindow(r, r.circle(c, c, 10), 11);
-        stub(r, 1, 26, 12, acc(0xd8eef7));
-        stub(r, 3, 26, 12, acc(0xf0d98c));
         save(r, name);
         glowOf(r, name);
         liquidBottom(name, s);

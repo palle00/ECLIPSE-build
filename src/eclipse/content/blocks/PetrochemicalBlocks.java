@@ -15,9 +15,8 @@ import static mindustry.type.ItemStack.*;
 
 /** Organic chemistry: oil refining, cracking, catalysts, polymers, methanol chemistry and carbon composites. */
 public class PetrochemicalBlocks{
-    public static Block distillationColumn, steamCracker, polymerizationReactor,
-        methanolSynthesizer, olefinReactor, rubberPlant, acrylonitrileReactor, carbonFiberFurnace, compositePress,
-        compositeWall, compositeWallLarge;
+    public static Block distillationColumn, steamCracker, carbonFiberFurnace, compositePress,
+        compositeWall, compositeWallLarge, pressureReactor;
 
     public static void load(){
         // Oil -> naphtha + methane, sulfur recovered from the bottoms.
@@ -51,88 +50,32 @@ public class PetrochemicalBlocks{
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(naphtha, 4f), new DrawDefault(), new DrawHeatInput());
         }};
 
-        // Ethylene -> polyethylene over a reusable catalyst.
-        polymerizationReactor = new ChemicalReactor("polymerization-reactor"){{
-            requirements(Category.crafting, with(Items.lead, 80, Items.titanium, 60, Items.silicon, 80, Items.metaglass, 40, pressureCasing, 10, titaniumGear, 10));
-            size = 3;
-            health = 650;
-            liquidCapacity = 40f;
-            itemCapacity = 10;
-            craftTime = 60f;
-            catalyst = polymerCatalyst;
-            craftsPerCatalyst = 12;
-            consumeLiquid(ethylene, 5f / 60f);
-            consumePower(1.5f);
-            outputItem = new ItemStack(polyethylene, 1);
-            craftEffect = Fx.steam;
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(ethylene, 4f),
-                new DrawBubbles(Color.valueOf("e3ecf0")){{ amount = 10; radius = 5f; spread = 9f; }},
-                new DrawDefault());
-        }};
     
         // ---- methanol chemistry: captured CO2 becomes the feedstock for the organic branch ----
 
-        // CO2 + 3 H2 -> methanol (+ water). Runs at pressure over a copper-zinc bed.
-        methanolSynthesizer = new ChemicalReactor("methanol-synthesizer"){{
-            requirements(Category.crafting, with(Items.lead, 100, Items.titanium, 80, Items.silicon, 60, reinforcedGlass, 30, pressureCasing, 15, superalloyFrame, 10));
-            size = 3;
-            health = 750;
-            liquidCapacity = 40f;
-            craftTime = 60f;
-            pressureRequired = 0.6f;
-            consumeLiquids(LiquidStack.with(carbonDioxide, 3f / 60f, Liquids.hydrogen, 9f / 60f));
-            consumePower(1.5f);
-            outputLiquid = new LiquidStack(methanol, 4f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(methanol, 4f), new DrawDefault());
-        }};
-
-        // Methanol -> propylene (methanol-to-olefins). The split-off water leaves as wastewater.
-        olefinReactor = new ChemicalReactor("olefin-reactor"){{
-            requirements(Category.crafting, with(Items.lead, 80, Items.metaglass, 40, Items.titanium, 60, Items.silicon, 50, pressureCasing, 10, pumpUnit, 2));
-            size = 3;
-            health = 650;
-            rotate = true;
-            rotateDraw = false;
-            liquidCapacity = 40f;
-            consumeLiquid(methanol, 8f / 60f);
-            consumePower(1f);
-            outputLiquids = LiquidStack.with(propylene, 4f / 60f, wastewater, 3f / 60f);
-            liquidOutputDirections = new int[]{1, 3};
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(methanol, 4f), new DrawDefault(), new DrawLiquidOutputs());
-        }};
-
-        // Ethylene + propylene over the Ziegler-Natta catalyst -> EPDM rubber, vulcanized with sulfur.
-        rubberPlant = new ChemicalReactor("rubber-plant"){{
-            requirements(Category.crafting, with(Items.lead, 80, Items.metaglass, 40, Items.titanium, 60, polyethylene, 30, pressureCasing, 10, industrialBearing, 5));
-            size = 3;
-            health = 650;
-            liquidCapacity = 40f;
-            itemCapacity = 10;
-            craftTime = 60f;
-            catalyst = polymerCatalyst;
-            craftsPerCatalyst = 12;
-            consumeItem(sulfur, 1);
-            consumeLiquids(LiquidStack.with(ethylene, 3f / 60f, propylene, 3f / 60f));
-            consumePower(1.2f);
-            outputItem = new ItemStack(syntheticRubber, 2);
-            craftEffect = Fx.steam;
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(propylene, 4f), new DrawDefault());
-        }};
-
-        // Propylene + ammonia + oxygen -> acrylonitrile (ammoxidation) over a molybdate catalyst.
-        acrylonitrileReactor = new ChemicalReactor("acrylonitrile-reactor"){{
-            requirements(Category.crafting, with(Items.lead, 80, Items.titanium, 80, Items.silicon, 60, reinforcedGlass, 30, syntheticRubber, 20, pressureCasing, 15));
+        // Catalytic and high-pressure synthesis: ammonia (Haber-Bosch, N2 + 3 H2, under pressure), methanol (CO2 + 3 H2, under
+        // pressure), olefins from methanol (propylene left, wastewater right), nitric acid over platinum gauze (Ostwald),
+        // acrylonitrile over a molybdenum catalyst (SOHIO), and polyethylene and synthetic rubber over the titanium
+        // chloride polymerization catalyst. Catalysts wear out slowly; pressure is built up with power.
+        pressureReactor = new RecipeCrafter("pressure-reactor"){{
+            requirements(Category.crafting, with(Items.lead, 80, titaniumPlate, 40, Items.silicon, 60, Items.metaglass, 40, pressureCasing, 15, piston, 4));
             size = 3;
             health = 700;
+            itemCapacity = 20;
             liquidCapacity = 40f;
-            itemCapacity = 10;
-            craftTime = 60f;
-            catalyst = molybdenum;
-            craftsPerCatalyst = 30;
-            consumeLiquids(LiquidStack.with(propylene, 3f / 60f, ammonia, 3f / 60f, oxygen, 4f / 60f));
-            consumePower(1.5f);
-            outputLiquid = new LiquidStack(acrylonitrile, 4f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(acrylonitrile, 4f), new DrawDefault());
+            recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(Liquids.nitrogen, 3f / 60f, Liquids.hydrogen, 9f / 60f)
+                .liquidsOut(ammonia, 6f / 60f).pressure(0.8f);
+            recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(carbonDioxide, 3f / 60f, Liquids.hydrogen, 9f / 60f)
+                .liquidsOut(methanol, 4f / 60f).pressure(0.6f);
+            recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(methanol, 8f / 60f)
+                .liquidsOut(propylene, 4f / 60f, wastewater, 3f / 60f).sides(1, 3);
+            recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(ammonia, 4f / 60f, oxygen, 8f / 60f)
+                .liquidsOut(nitricAcid, 4f / 60f).catalyst(platinum, 60);
+            recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(propylene, 3f / 60f, ammonia, 3f / 60f, oxygen, 4f / 60f)
+                .liquidsOut(acrylonitrile, 4f / 60f).catalyst(molybdenum, 30);
+            recipe(3, 60f, ItemStack.empty, with(polyethylene, 1)).liquidsIn(ethylene, 5f / 60f).catalyst(polymerCatalyst, 12);
+            recipe(3, 60f, with(sulfur, 1), with(syntheticRubber, 2)).liquidsIn(ethylene, 3f / 60f, propylene, 3f / 60f).catalyst(polymerCatalyst, 12);
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(), new DrawDefault());
         }};
 
         // Acrylonitrile is spun into fiber, then oxidized and carbonized in a very hot furnace. Off-gases leave as flue gas.

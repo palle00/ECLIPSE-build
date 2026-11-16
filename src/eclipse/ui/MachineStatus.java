@@ -109,6 +109,9 @@ public class MachineStatus{
             return s.set(Kind.missing, missingOf(b, c), 0f);
         }
 
+        if(b instanceof RecipeBuild r && r.catalystMissing()) return s.set(Kind.noCatalyst, r.recipe.catalyst, 0f);
+        if(b instanceof RecipeBuild r && r.pressurizing()) return s.set(Kind.pressurizing, null, r.pressure / r.recipe.pressure);
+
         //heat recipes stop below their heat requirement
         if(b instanceof RecipeBuild r && r.heatShort()){
             if(r.heat <= 0.001f) return s.set(Kind.noHeat, null, r.recipe.heat);

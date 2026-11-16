@@ -10,6 +10,7 @@ import arc.util.*;
 import arc.util.io.*;
 import mindustry.ctype.*;
 import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.blocks.heat.*;
@@ -46,6 +47,8 @@ import static mindustry.Vars.*;
  * Heat: {@code .heat(8f)} on a recipe makes it need that much heat from adjacent heaters; below it the machine stops.
  * Liquid-only recipes pass {@code ItemStack.empty} and are named by their first liquid output. {@code .sides(1, 3, 0)} sends
  * each liquid output out of a fixed side (1 left, 3 right, 0 front, relative to the machine's rotation).
+ * Catalysts: {@code .catalyst(platinum, 60)} needs one platinum in the machine, used up every 60 crafts.
+ * Pressure: {@code .pressure(0.8f)} must pressurize (with power) to 80% before it runs; it loses pressure while idle.
  *
  * {@link #autoSelect}: with no recipe chosen, the machine runs whichever recipe its inputs complete, so a mixed belt never
  * jams it (e.g. the Vacuum Freezer cooling any hot metal that arrives).
@@ -64,6 +67,10 @@ public class RecipeCrafter extends GenericCrafter{
     public boolean autoSelect = false;
     /** Some recipe needs heat (set in init). */
     public boolean usesHeat;
+    /** Some recipe needs a catalyst / pressure (set in init). */
+    public boolean usesCatalyst, usesPressure;
+    /** Pressure gained per tick at full power / lost per tick while idle. */
+    public float pressurizeSpeed = 1f / 300f, depressurizeSpeed = 1f / 600f;
 
     public static class Recipe{
         public final int tier;
@@ -76,6 +83,11 @@ public class RecipeCrafter extends GenericCrafter{
         public float heat;
         /** Side each liquid output leaves from (0 front, 1 left, 2 back, 3 right; -1 any), by output index. */
         public int[] liquidSides = {};
+        /** An item that must be in the machine and is used up once every {@link #craftsPerCatalyst} crafts. */
+        public @Nullable Item catalyst;
+        public int craftsPerCatalyst = 10;
+        /** Operating pressure (fraction of maximum) to reach with power before the recipe runs; 0: none. */
+        public float pressure;
 
         public Recipe(int tier, float time, ItemStack[] inputs, ItemStack[] outputs){
             if(tier < 1 || tier > maxTier) throw new IllegalArgumentException("recipe tier must be 1-" + maxTier + ", got " + tier);
@@ -83,6 +95,19 @@ public class RecipeCrafter extends GenericCrafter{
             this.time = time;
             this.inputs = inputs;
             this.outputs = outputs;
+        }
+
+        /** Needs one {@code item} in the machine, used up once every {@code crafts} crafts. */
+        public Recipe catalyst(Item item, int crafts){
+            catalyst = item;
+            craftsPerCatalyst = crafts;
+            return this;
+        }
+
+        /** Must reach this pressure (fraction of maximum, built up with power) before it runs. */
+        public Recipe pressure(float level){
+            pressure = level;
+            return this;
         }
 
         /** Fixed sides for the liquid outputs, in output order (0 front, 1 left, 2 back, 3 right). */
@@ -178,6 +203,10 @@ public class RecipeCrafter extends GenericCrafter{
         return recipes.contains(r -> r.uses(item));
     }
 
+    public boolean catalyzes(Item item){
+        return recipes.contains(r -> r.catalyst == item);
+    }
+
     public boolean usesLiquid(Liquid liquid){
         return recipes.contains(r -> r.usesLiquid(liquid));
     }
@@ -215,6 +244,8 @@ public class RecipeCrafter extends GenericCrafter{
         outputItems = outs.toArray(ItemStack.class);
         craftTime = recipes.first().time;
         usesHeat = recipes.contains(r -> r.heat > 0f);
+        usesCatalyst = recipes.contains(r -> r.catalyst != null);
+        usesPressure = recipes.contains(r -> r.pressure > 0f);
         //fixed liquid output sides turn with the machine (the sprite stays put)
         if(recipes.contains(r -> r.liquidSides.length > 0)){
             rotate = true;
@@ -266,13 +297,39 @@ public class RecipeCrafter extends GenericCrafter{
         }).left().row();
         t.add("[lightgray]" + Core.bundle.format("eclipse-recipe.tier", roman(r.tier), Strings.autoFixed(r.power() * 60f, 1))
             + (r.heat > 0f ? ", " + Core.bundle.format("eclipse-recipe.heat", Strings.autoFixed(r.heat, 1)) : "")
+            + (r.pressure > 0f ? ", " + Core.bundle.format("eclipse-recipe.pressure", (int)(r.pressure * 100)) : "")
             + ", " + Core.bundle.format("eclipse-recipe.time", Strings.autoFixed(r.time / 60f, 2))).left().padTop(2f);
+        if(r.catalyst != null){
+            t.row();
+            t.table(c -> {
+                c.add("[lightgray]" + Core.bundle.get("eclipse-recipe.catalyst") + " ");
+                c.image(r.catalyst.uiIcon).size(20f);
+                c.add(" [lightgray]" + Core.bundle.format("eclipse-recipe.catalyst-life", r.catalyst.localizedName, r.craftsPerCatalyst));
+            }).left();
+        }
         return t;
     }
 
     static void stack(Table row, TextureRegion icon, String text){
         row.image(icon).size(24f);
         row.add(text).padLeft(3f).padRight(8f);
+    }
+
+    @Override
+    public void setBars(){
+        super.setBars();
+        if(usesPressure){
+            addBar("eclipse-pressure", (RecipeBuild e) -> new Bar(
+                () -> Core.bundle.format("bar.eclipse-pressure", (int)(e.pressure * 100)),
+                () -> e.recipe != null && e.pressure >= e.recipe.pressure ? Pal.accent : Pal.lightOrange,
+                () -> e.pressure));
+        }
+        if(usesCatalyst){
+            addBar("eclipse-catalyst", (RecipeBuild e) -> new Bar(
+                () -> e.recipe == null || e.recipe.catalyst == null ? "" : e.recipe.catalyst.localizedName + " " + e.items.get(e.recipe.catalyst),
+                () -> Pal.items,
+                () -> e.recipe == null || e.recipe.catalyst == null || !e.items.has(e.recipe.catalyst) ? 0f : 1f - e.catalystUses / (float)e.recipe.craftsPerCatalyst));
+        }
     }
 
     public class RecipeBuild extends GenericCrafterBuild implements HeatConsumer{
@@ -287,6 +344,23 @@ public class RecipeCrafter extends GenericCrafter{
         /** Heat arriving from adjacent heaters, per side and in total. */
         public float[] sideHeat = new float[4];
         public float heat;
+        /** Current pressure (fraction of maximum) and crafts done on the current catalyst. */
+        public float pressure;
+        public int catalystUses;
+
+        /** The running recipe needs a catalyst that isn't in the machine. */
+        public boolean catalystMissing(){
+            return recipe != null && recipe.catalyst != null && !items.has(recipe.catalyst);
+        }
+
+        /** The running recipe needs more pressure than the machine has built up. */
+        public boolean pressurizing(){
+            return recipe != null && recipe.pressure > 0f && pressure < recipe.pressure;
+        }
+
+        boolean wanted(Item item){
+            return auto() ? usesItem(item) || catalyzes(item) : recipe != null && (recipe.uses(item) || recipe.catalyst == item);
+        }
 
         @Override
         public float[] sideHeat(){
@@ -355,12 +429,12 @@ public class RecipeCrafter extends GenericCrafter{
 
         @Override
         public float efficiencyScale(){
-            return underpowered() || heatShort() ? 0f : super.efficiencyScale();
+            return underpowered() || heatShort() || pressurizing() ? 0f : super.efficiencyScale();
         }
 
         @Override
         public boolean shouldConsume(){
-            if(recipe == null || !enabled) return false;
+            if(recipe == null || !enabled || catalystMissing()) return false;
             for(ItemStack out : recipe.outputs) if(items.get(out.item) + out.amount > itemCapacity) return false;
             for(LiquidStack out : recipe.liquidOutputs) if(liquids.get(out.liquid) >= liquidCapacity - 0.001f) return false;
             return true;
@@ -369,6 +443,16 @@ public class RecipeCrafter extends GenericCrafter{
         @Override
         public void updateTile(){
             if(usesHeat) heat = calculateHeat(sideHeat);
+            if(usesPressure){
+                //Pressure Stabilizer modules: faster pressurizing, slower pressure loss
+                float stabilizer = 1f + eclipse.augment.Augmentation.effects(this).pressure;
+                float powered = power == null ? 1f : power.status;
+                if(recipe != null && recipe.pressure > 0f && enabled && shouldConsume() && powered > 0f){
+                    pressure = Math.min(pressure + pressurizeSpeed * stabilizer * powered * delta(), 1f);
+                }else{
+                    pressure = Math.max(pressure - depressurizeSpeed / stabilizer * delta(), 0f);
+                }
+            }
             //automatic: keep the running recipe while it has its inputs, otherwise switch to one that does
             if(auto() && (recipe == null || !ready(recipe))){
                 Recipe next = nextReady();
@@ -405,14 +489,21 @@ public class RecipeCrafter extends GenericCrafter{
 
         @Override
         public boolean acceptItem(Building source, Item item){
-            boolean wanted = auto() ? usesItem(item) : recipe != null && recipe.uses(item);
-            return wanted && items.get(item) < itemCapacity;
+            return wanted(item) && items.get(item) < itemCapacity;
         }
 
         @Override
         public void craft(){
             if(recipe == null) return;
             consume();
+            //Catalyst Optimizer modules: more crafts per catalyst
+            if(recipe.catalyst != null && items.has(recipe.catalyst)){
+                int life = Math.round(recipe.craftsPerCatalyst * (1f + eclipse.augment.Augmentation.effects(this).catalystLife));
+                if(++catalystUses >= life){
+                    catalystUses = 0;
+                    items.remove(recipe.catalyst, 1);
+                }
+            }
             for(ItemStack out : recipe.outputs) for(int i = 0; i < out.amount; i++) offload(out.item);
             if(wasVisible) craftEffect.at(x, y);
             progress %= 1f;
@@ -431,7 +522,7 @@ public class RecipeCrafter extends GenericCrafter{
 
         @Override
         public boolean canDump(Building to, Item item){
-            return auto() ? !usesItem(item) : recipe == null || !recipe.uses(item);
+            return !wanted(item);
         }
 
         @Override
@@ -491,7 +582,7 @@ public class RecipeCrafter extends GenericCrafter{
 
         @Override
         public byte version(){
-            return 2;
+            return 3;
         }
 
         @Override
@@ -500,6 +591,8 @@ public class RecipeCrafter extends GenericCrafter{
             write.s(fixed == null ? -1 : fixed.output().id);
             write.b(fixed != null && fixed.output() instanceof Liquid ? 1 : 0);
             write.b(level);
+            write.f(pressure);
+            write.i(catalystUses);
         }
 
         @Override
@@ -512,6 +605,10 @@ public class RecipeCrafter extends GenericCrafter{
                 float saved = progress; //selecting resets progress; a loaded machine keeps it
                 select(id < 0 ? null : recipeFor(liquid ? content.liquid(id) : content.item(id)), lvl);
                 progress = saved;
+                if(revision >= 3){
+                    pressure = read.f();
+                    catalystUses = read.i();
+                }
             }
         }
     }

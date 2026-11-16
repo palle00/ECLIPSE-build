@@ -49,8 +49,8 @@ public class EclipseTechTree{
         TechNode electrolysis = child(treatment, electrolyzer); //water, brine, alumina and scrap electrolysis
         child(electrolysis, hydrogenFuelCell);
         TechNode airSeparation = child(electrolysis, airSeparationUnit);
-        TechNode haber = child(airSeparation, highPressureReactor);
-        TechNode nitric = child(haber, nitricAcidPlant);
+        TechNode haber = child(airSeparation, pressureReactor); //ammonia, methanol, olefins, nitric acid, acrylonitrile, polymers
+        TechNode nitric = haber;
         child(nitric, platinumRefinery);
         TechNode chlorAlkali = electrolysis;
         TechNode acid = child(chlorAlkali, chemicalReactor); //HCl, aqua regia, neutralizing, nitrates, fertilizer, catalyst, epoxy, explosives
@@ -60,7 +60,7 @@ public class EclipseTechTree{
         child(distillation, methaneTurbine);
         TechNode heater = child(distillation, industrialHeater);
         TechNode cracker = child(heater, steamCracker);
-        TechNode polymerization = child(cracker, polymerizationReactor);
+        TechNode polymerization = cracker;
 
         //augmentation
         TechNode coupler = child(find(Blocks.overdriveProjector), AugmentContent.augmentationCoupler);
@@ -163,9 +163,9 @@ public class EclipseTechTree{
         TechNode separatorNode = child(heater, gasSeparator);
 
         //organic chemistry and composites
-        TechNode olefin = child(child(separatorNode, methanolSynthesizer), olefinReactor);
-        TechNode rubber = child(olefin, rubberPlant);
-        TechNode press = child(child(child(rubber, acrylonitrileReactor), carbonFiberFurnace), compositePress);
+        TechNode olefin = separatorNode;
+        TechNode rubber = olefin;
+        TechNode press = child(child(rubber, carbonFiberFurnace), compositePress);
         child(child(press, compositeWall), compositeWallLarge);
         TechNode wastewaterNode = child(scrubber, wastewaterTreatmentPlant);
         child(wastewaterNode, thermalWasteProcessor);

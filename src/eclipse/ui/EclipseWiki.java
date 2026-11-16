@@ -37,7 +37,7 @@ public class EclipseWiki extends BaseDialog{
         {"components", "eclipse-titanium-gear", "eclipse-industrial-bearing", "eclipse-precision-component", "eclipse-superalloy-frame", "eclipse-experimental-core", "eclipse-gear-press", "eclipse-component-depot"},
         {"metallurgy", "eclipse-ore-nickel", "eclipse-ore-chromium", "eclipse-ore-cobalt", "eclipse-ore-tungsten", "eclipse-ore-molybdenum", "eclipse-ore-platinum", "eclipse-ore-crusher", "eclipse-carbide-drill"},
         {"heat", "eclipse-industrial-heater", "eclipse-electric-heater", "eclipse-geothermal-heat-tap", "eclipse-thermal-storage", "eclipse-heat-exchanger"},
-        {"chemistry", "eclipse-sulfuric-acid", "eclipse-acidic-waste", "eclipse-polymer-conduit", "eclipse-high-pressure-reactor"},
+        {"chemistry", "eclipse-sulfuric-acid", "eclipse-acidic-waste", "eclipse-polymer-conduit"},
         {"electronics", "eclipse-copper-wire", "eclipse-circuit-board", "eclipse-microchip", "eclipse-control-unit"},
         {"power", "eclipse-steam-turbine", "eclipse-hydrogen-fuel-cell", "eclipse-fission-reactor", "eclipse-industrial-battery", "eclipse-world-engine"},
         {"logistics", "eclipse-three-way-sorter", "eclipse-distribution-hub", "eclipse-priority-merger", "eclipse-controlled-splitter", "eclipse-line-balancer", "eclipse-smart-unloader", "eclipse-batch-gate", "eclipse-liquid-overflow-valve"},
@@ -387,7 +387,15 @@ public class EclipseWiki extends BaseDialog{
             for(ItemStack s : r.outputs) link(row, s.item, perCraft(s.amount, seconds));
             for(LiquidStack s : r.liquidOutputs) link(row, s.liquid, perSecond(s.amount * 60f));
             page.add(row).left().row();
-            page.add("[lightgray]" + Core.bundle.format("eclipse-recipe.tier", RecipeCrafter.roman(r.tier), Strings.autoFixed(r.power() * 60f, 1))).left().row();
+            String extra = (r.heat > 0f ? ", " + Core.bundle.format("eclipse-recipe.heat", Strings.autoFixed(r.heat, 1)) : "")
+                + (r.pressure > 0f ? ", " + Core.bundle.format("eclipse-recipe.pressure", (int)(r.pressure * 100)) : "");
+            page.add("[lightgray]" + Core.bundle.format("eclipse-recipe.tier", RecipeCrafter.roman(r.tier), Strings.autoFixed(r.power() * 60f, 1)) + extra).left().row();
+            if(r.catalyst != null){
+                Table cat = new Table().left();
+                cat.add("[lightgray]" + Core.bundle.get("eclipse-recipe.catalyst") + " ");
+                link(cat, r.catalyst, Core.bundle.format("eclipse-wiki.catalyst", r.craftsPerCatalyst));
+                page.add(cat).left().row();
+            }
             page.add(new SetupDiagram(rc, r)).left().padBottom(8f).row();
         }
         page.add("[lightgray]" + Core.bundle.get("eclipse-wiki.recipes.hint")).wrap().width(textWidth()).left().padBottom(8f).row();
@@ -557,7 +565,7 @@ public class EclipseWiki extends BaseDialog{
             if(cons instanceof ConsumeLiquidFilter f && mat instanceof Liquid l && f.filter.get(l)) return true;
         }
         if(b instanceof eclipse.world.blocks.ChemicalReactor r && r.catalyst == mat) return true;
-        if(b instanceof RecipeCrafter rc && mat instanceof Item i && rc.usesItem(i)) return true;
+        if(b instanceof RecipeCrafter rc && mat instanceof Item i && (rc.usesItem(i) || rc.catalyzes(i))) return true;
         if(b instanceof RecipeCrafter rc && mat instanceof Liquid l && rc.usesLiquid(l)) return true;
         if(b instanceof ItemTurret it && mat instanceof Item i && it.ammoTypes.containsKey(i)) return true;
         if(b instanceof LiquidTurret lt && mat instanceof Liquid l && lt.ammoTypes.containsKey(l)) return true;

@@ -58,9 +58,9 @@ public class AugmentContent{
     /** Heat-driven machines. */
     public static final Boolf<Block> heatConsumers = b -> b instanceof HeatCrafter || (b instanceof RecipeCrafter rc && rc.usesHeat);
 
-    public static final Boolf<Block> pressurized = b -> b instanceof ChemicalReactor r && r.pressureRequired > 0f;
+    public static final Boolf<Block> pressurized = b -> (b instanceof ChemicalReactor r && r.pressureRequired > 0f) || (b instanceof RecipeCrafter rc && rc.usesPressure);
 
-    public static final Boolf<Block> catalytic = b -> b instanceof ChemicalReactor r && r.catalyst != null;
+    public static final Boolf<Block> catalytic = b -> (b instanceof ChemicalReactor r && r.catalyst != null) || (b instanceof RecipeCrafter rc && rc.usesCatalyst);
 
     /** Crafters with a product liquid (waste is not a product). */
     public static final Boolf<Block> liquidProducers = b -> b instanceof GenericCrafter g && AugmentationCoupler.primaryLiquid(g) != null;

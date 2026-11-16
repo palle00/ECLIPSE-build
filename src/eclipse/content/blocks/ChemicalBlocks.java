@@ -19,7 +19,7 @@ public class ChemicalBlocks{
     public static Block
     waterTreatmentPlant, acidLeachingVat,
     sulfuricAcidPlant,
-    airSeparationUnit, highPressureReactor, cryogenicCondenser, nitricAcidPlant,
+    airSeparationUnit, cryogenicCondenser,
     industrialScrubber, gasSeparator, wastewaterTreatmentPlant, thermalWasteProcessor, electrolyzer, chemicalReactor;
 
     public static void load(){
@@ -131,20 +131,6 @@ public class ChemicalBlocks{
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.cryofluid, 4f), new DrawDefault(), new DrawLiquidOutputs());
         }};
 
-        // N2 + 3 H2 -> 2 NH3 (Haber process). Must reach operating pressure first.
-        highPressureReactor = new ChemicalReactor("high-pressure-reactor"){{
-            requirements(Category.crafting, with(titaniumPlate, 50, Items.thorium, 40, Items.silicon, 60, pressureCasing, 20, superalloyFrame, 10, piston, 4));
-            size = 3;
-            health = 900;
-            liquidCapacity = 40f;
-            craftTime = 60f;
-            pressureRequired = 0.8f;
-            consumeLiquids(LiquidStack.with(Liquids.nitrogen, 3f / 60f, Liquids.hydrogen, 9f / 60f));
-            consumePower(3f);
-            outputLiquid = new LiquidStack(ammonia, 6f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(ammonia, 4f), new DrawDefault());
-        }};
-
         // Nitrogen gas + cryofluid refrigeration -> liquid nitrogen, a premium turret coolant.
         cryogenicCondenser = new AttributeCrafter("cryogenic-condenser"){{
             attribute = Biomes.cold; //faster on ice and snow
@@ -159,24 +145,6 @@ public class ChemicalBlocks{
             consumePower(2f);
             outputLiquid = new LiquidStack(liquidNitrogen, 4f / 60f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(liquidNitrogen, 3f), new DrawDefault());
-        }};
-
-        // NH3 + O2 -> HNO3 (Ostwald process). Runs twice as fast over platinum gauze.
-        nitricAcidPlant = new ChemicalReactor("nitric-acid-plant"){{
-            requirements(Category.crafting, with(Items.lead, 60, Items.titanium, 50, Items.metaglass, 50, Items.silicon, 30, pressureCasing, 10));
-            size = 2;
-            health = 320;
-            liquidCapacity = 30f;
-            itemCapacity = 10;
-            craftTime = 60f;
-            catalyst = platinum;
-            catalystOptional = true;
-            catalystBoost = 2f;
-            craftsPerCatalyst = 60;
-            consumeLiquids(LiquidStack.with(ammonia, 4f / 60f, oxygen, 8f / 60f));
-            consumePower(0.5f);
-            outputLiquid = new LiquidStack(nitricAcid, 4f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(nitricAcid, 3f), new DrawDefault());
         }};
 
     
