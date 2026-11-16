@@ -25,7 +25,7 @@ import static mindustry.Vars.*;
  * stall on a full waste output, missing heat, a missing catalyst or pressure.
  */
 public class MachineStatus{
-    public enum Kind{working, disabled, outputFull, noPower, missing, noCatalyst, noHeat, pressurizing, lowHeat, noRecipe, autoWaiting, underpowered}
+    public enum Kind{working, disabled, outputFull, noPower, missing, noCatalyst, noHeat, pressurizing, lowHeat, noRecipe, autoWaiting, underpowered, heatShort}
 
     public static class Status{
         public Kind kind = Kind.working;
@@ -60,6 +60,7 @@ public class MachineStatus{
                 case lowHeat -> Core.bundle.format("eclipse-status.low-heat", Math.round(value * 100));
                 case noRecipe -> Core.bundle.get("eclipse-status.no-recipe");
                 case autoWaiting -> Core.bundle.get("eclipse-status.auto-waiting");
+                case heatShort -> Core.bundle.format("eclipse-status.heat-short", Strings.autoFixed(value, 1), Strings.autoFixed(need, 1));
                 case underpowered -> Core.bundle.format("eclipse-status.underpowered", Strings.autoFixed(need, 1), (int)(value * 100));
             };
         }
@@ -101,9 +102,18 @@ public class MachineStatus{
 
         //required inputs
         for(Consume c : b.block.consumers){
-            if(c.optional || c.efficiency(b) > 0.0001f) continue;
+            if(c.optional) continue;
+            //a stopped machine reports its liquids as unusable (they scale with its own speed): check what is actually there
+            if(c instanceof ConsumeLiquidsDynamic cd ? !Structs.contains(cd.liquids.get(b), st -> b.liquids.get(st.liquid) < st.amount) : c.efficiency(b) > 0.0001f) continue;
             if(c instanceof ConsumePower) return s.set(Kind.noPower, null, 0f);
             return s.set(Kind.missing, missingOf(b, c), 0f);
+        }
+
+        //heat recipes stop below their heat requirement
+        if(b instanceof RecipeBuild r && r.heatShort()){
+            if(r.heat <= 0.001f) return s.set(Kind.noHeat, null, r.recipe.heat);
+            s.need = r.recipe.heat;
+            return s.set(Kind.heatShort, null, r.heat);
         }
 
         //tier recipes stop below full power instead of slowing down

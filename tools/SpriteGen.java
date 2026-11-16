@@ -209,8 +209,6 @@ public class SpriteGen{
 
         mineralSeparator("mineral-separator");
         lithiumExtractor("lithium-extractor");
-        alloyFurnace("alloy-furnace");
-        sinteringFurnace("sintering-furnace");
         carbideDrill("carbide-drill");
         latticeDrill("lattice-drill");
         lithiumBattery("lithium-battery");
@@ -245,8 +243,6 @@ public class SpriteGen{
         aluminaRefinery("alumina-refinery");
         edgeGlow("alumina-refinery-heat", 3);
         aluminiumSmelter("aluminium-smelter");
-        glassKiln("glass-kiln");
-        arcFurnace("arc-furnace");
         wallArt("surge-superalloy-wall", 1, 2);
         wallArt("surge-superalloy-wall-large", 2, 2);
 
@@ -334,7 +330,8 @@ public class SpriteGen{
         metalPress("metal-press");
         lathe("lathe");
         assemblerSprite("assembler");
-        frameForge("frame-forge");
+        blastFurnace("blast-furnace");
+        electricFurnace("electric-furnace");
         coreAssembler("experimental-core-assembler");
         componentDepotArt("component-depot");
 
@@ -379,14 +376,12 @@ public class SpriteGen{
         boardPrinter("circuit-assembler");
         oreCrusher("ore-crusher");
         oreWasher("ore-washer");
-        inductionFurnace("induction-furnace");
         thermalStorage("thermal-storage");
         coolingTower("cooling-tower");
 
         // ---- upgraded vanilla production ----
         reductionFurnace("silicon-reduction-furnace");
         pyrolysisReactor("methane-pyrolysis-reactor");
-        glassFurnace("soda-glass-furnace");
         chloridePlant("chloride-titanium-plant");
         electrowinningCell("electrowinning-cell");
 
@@ -2948,6 +2943,51 @@ public class SpriteGen{
     }
 
     /**
+     * Blast Furnace (3×3): a round refractory shaft with a glowing hearth, tuyeres around it where the heat goes in,
+     * and a tapping spout at the bottom.
+     */
+    static void blastFurnace(String name) throws IOException{
+        int s = 3 * T;
+        float c = s / 2f;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 8, 5, steel);
+        r.fill(r.circle(c, c, 38), 10, dull(0x8a5a44), 4);
+        r.fill(r.circle(c, c, 30), 12, metal, 3);
+        r.fill(r.circle(c, c, 18), 8, deep, 1);
+        r.fill(r.circle(c, c, 12), 9, lit(0xffb46b), 0);
+        for(int i = 0; i < 8; i++) r.fill(r.bar(c, c, 30, 8, 5, i * 45 + 22.5f), 13, steel, 2);
+        r.fill(r.rect((int)c - 5, s - 14, 10, 12), 9, steel, 1);
+        r.fill(r.rect((int)c - 2, s - 6, 4, 4), 10, lit(0xff8a3a), 0);
+        save(r, name);
+        glowOf(r, name);
+        edgeGlow(name + "-heat", 3);
+    }
+
+    /**
+     * Electric Furnace (3×3): a squat crucible with three graphite electrodes over its glowing bath, held by an arm,
+     * and the transformer cabinet beside it.
+     */
+    static void electricFurnace(String name) throws IOException{
+        int s = 3 * T;
+        float c = s / 2f;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 6, 5, metal);
+        r.fill(r.oct(6, 60, 26, 30, 4), 9, steel, 2);
+        for(int y = 66; y < 86; y += 5) r.fill(r.rect(10, y, 18, 2), 10, metal, 0);
+        r.fill(r.circle(c + 8, c - 4, 32), 10, dull(0x6a5a52), 3);
+        r.fill(r.circle(c + 8, c - 4, 22), 8, deep, 1);
+        r.fill(r.circle(c + 8, c - 4, 16), 9, lit(0xff6a3d), 0);
+        for(int i = 0; i < 3; i++){
+            double a = Math.PI * 2 * i / 3 + Math.PI / 2;
+            float ex = c + 8 + (float)Math.cos(a) * 9, ey = c - 4 + (float)Math.sin(a) * 9;
+            r.fill(r.circle(ex, ey, 4.5f), 14, dull(0x3a3a40), 2);
+        }
+        r.fill(r.rect(18, 44, 40, 6), 15, steel, 2);
+        save(r, name);
+        glowOf(r, name);
+    }
+
+    /**
      * Assembler (3×3): a work table with a part being put together, a robot arm reaching over it from its base, and
      * part trays along the edges.
      */
@@ -2990,37 +3030,6 @@ public class SpriteGen{
         r.fill(r.rect(35, 32, 3, 5), 13, lit(0xffb46b), 0);
         save(r, name);
         glowOf(r, name);
-    }
-
-    /**
-     * Frame Forge (3×3, heat): a big open hot-forming frame. Two massive columns joined by a crossbeam that carries the
-     * forming head, a heated die below it, feed rails entering from the left and an exit run at the bottom.
-     */
-    static void frameForge(String name) throws IOException{
-        int s = 3 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 5, 5, metal);
-        //work floor between the columns
-        r.fill(r.rect(18, 8, 60, 80), 3, deep, 1);
-        r.fill(r.rect(22, 30, 52, 44), 3.5f, steel, 1);
-        //feed rails (left) and exit run (bottom)
-        for(int y : new int[]{38, 52}) r.fill(r.rect(2, y, 30, 4), 5, metal, 1);
-        r.fill(r.rect(38, 74, 20, 20), 2, deep, 1);
-        for(int x : new int[]{40, 52}) r.fill(r.rect(x, 74, 4, 20), 4, metal, 1);
-        //heated die: a dark bed with a glowing strip
-        r.fill(r.oct(30, 42, 36, 24, 4), 6, steel, 2);
-        r.fill(r.rect(34, 48, 28, 12), 2, deep, 0);
-        r.fill(r.rect(36, 52, 24, 4), 3, lit(0xffb46b), 0);
-        //the columns and crossbeam with the forming head
-        for(int x : new int[]{8, 74}) r.fill(r.oct(x, 4, 14, 72, 3), 14, steel, 3);
-        r.fill(r.rect(16, 12, 64, 14), 16, steel, 3);
-        r.fill(r.oct(36, 18, 24, 16, 3), 18, metal, 2);
-        r.fill(r.rect(42, 33, 12, 6), 15, metal, 1);
-        save(r, name);
-        glowOf(r, name);
-
-        //heat input glow on the receiving edge (rotated to each heated side by the game)
-        edgeGlow(name + "-heat", 3);
     }
 
     /**
@@ -4003,36 +4012,6 @@ public class SpriteGen{
         heatLayer(r, name, r.oct(12, 38, 72, 20, 7));
     }
 
-    /** Soda Glass Furnace (2×2, heat): a round crucible of molten glass sunk in a grey housing, a sand feed in the corner. */
-    static void glassFurnace(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 6, metal);
-        r.fill(r.circle(34, 36, 22), 10, steel, 3);
-        r.fill(r.circle(34, 36, 15), 3, deep, 1);
-        r.fill(r.circle(34, 36, 10), 4, lit(0xbfe9ff), 1);
-        hopper(r, 2, 2, 16, 12, sandM);
-        save(r, name);
-        glowOf(r, name);
-        heatLayer(r, name, r.circle(34, 36, 15));
-    }
-
-    /** Glass Kiln (2×2, heat): a rectangular fusing bed with heating bars and a reinforced pane in a titanium frame. */
-    static void glassKiln(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 3, 6, steel);
-        r.fill(r.rect(6, 10, 52, 44), 10, metal, 3);
-        r.fill(r.rect(11, 15, 42, 34), 3, deep, 1);
-        for(int y = 18; y < 48; y += 7) r.fill(r.rect(13, y, 38, 2), 4, molten, 0);
-        r.fill(r.rect(20, 23, 24, 18), 7, titaniumM, 1);
-        r.fill(r.rect(23, 26, 18, 12), 8, glass(0xbfe9ff), 0);
-        for(int y : new int[]{2, 57}) r.fill(r.rect(14, y, 36, 5), 8, metal, 1);
-        save(r, name);
-        glowOf(r, name);
-        heatLayer(r, name, r.rect(11, 15, 42, 34));
-    }
-
     /**
      * Distillation Column (3×3, oil window): a round separation body with radial trays over the oil, naphtha leaving
      * on the left, methane on the right (their fixed sides), and a sulfur recovery tray at the bottom.
@@ -4058,81 +4037,6 @@ public class SpriteGen{
         save(r, name);
         glowOf(r, name);
         liquidBottom(name, s);
-    }
-
-    /** Alloy Furnace (3×3, heat): a thick heat-resistant casing round a big crucible, fed by three separate chutes. */
-    static void alloyFurnace(String name) throws IOException{
-        int s = 3 * T;
-        float c = s / 2f;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 8, 6, steel);
-        r.fill(r.oct(12, 16, 72, 72, 16), 12, metal, 4);
-        r.fill(r.oct(24, 28, 48, 48, 12), 4, deep, 1);
-        r.fill(r.oct(38, 42, 20, 20, 6), 5, molten, 0);
-        r.fill(r.ring(48, 52, 15, 18), 5, steel, 0);
-        //three feed chutes for nickel, chromium and cobalt
-        int[] metals = {0xc5c9a1, 0xb7c0cc, 0x6d8fd6};
-        for(int i = 0; i < 3; i++){
-            int x = 14 + i * 26;
-            r.fill(r.rect(x, 0, 16, 14), 14, metal, 2);
-            r.fill(r.rect(x + 4, 3, 8, 7), 6, dull(metals[i]), 0);
-        }
-        save(r, name);
-        glowOf(r, name);
-        heatLayer(r, name, r.oct(24, 28, 48, 48, 12));
-    }
-
-    /** Induction Furnace (2×2): a small melting pot wound with copper induction coils, two power terminals; no flame. */
-    static void inductionFurnace(String name) throws IOException{
-        int s = 2 * T;
-        float c = s / 2f;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 6, 5, metal);
-        r.fill(r.circle(c, c, 26), 8, steel, 3);
-        for(int k = 0; k < 3; k++) r.fill(r.ring(c, c, 11 + k * 5, 14 + k * 5), 10 - k, copperGearM, 1);
-        r.fill(r.circle(c, c, 9), 4, deep, 1);
-        r.fill(r.circle(c, c, 5), 5, lit(0xff6a3d), 0);
-        for(int x : new int[]{3, 51}) r.fill(r.rect(x, 3, 10, 8), 11, steel, 2);
-        save(r, name);
-        glowOf(r, name);
-    }
-
-    /** Arc Furnace (3×3): a strong square frame round an arc chamber with three electrodes and small bright tips. */
-    static void arcFurnace(String name) throws IOException{
-        int s = 3 * T;
-        float c = s / 2f;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 4, 5, metal);
-        r.fill(r.minus(r.rect(6, 6, 84, 84), r.rect(18, 18, 60, 60)), 12, steel, 3);
-        r.fill(r.circle(c, c, 28), 9, metal, 3);
-        r.fill(r.circle(c, c, 20), 3, deep, 1);
-        for(int i = 0; i < 3; i++){
-            double a = Math.toRadians(i * 120 - 90);
-            float ex = c + (float)Math.cos(a) * 10, ey = c - (float)Math.sin(a) * 10;
-            r.fill(r.circle(ex, ey, 5.5f), 14, dull(0x4a4b53), 2);
-            r.fill(r.circle(ex, ey, 2), 15, lit(0xf2e878), 0);
-            r.fill(r.bar(c, c, 22, 22, 6, i * 120 - 90), 13, steel, 1);
-        }
-        save(r, name);
-        glowOf(r, name);
-    }
-
-    /** Sintering Furnace (2×2): a dark sintering chamber under a heavy compression lid ("-press"), a tungsten strip. */
-    static void sinteringFurnace(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 3, 6, metal);
-        r.fill(r.rect(8, 8, 48, 48), 3, deep, 1);
-        r.fill(r.rect(12, 28, 40, 8), 4, lit(0xff6a3d), 0);
-        for(int x : new int[]{2, 56}) r.fill(r.rect(x, 6, 6, 52), 10, steel, 2);
-        save(r, name);
-        glowOf(r, name);
-
-        R p = canvas(s);
-        p.fill(p.oct(10, 10, 44, 44, 4), 14, steel, 3);
-        p.fill(p.oct(16, 16, 32, 32, 3), 16, metal, 2);
-        p.fill(p.rect(16, 30, 32, 4), 17, dull(0x50525e), 0);
-        save(p, name + "-press");
     }
 
     /** Alumina Refinery (3×3, heat, liquid window): vessels, not plates. A digester, a small autoclave, and a settling tank. */

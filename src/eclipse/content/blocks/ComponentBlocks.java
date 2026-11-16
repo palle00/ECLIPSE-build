@@ -19,7 +19,7 @@ import static mindustry.type.ItemStack.*;
  * Each producer only needs earlier components to build, so there are no circular costs (checked by the test).
  */
 public class ComponentBlocks{
-    public static Block gearPress, extruder, metalPress, lathe, assembler, frameForge, coreAssembler,
+    public static Block gearPress, extruder, metalPress, lathe, assembler, coreAssembler,
         componentDepot;
 
     public static void load(){
@@ -109,22 +109,6 @@ public class ComponentBlocks{
             recipe(3, 90f, with(leadPlate, 2, polyethylene, 1), with(leadAcidCell, 1)).liquidsIn(sulfuricAcid, 3f / 60f);
             recipe(3, 120f, with(Items.thorium, 4, superalloy, 1), with(thoriumFuelRod, 1));
             craftEffect = Fx.pulverizeMedium;
-        }};
-
-        // Superalloy plates + titanium rods, hot-formed and bolted -> superalloy machine frames for heavy and hot machinery.
-        frameForge = new HeatCrafter("frame-forge"){{
-            requirements(Category.crafting, with(Items.titanium, 60, Items.silicon, 40, Items.graphite, 40, industrialBearing, 10, pressureCasing, 10));
-            size = 3;
-            health = 650;
-            itemCapacity = 10;
-            craftTime = 120f;
-            heatRequirement = 8f;
-            maxEfficiency = 2f;
-            consumeItems(with(superalloyPlate, 2, titaniumRod, 2, titaniumBolt, 2));
-            consumePower(1f);
-            outputItem = new ItemStack(superalloyFrame, 1);
-            craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ffb46b"); }}, new DrawHeatInput());
         }};
 
         // Precision components + surge superalloy + platinum + phase fabric -> experimental cores for endgame machinery.

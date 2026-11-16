@@ -86,12 +86,20 @@ public class PlacementHints{
         float heat = heater instanceof GeothermalHeater geo ? geo.sumAttribute(geo.attribute, tx, ty) * geo.heatOutput : heater.heatOutput;
         String text;
         Color color;
+        float need = -1f, now = 0f;
         if(target instanceof HeatCrafterBuild h){
-            float need = h.heatRequirement(), now = h.heat;
+            need = h.heatRequirement();
+            now = h.heat;
+        }else if(target instanceof eclipse.world.blocks.RecipeCrafter.RecipeBuild r && ((eclipse.world.blocks.RecipeCrafter)r.block).usesHeat){
+            need = r.heatRequirement();
+            now = r.heat;
+        }
+        boolean noHeatUse = target instanceof eclipse.world.blocks.RecipeCrafter.RecipeBuild r && !((eclipse.world.blocks.RecipeCrafter)r.block).usesHeat;
+        if(need >= 0f){
             boolean enough = now + heat >= need - 0.001f;
             text = Core.bundle.format("eclipse-hint.heat-to", Strings.autoFixed(heat, 1), target.block.localizedName, Strings.autoFixed(now + heat, 1), Strings.autoFixed(need, 1));
             color = enough ? Pal.accent : Pal.lightOrange;
-        }else if(target instanceof HeatBlock || target instanceof HeatConsumer){
+        }else if(!noHeatUse && (target instanceof HeatBlock || target instanceof HeatConsumer)){
             text = Core.bundle.format("eclipse-hint.heat-relay", Strings.autoFixed(heat, 1), target.block.localizedName);
             color = Pal.accent;
         }else{

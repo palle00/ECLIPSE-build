@@ -35,7 +35,7 @@ public class EclipseWiki extends BaseDialog{
         {"start", "eclipse-gear-press", "eclipse-extruder", "eclipse-rivet", "eclipse-flow-meter", "eclipse-metal-press", "eclipse-component-depot", "eclipse-water-treatment-plant", "eclipse-augmentation-coupler", "eclipse-ore-crusher"},
         {"qol", "eclipse-flow-meter", "eclipse-component-depot", "eclipse-wave-intelligence-scanner"},
         {"components", "eclipse-titanium-gear", "eclipse-industrial-bearing", "eclipse-precision-component", "eclipse-superalloy-frame", "eclipse-experimental-core", "eclipse-gear-press", "eclipse-component-depot"},
-        {"metallurgy", "eclipse-ore-nickel", "eclipse-ore-chromium", "eclipse-ore-cobalt", "eclipse-ore-tungsten", "eclipse-ore-molybdenum", "eclipse-ore-platinum", "eclipse-ore-crusher", "eclipse-alloy-furnace", "eclipse-carbide-drill"},
+        {"metallurgy", "eclipse-ore-nickel", "eclipse-ore-chromium", "eclipse-ore-cobalt", "eclipse-ore-tungsten", "eclipse-ore-molybdenum", "eclipse-ore-platinum", "eclipse-ore-crusher", "eclipse-carbide-drill"},
         {"heat", "eclipse-industrial-heater", "eclipse-electric-heater", "eclipse-geothermal-heat-tap", "eclipse-thermal-storage", "eclipse-heat-exchanger"},
         {"chemistry", "eclipse-sulfuric-acid", "eclipse-acidic-waste", "eclipse-polymer-conduit", "eclipse-industrial-neutralizer", "eclipse-catalyst-plant", "eclipse-high-pressure-reactor"},
         {"electronics", "eclipse-copper-wire", "eclipse-circuit-board", "eclipse-microchip", "eclipse-control-unit"},

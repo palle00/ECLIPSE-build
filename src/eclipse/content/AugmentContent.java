@@ -45,7 +45,7 @@ public class AugmentContent{
         basicModuleAssembler, advancedModuleAssembler, experimentalFacility, moduleRecycler;
 
     /** Hot machines whose waste heat can be recovered: heat producers, heat-driven machines and smelters. */
-    public static final Boolf<Block> hotMachines = b -> b instanceof HeatProducer || b instanceof HeatCrafter
+    public static final Boolf<Block> hotMachines = b -> b instanceof HeatProducer || b instanceof HeatCrafter || (b instanceof RecipeCrafter rc && rc.usesHeat)
         || Polish.smelters.contains(b); //smelters, recorded by their original smelting smoke before Polish changes effects
 
     public static final Boolf<Block> drills = b -> b instanceof Drill;
@@ -56,7 +56,7 @@ public class AugmentContent{
     public static final Boolf<Block> chemicalMachines = b -> b instanceof GenericCrafter && b.hasLiquids;
 
     /** Heat-driven machines. */
-    public static final Boolf<Block> heatConsumers = b -> b instanceof HeatCrafter;
+    public static final Boolf<Block> heatConsumers = b -> b instanceof HeatCrafter || (b instanceof RecipeCrafter rc && rc.usesHeat);
 
     public static final Boolf<Block> pressurized = b -> b instanceof ChemicalReactor r && r.pressureRequired > 0f;
 

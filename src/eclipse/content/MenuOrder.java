@@ -84,16 +84,15 @@ public class MenuOrder{
         after(Blocks.overdriveDome, augmentationCoupler, advancedCoupler, chemicalInterface, militaryInterface, augmentationHub);
 
         //---- crafting: each ECLIPSE production chain follows the vanilla machine it grows out of ----
-        after(Blocks.multiPress, methanePyrolysisReactor, gearPress, extruder, metalPress, lathe, assembler, frameForge,
+        after(Blocks.multiPress, methanePyrolysisReactor, gearPress, extruder, metalPress, lathe, assembler,
             coreAssembler); //mechanical manufacturing
         after(Blocks.siliconSmelter, siliconReductionFurnace, siliconRefinery, chipFabricator, circuitAssembler);
-        after(Blocks.kiln, sodaGlassFurnace, glassKiln);
         after(Blocks.plastaniumCompressor, //oil -> petrochemicals and heat
             distillationColumn, industrialHeater, electricHeater, geothermalHeatTap, heatExchanger, thermalStorage, steamCracker, catalystPlant,
             polymerizationReactor, methanolSynthesizer, olefinReactor, epoxyPlant, rubberPlant, acrylonitrileReactor,
             carbonFiberFurnace, compositePress, sulfuricAcidPlant);
         after(Blocks.phaseWeaver, reprocessingPlant); //thorium -> nuclear fuel
-        after(Blocks.surgeSmelter, alloyFurnace, inductionFurnace, arcFurnace);
+        after(Blocks.surgeSmelter, blastFurnace, electricFurnace);
         after(Blocks.pulverizer, oreCrusher, oreWasher);
         after(Blocks.cryofluidMixer, //water -> chemical industry
             coolingTower, waterTreatmentPlant, electrolysisPlant, airSeparationUnit, cryogenicCondenser, vacuumFreezer, highPressureReactor, nitricAcidPlant,
@@ -101,7 +100,7 @@ public class MenuOrder{
             wastewaterTreatmentPlant, thermalWasteProcessor, lithiumExtractor, aluminaRefinery, aluminiumSmelter,
             aquaRegiaMixer, platinumRefinery, synthesisComplex);
         after(Blocks.blastMixer, ammoniumNitratePlant, explosivesPlant);
-        after(Blocks.separator, chlorideTitaniumPlant, electrowinningCell, mineralSeparator, sinteringFurnace);
+        after(Blocks.separator, chlorideTitaniumPlant, electrowinningCell, mineralSeparator);
         after(Blocks.sporePress, fertilizerPlant, enzymeExtractor, biochemicalFermenter, anaerobicDigester); //biology
         after(Blocks.incinerator, basicModuleAssembler, advancedModuleAssembler, experimentalFacility, aetheriteForge, moduleRecycler); //augmentation section
 

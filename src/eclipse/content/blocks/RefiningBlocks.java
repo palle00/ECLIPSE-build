@@ -17,7 +17,7 @@ import static mindustry.type.ItemStack.*;
  * chemistry and heat. On Serpulo, Erekir's silicon arc furnace and electrolyzer can't be built, so nothing is duplicated.
  */
 public class RefiningBlocks{
-    public static Block siliconReductionFurnace, methanePyrolysisReactor, sodaGlassFurnace, chlorideTitaniumPlant, electrowinningCell;
+    public static Block siliconReductionFurnace, methanePyrolysisReactor, chlorideTitaniumPlant, electrowinningCell;
 
     public static void load(){
         // Sand reduced with methane as the carbon source, in a heated retort -> silicon. No coal; up to 8 silicon/s at full heat.
@@ -54,24 +54,6 @@ public class RefiningBlocks{
             outputLiquid = new LiquidStack(Liquids.hydrogen, 8f / 60f);
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff8a3d"); }}, new DrawHeatInput());
-        }};
-
-        // Sand fluxed with sodium hydroxide (soda glass) -> metaglass without lead, leaving lead free for building costs.
-        sodaGlassFurnace = new HeatCrafter("soda-glass-furnace"){{
-            requirements(Category.crafting, with(Items.lead, 60, Items.graphite, 40, Items.titanium, 30, titaniumRod, 10, pressureCasing, 5));
-            size = 2;
-            health = 340;
-            itemCapacity = 15;
-            liquidCapacity = 20f;
-            craftTime = 60f;
-            heatRequirement = 6f;
-            maxEfficiency = 2f;
-            consumeItem(Items.sand, 3);
-            consumeLiquid(sodiumHydroxide, 2f / 60f);
-            consumePower(0.4f);
-            outputItem = new ItemStack(hotMetaglass, 3); //cooled in the vacuum freezer
-            craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("9fd6ff"); }}, new DrawHeatInput());
         }};
 
         // Mineral sands chlorinated with coal as reductant, then reduced (chloride process) -> titanium from sand instead of ore.

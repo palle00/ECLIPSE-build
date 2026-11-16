@@ -35,7 +35,6 @@ public class EclipseTechTree{
         child(gears, metalPress);
         child(rods, lathe);
         TechNode parts = child(rods, assembler);
-        child(parts, frameForge);
         child(parts, coreAssembler);
         child(rods, componentDepot);
         TechNode gearItem = child(find(Items.copper), copperGear);
@@ -191,18 +190,15 @@ public class EclipseTechTree{
 
         //metallurgy
         TechNode mineralSep = child(find(Blocks.separator), mineralSeparator);
-        child(mineralSep, sinteringFurnace);
-        child(heater, alloyFurnace);
+        child(child(heater, blastFurnace), electricFurnace); //heat-driven and electric furnaces
         child(treatment, lithiumExtractor);
         child(child(find(Blocks.laserDrill), carbideDrill), latticeDrill);
         TechNode wall = child(find(Blocks.thoriumWall), superalloyWall);
         child(wall, superalloyWallLarge);
         TechNode refinery = child(chlorAlkali, aluminaRefinery);
         TechNode smelter = child(refinery, aluminiumSmelter);
-        child(heater, glassKiln);
         child(airSeparation, cryogenicCondenser);
         child(find(Blocks.cryofluidMixer), vacuumFreezer); //every midgame furnace metal cools here
-        child(smelter, arcFurnace);
         TechNode surgeWall = child(find(Blocks.surgeWall), surgeSuperalloyWall);
         child(surgeWall, surgeSuperalloyWallLarge);
 
@@ -275,7 +271,6 @@ public class EclipseTechTree{
         //electronics, ore processing, heat storage and cooling
         child(find(extruder), circuitAssembler);
         child(child(find(Blocks.pulverizer), oreCrusher), oreWasher);
-        child(find(alloyFurnace), inductionFurnace);
         child(find(heatExchanger), thermalStorage);
         child(find(waterTreatmentPlant), coolingTower);
         child(child(child(find(copperGear), copperWire), circuitBoard), controlUnit);
@@ -335,7 +330,6 @@ public class EclipseTechTree{
         //upgraded production of the vanilla materials ECLIPSE consumes most, each under the vanilla building it upgrades
         child(find(Blocks.siliconSmelter), siliconReductionFurnace);
         child(find(Blocks.graphitePress), methanePyrolysisReactor);
-        child(find(Blocks.kiln), sodaGlassFurnace);
         child(find(Blocks.separator), chlorideTitaniumPlant);
         child(find(Blocks.separator), electrowinningCell);
     }

@@ -142,7 +142,7 @@ public class SetupDiagram extends Element{
             l.liquid = liquid;
             lines.add(l);
         }
-        if(b instanceof HeatCrafter){
+        if(b instanceof HeatCrafter || (recipe != null && recipe.heat > 0f)){
             //the heater (2x2) needs two free neighbouring slots on one side
             for(int side : new int[]{3, 1, 2, 0}){
                 for(int k = 0; k + 1 < n; k++){

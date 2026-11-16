@@ -15,9 +15,10 @@ import static mindustry.type.ItemStack.*;
 
 /** Metal extraction and alloys. */
 public class MetallurgyBlocks{
-    public static Block oreCrusher, oreWasher, inductionFurnace,
-        mineralSeparator, platinumRefinery, lithiumExtractor, alloyFurnace, sinteringFurnace, carbideDrill, superalloyWall, superalloyWallLarge,
-        aluminaRefinery, aluminiumSmelter, glassKiln, arcFurnace, surgeSuperalloyWall, surgeSuperalloyWallLarge, vacuumFreezer;
+    public static Block oreCrusher, oreWasher,
+        mineralSeparator, platinumRefinery, lithiumExtractor, carbideDrill, superalloyWall, superalloyWallLarge,
+        aluminaRefinery, aluminiumSmelter, surgeSuperalloyWall, surgeSuperalloyWallLarge, vacuumFreezer,
+        blastFurnace, electricFurnace;
 
     public static void load(){
         // Slag + sulfuric acid -> trace metals. The metal source on maps without the new ores.
@@ -64,36 +65,6 @@ public class MetallurgyBlocks{
             outputItem = new ItemStack(lithium, 1);
             craftEffect = Fx.pulverizeSmall;
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(brine, 3f), new DrawDefault());
-        }};
-
-        // Nickel + chromium + cobalt + heat -> hot superalloy (cooled in the vacuum freezer).
-        alloyFurnace = new HeatCrafter("alloy-furnace"){{
-            requirements(Category.crafting, with(Items.lead, 80, Items.titanium, 80, Items.silicon, 60, Items.graphite, 60, titaniumRod, 20, industrialBearing, 5));
-            size = 3;
-            health = 700;
-            itemCapacity = 20;
-            craftTime = 90f;
-            heatRequirement = 8f;
-            maxEfficiency = 2f;
-            consumeItems(with(nickel, 2, chromium, 1, cobalt, 1));
-            consumePower(1f);
-            outputItem = new ItemStack(hotSuperalloy, 1);
-            craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ffb46b"); }}, new DrawHeatInput());
-        }};
-
-        // Tungsten + graphite -> hot tungsten carbide (powder metallurgy; cooled in the vacuum freezer).
-        sinteringFurnace = new GenericCrafter("sintering-furnace"){{
-            requirements(Category.crafting, with(Items.lead, 60, Items.titanium, 50, Items.silicon, 40, Items.graphite, 40, titaniumRod, 10, industrialBearing, 5));
-            size = 2;
-            health = 320;
-            itemCapacity = 10;
-            craftTime = 60f;
-            consumeItems(with(tungsten, 1, Items.graphite, 1));
-            consumePower(2f);
-            outputItem = new ItemStack(hotTungstenCarbide, 1);
-            craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff6a3d"); }});
         }};
 
         // Faster than the laser drill at the same size.
@@ -160,19 +131,35 @@ public class MetallurgyBlocks{
 
         // ---- advanced vanilla combinations ----
 
-        // Metaglass + titanium + heat -> pressure-rated glass.
-        glassKiln = new HeatCrafter("glass-kiln"){{
-            requirements(Category.crafting, with(Items.lead, 40, Items.graphite, 30, Items.titanium, 30, Items.metaglass, 20, titaniumRod, 10));
-            size = 2;
-            health = 320;
-            itemCapacity = 10;
-            craftTime = 60f;
-            heatRequirement = 5f;
-            maxEfficiency = 2f;
-            consumeItems(with(Items.metaglass, 2, Items.titanium, 1));
-            outputItem = new ItemStack(hotReinforcedGlass, 1); //cooled in the vacuum freezer
+        // Heat-driven furnace: everything that melts or hot-forms with heat from adjacent heaters. Hot superalloy (nickel,
+        // chromium, cobalt), superalloy frames (hot-formed plates, rods and bolts), soda glass and reinforced glass.
+        // Every recipe stops below its heat. Its cost must not need superalloy frames or later components.
+        blastFurnace = new RecipeCrafter("blast-furnace"){{
+            requirements(Category.crafting, with(Items.lead, 80, Items.titanium, 80, Items.silicon, 60, Items.graphite, 60, titaniumRod, 20, industrialBearing, 5));
+            size = 3;
+            health = 700;
+            itemCapacity = 20;
+            liquidCapacity = 20f;
+            recipe(3, 90f, with(nickel, 2, chromium, 1, cobalt, 1), with(hotSuperalloy, 1)).heat(8f);
+            recipe(3, 120f, with(superalloyPlate, 2, titaniumRod, 2, titaniumBolt, 2), with(superalloyFrame, 1)).heat(8f);
+            recipe(2, 60f, with(Items.sand, 3), with(hotMetaglass, 3)).liquidsIn(sodiumHydroxide, 2f / 60f).heat(6f);
+            recipe(2, 60f, with(Items.metaglass, 2, Items.titanium, 1), with(hotReinforcedGlass, 1)).heat(5f);
             craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("9fd6ff"); }}, new DrawHeatInput());
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ffb46b"); }}, new DrawHeatInput());
+        }};
+
+        // Electric furnace: melting and sintering by electricity alone. AlNiCo magnets (induction), hot tungsten carbide
+        // (sintering) and hot surge superalloy (electric arc). Its cost must not need anything it makes.
+        electricFurnace = new RecipeCrafter("electric-furnace"){{
+            requirements(Category.crafting, with(Items.lead, 60, Items.titanium, 80, Items.silicon, 60, tungstenRod, 10, heatingCoil, 4, industrialBearing, 5));
+            size = 3;
+            health = 700;
+            itemCapacity = 20;
+            recipe(3, 60f, with(aluminium, 1, nickel, 1, cobalt, 1), with(alnicoMagnet, 2));
+            recipe(3, 60f, with(tungsten, 1, Items.graphite, 1), with(hotTungstenCarbide, 1));
+            recipe(5, 120f, with(Items.surgeAlloy, 1, superalloy, 2), with(hotSurgeSuperalloy, 1));
+            craftEffect = Fx.smeltsmoke;
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff6a3d"); }});
         }};
 
         // Hot metal + cryofluid -> usable metal. Every midgame and later furnace metal cools here before use.
@@ -195,20 +182,6 @@ public class MetallurgyBlocks{
             recipe(2, 30f, with(hotReinforcedGlass, 1), with(reinforcedGlass, 1)).liquidsIn(Liquids.cryofluid, 1f / 60f);
             craftEffect = Fx.freezing;
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.cryofluid, 4f), new DrawDefault());
-        }};
-
-        // Surge alloy + superalloy -> hot surge superalloy (cooled in the vacuum freezer).
-        arcFurnace = new GenericCrafter("arc-furnace"){{
-            requirements(Category.crafting, with(Items.titanium, 80, Items.silicon, 60, tungstenCarbide, 30, microchip, 20, superalloyFrame, 10, tungstenRod, 10));
-            size = 3;
-            health = 800;
-            itemCapacity = 20;
-            craftTime = 120f;
-            consumeItems(with(Items.surgeAlloy, 1, superalloy, 2));
-            consumePower(8f);
-            outputItem = new ItemStack(hotSurgeSuperalloy, 1);
-            craftEffect = Fx.lightningShoot;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("f2e878"); }});
         }};
 
         surgeSuperalloyWall = new Wall("surge-superalloy-wall"){{
@@ -258,18 +231,5 @@ public class MetallurgyBlocks{
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.water, 3f), new DrawDefault());
         }};
 
-        // Aluminium + nickel + cobalt melted electrically -> AlNiCo permanent magnets. Needs no heat network.
-        inductionFurnace = new GenericCrafter("induction-furnace"){{
-            requirements(Category.crafting, with(Items.titanium, 60, Items.silicon, 50, heatingCoil, 4, industrialBearing, 5));
-            size = 2;
-            health = 340;
-            itemCapacity = 10;
-            craftTime = 60f;
-            consumeItems(with(aluminium, 1, nickel, 1, cobalt, 1));
-            consumePower(3f);
-            outputItem = new ItemStack(alnicoMagnet, 2);
-            craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff6a3d"); }});
-        }};
 }
 }

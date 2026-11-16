@@ -41,12 +41,12 @@ public class PhotoShoot{
         new Shot("chemistry", "electrolysis-plant", 2, -4, 4.4f),
         new Shot("fission", "fission-reactor", 3, -2, 4.4f),
         new Shot("components", "component-depot", -6, -3, 4.4f),
-        new Shot("smelting", "alloy-furnace", -6, 0, 4f),
+        new Shot("smelting", "blast-furnace", -6, 0, 4f),
         new Shot("lattice", "lattice-drill", 11, 1, 3.4f),
         new Shot("defense", "thunderhead", -4, -3, 3.4f, false, true),
         new Shot("chemistry-night", "electrolysis-plant", 2, -4, 4.4f, true, false),
         new Shot("fission-night", "fission-reactor", 3, -2, 4.4f, true, false),
-        new Shot("smelting-night", "alloy-furnace", -6, 0, 4f, true, false),
+        new Shot("smelting-night", "blast-furnace", -6, 0, 4f, true, false),
         //wide night shot between the chemistry, the reactor and the smelter: the cover art is cut from its middle
         new Shot("hero-night", "fission-reactor", -4, 8, 3f, true, false),
     };
@@ -60,7 +60,7 @@ public class PhotoShoot{
     static final float settle = 50f, enemyLead = 60f * 6f;
     static float warmupTime = 60f * 40f;
     /** The block whose wiki page gets the last shot (art mode: the first block named). */
-    static String wikiPage = "eclipse-alloy-furnace";
+    static String wikiPage = "eclipse-blast-furnace";
     static Shot[] shots = showcaseShots;
     static boolean running;
     static int index;

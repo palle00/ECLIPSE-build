@@ -11,6 +11,7 @@ import arc.util.io.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.ui.*;
+import mindustry.world.blocks.heat.*;
 import mindustry.world.blocks.production.*;
 import mindustry.world.consumers.*;
 import mindustry.world.meta.*;
@@ -41,6 +42,7 @@ import static mindustry.Vars.*;
  *         .liquidsIn(hydrochloricAcid, 2f / 60f).liquidsOut(acidicWaste, 1f / 60f);
  * </pre>
  * A full liquid output stops the machine (waste must be removed), like the other ECLIPSE chemistry.
+ * Heat: {@code .heat(8f)} on a recipe makes it need that much heat from adjacent heaters; below it the machine stops.
  *
  * {@link #autoSelect}: with no recipe chosen, the machine runs whichever recipe its inputs complete, so a mixed belt never
  * jams it (e.g. the Vacuum Freezer cooling any hot metal that arrives).
@@ -57,6 +59,8 @@ public class RecipeCrafter extends GenericCrafter{
     public final Seq<Recipe> recipes = new Seq<>();
     /** With no recipe chosen, accept every recipe's inputs and run whichever recipe they complete. */
     public boolean autoSelect = false;
+    /** Some recipe needs heat (set in init). */
+    public boolean usesHeat;
 
     public static class Recipe{
         public final int tier;
@@ -65,6 +69,8 @@ public class RecipeCrafter extends GenericCrafter{
         public final ItemStack[] inputs, outputs;
         /** Liquids per tick at overclock 0. */
         public LiquidStack[] liquidInputs = {}, liquidOutputs = {};
+        /** Heat needed from adjacent heaters (0: none). Below it the machine stops. */
+        public float heat;
 
         public Recipe(int tier, float time, ItemStack[] inputs, ItemStack[] outputs){
             if(tier < 1 || tier > maxTier) throw new IllegalArgumentException("recipe tier must be 1-" + maxTier + ", got " + tier);
@@ -73,6 +79,12 @@ public class RecipeCrafter extends GenericCrafter{
             this.time = time;
             this.inputs = inputs;
             this.outputs = outputs;
+        }
+
+        /** Needs this much heat from adjacent heaters; the machine stops below it. */
+        public Recipe heat(float amount){
+            heat = amount;
+            return this;
         }
 
         /** Liquid inputs as liquid/amount-per-tick pairs. */
@@ -186,6 +198,7 @@ public class RecipeCrafter extends GenericCrafter{
         }
         outputItems = outs.toArray(ItemStack.class);
         craftTime = recipes.first().time;
+        usesHeat = recipes.contains(r -> r.heat > 0f);
         //liquid handling only for machines that have liquid recipes, so dry machines don't count as chemical plants
         if(recipes.contains(r -> r.liquidInputs.length > 0 || r.liquidOutputs.length > 0)){
             hasLiquids = true;
@@ -213,7 +226,8 @@ public class RecipeCrafter extends GenericCrafter{
                         for(ItemStack s : r.outputs) out.add(StatValues.displayItem(s.item, s.amount, r.time, true)).pad(2f);
                         for(LiquidStack s : r.liquidOutputs) out.add(StatValues.displayLiquid(s.liquid, s.amount * 60f, true)).pad(2f);
                     }).left().growX();
-                    t.add(Core.bundle.format("eclipse-recipe.tier", roman(r.tier), Strings.autoFixed(r.power() * 60f, 1))).right().pad(4f);
+                    t.add(Core.bundle.format("eclipse-recipe.tier", roman(r.tier), Strings.autoFixed(r.power() * 60f, 1))
+                        + (r.heat > 0f ? ", " + Core.bundle.format("eclipse-recipe.heat", Strings.autoFixed(r.heat, 1)) : "")).right().pad(4f);
                 }).growX().pad(4f).row();
             }
         });
@@ -230,6 +244,7 @@ public class RecipeCrafter extends GenericCrafter{
             for(LiquidStack s : r.liquidOutputs) stack(row, s.liquid.uiIcon, Strings.autoFixed(s.amount * 60f, 1) + "/s " + s.liquid.localizedName);
         }).left().row();
         t.add("[lightgray]" + Core.bundle.format("eclipse-recipe.tier", roman(r.tier), Strings.autoFixed(r.power() * 60f, 1))
+            + (r.heat > 0f ? ", " + Core.bundle.format("eclipse-recipe.heat", Strings.autoFixed(r.heat, 1)) : "")
             + ", " + Core.bundle.format("eclipse-recipe.time", Strings.autoFixed(r.time / 60f, 2))).left().padTop(2f);
         return t;
     }
@@ -239,7 +254,7 @@ public class RecipeCrafter extends GenericCrafter{
         row.add(text).padLeft(3f).padRight(8f);
     }
 
-    public class RecipeBuild extends GenericCrafterBuild{
+    public class RecipeBuild extends GenericCrafterBuild implements HeatConsumer{
         /** The recipe the player chose (null: none, or automatic on autoSelect machines). */
         public @Nullable Recipe fixed;
         /** The recipe running now: the chosen one, or the one picked automatically. */
@@ -248,6 +263,24 @@ public class RecipeCrafter extends GenericCrafter{
         public int level, overclock;
         /** The recipe's liquid inputs scaled by the overclock speed (what the liquid consumer takes per tick). */
         public LiquidStack[] liquidInputs = {};
+        /** Heat arriving from adjacent heaters, per side and in total. */
+        public float[] sideHeat = new float[4];
+        public float heat;
+
+        @Override
+        public float[] sideHeat(){
+            return sideHeat;
+        }
+
+        @Override
+        public float heatRequirement(){
+            return recipe == null ? 0f : recipe.heat;
+        }
+
+        /** The running recipe needs more heat than arrives: the machine stops. */
+        public boolean heatShort(){
+            return recipe != null && recipe.heat > 0f && heat < recipe.heat - 0.001f && !cheating();
+        }
 
         public void select(@Nullable Recipe r, int lvl){
             fixed = r;
@@ -301,7 +334,7 @@ public class RecipeCrafter extends GenericCrafter{
 
         @Override
         public float efficiencyScale(){
-            return underpowered() ? 0f : super.efficiencyScale();
+            return underpowered() || heatShort() ? 0f : super.efficiencyScale();
         }
 
         @Override
@@ -314,6 +347,7 @@ public class RecipeCrafter extends GenericCrafter{
 
         @Override
         public void updateTile(){
+            if(usesHeat) heat = calculateHeat(sideHeat);
             //automatic: keep the running recipe while it has its inputs, otherwise switch to one that does
             if(auto() && (recipe == null || !ready(recipe))){
                 Recipe next = nextReady();
