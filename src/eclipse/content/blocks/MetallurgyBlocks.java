@@ -130,6 +130,8 @@ public class MetallurgyBlocks{
             recipe(3, 120f, with(superalloyPlate, 2, titaniumRod, 2, titaniumBolt, 2), with(superalloyFrame, 1)).heat(8f);
             recipe(2, 60f, with(Items.sand, 3, sodaAsh, 1), with(hotMetaglass, 3)).heat(6f); //soda-lime glass: sand with a soda ash flux
             recipe(2, 60f, with(Items.metaglass, 2, Items.titanium, 1), with(hotReinforcedGlass, 1)).heat(5f);
+            //Kroll: mineral sand chlorinated with coke, the titanium chloride reduced with magnesium under argon
+            recipe(3, 60f, with(Items.sand, 4, Items.coal, 2, magnesium, 1), with(hotTitanium, 2)).liquidsIn(chlorine, 4f / 60f, argon, 1f / 60f).heat(10f);
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ffb46b"); }}, new DrawHeatInput());
         }};

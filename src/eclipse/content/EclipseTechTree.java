@@ -159,7 +159,7 @@ public class EclipseTechTree{
         child(heater, electricHeater);
 
         //waste and emissions
-        TechNode scrubber = child(heater, industrialScrubber);
+        TechNode scrubber = heater; //flue gas scrubbing is a Chemical Reactor recipe
         TechNode separatorNode = child(heater, gasSeparator);
 
         //organic chemistry and composites
@@ -321,7 +321,6 @@ public class EclipseTechTree{
 
         //upgraded production of the vanilla materials ECLIPSE consumes most, each under the vanilla building it upgrades
         child(find(Blocks.graphitePress), methanePyrolysisReactor);
-        child(find(Blocks.separator), chlorideTitaniumPlant);
     }
 
     static void unitLine(Block factory, UnitType... tiers){

@@ -94,10 +94,10 @@ public class MenuOrder{
         after(Blocks.surgeSmelter, blastFurnace, electricFurnace);
         after(Blocks.pulverizer, oreCrusher, oreWasher);
         after(Blocks.cryofluidMixer, //water -> chemical industry
-            coolingTower, waterTreatmentPlant, electrolyzer, chemicalReactor, pressureReactor, airSeparationUnit, cryogenicCondenser, vacuumFreezer, acidLeachingVat, industrialScrubber, gasSeparator,
+            coolingTower, waterTreatmentPlant, electrolyzer, chemicalReactor, pressureReactor, airSeparationUnit, cryogenicCondenser, vacuumFreezer, acidLeachingVat, gasSeparator,
             wastewaterTreatmentPlant, thermalWasteProcessor, lithiumExtractor, aluminaRefinery, platinumRefinery, synthesisComplex);
         after(Blocks.blastMixer);
-        after(Blocks.separator, chlorideTitaniumPlant, mineralSeparator);
+        after(Blocks.separator, mineralSeparator);
         after(Blocks.sporePress, enzymeExtractor, biochemicalFermenter, anaerobicDigester); //biology
         after(Blocks.incinerator, basicModuleAssembler, advancedModuleAssembler, experimentalFacility, aetheriteForge, moduleRecycler); //augmentation section
 
@@ -110,7 +110,7 @@ public class MenuOrder{
         after(Items.coal, sulfur, petroleumCoke);
         after(Items.copper, copperGear, copperWire, magnetWire, insulatedCable, copperPlate, copperFoil);
         after(Items.lead, leadPlate);
-        after(Items.titanium, hotTitanium, titaniumRod, titaniumGear, titaniumPlate, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, rotor, electricMotor, pumpUnit, piston, pressureCasing, industrialBearing, nickel, chromium, cobalt, molybdenum, vanadium, tungsten, tungstenPlate, tungstenRod, hotTungstenCarbide, tungstenCarbide, alumina, hotAluminium, aluminium, aluminiumPlate, aluminiumFoil, aluminiumWire, lithium, hotSuperalloy, superalloy, superalloyPlate, superalloyGear, superalloyFrame, alnicoMagnet, permanentMagnetMotor, heatingCoil, platinum);
+        after(Items.titanium, hotTitanium, titaniumRod, titaniumGear, titaniumPlate, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, rotor, electricMotor, pumpUnit, piston, pressureCasing, industrialBearing, nickel, chromium, cobalt, molybdenum, vanadium, tungsten, tungstenPlate, tungstenRod, hotTungstenCarbide, tungstenCarbide, alumina, hotAluminium, aluminium, aluminiumPlate, aluminiumFoil, aluminiumWire, magnesium, lithium, hotSuperalloy, superalloy, superalloyPlate, superalloyGear, superalloyFrame, alnicoMagnet, permanentMagnetMotor, heatingCoil, platinum);
         after(Items.thorium, thoriumFuelRod, spentFuelRod);
         after(Items.scrap, crushedOre, industrialSludge);
         after(Items.silicon, hotSilicon, highPuritySilicon, resistor, capacitor, transistor, sensor, emitter, microchip, circuitBoard, precisionComponent, controlUnit);

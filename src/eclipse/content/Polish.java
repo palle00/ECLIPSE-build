@@ -35,9 +35,9 @@ public class Polish{
 
     static{
         kind(Kind.furnace, "blast-furnace",
-            "carbon-fiber-furnace", "thermal-waste-processor", "chloride-titanium-plant", "alumina-refinery", "methane-pyrolysis-reactor");
+            "carbon-fiber-furnace", "thermal-waste-processor", "alumina-refinery", "methane-pyrolysis-reactor");
         kind(Kind.electric, "electrolyzer", "electric-furnace", "electric-heater");
-        kind(Kind.chemical, "chemical-reactor", "pressure-reactor", "acid-leaching-vat", "sulfuric-acid-plant", "platinum-refinery", "industrial-scrubber", "reprocessing-plant",
+        kind(Kind.chemical, "chemical-reactor", "pressure-reactor", "acid-leaching-vat", "sulfuric-acid-plant", "platinum-refinery", "reprocessing-plant",
             "chemical-synthesis-complex", "lithium-extractor", "mineral-separator", "water-treatment-plant", "wastewater-treatment-plant", "distillation-column");
         kind(Kind.steam, "industrial-boiler", "steam-turbine", "cooling-tower", "steam-cracker", "geothermal-heat-tap");
         kind(Kind.combustion, "industrial-heater", "methane-turbine", "biofuel-engine");

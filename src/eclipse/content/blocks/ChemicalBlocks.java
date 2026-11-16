@@ -19,8 +19,7 @@ public class ChemicalBlocks{
     public static Block
     waterTreatmentPlant, acidLeachingVat,
     sulfuricAcidPlant,
-    airSeparationUnit, cryogenicCondenser,
-    industrialScrubber, gasSeparator, wastewaterTreatmentPlant, thermalWasteProcessor, electrolyzer, chemicalReactor;
+    airSeparationUnit, cryogenicCondenser, gasSeparator, wastewaterTreatmentPlant, thermalWasteProcessor, electrolyzer, chemicalReactor;
 
     public static void load(){
         // Water -> purified water + brine concentrate (reverse osmosis style).
@@ -56,6 +55,9 @@ public class ChemicalBlocks{
             recipe(3, 90f, ItemStack.empty, with(epoxyResin, 1)).liquidsIn(propylene, 3f / 60f, chlorine, 3f / 60f, sodiumHydroxide, 2f / 60f)
                 .liquidsOut(wastewater, 2f / 60f);
             recipe(3, 60f, with(ammoniumNitrate, 2), with(Items.blastCompound, 2)).liquidsIn(diesel, 1f / 60f); //ANFO: ammonium nitrate + fuel oil
+            recipe(3, 60f, with(magnesium, 1, ammoniumNitrate, 1), with(Items.pyratite, 2)); //magnesium incendiary
+            recipe(2, 120f, ItemStack.empty, ItemStack.empty).liquidsIn(flueGas, 12f / 60f, sodiumHydroxide, 2f / 60f)
+                .liquidsOut(sulfuricAcid, 1f / 60f, wastewater, 4f / 60f).sides(1, 3); //regenerative scrubbing: SO2 recovered as sulfuric acid
             recipe(2, 60f, ItemStack.empty, with(sodaAsh, 1)).liquidsIn(sodiumHydroxide, 4f / 60f, carbonDioxide, 2f / 60f); //2 NaOH + CO2 -> Na2CO3 + H2O
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(), new DrawDefault());
         }};
@@ -73,6 +75,8 @@ public class ChemicalBlocks{
                 .liquidsOut(Liquids.hydrogen, 8f / 60f, oxygen, 4f / 60f).sides(1, 3);
             recipe(2, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(brine, 6f / 60f)
                 .liquidsOut(chlorine, 3f / 60f, Liquids.hydrogen, 3f / 60f, sodiumHydroxide, 6f / 60f).sides(1, 3, 0); //2 NaCl + 2 H2O -> Cl2 + H2 + 2 NaOH
+            recipe(3, 90f, ItemStack.empty, with(magnesium, 1)).liquidsIn(brine, 6f / 60f, hydrochloricAcid, 2f / 60f)
+                .liquidsOut(chlorine, 2f / 60f).vented(); //Dow: magnesium chloride from brine, electrolysed molten (chlorine vented if unused)
             recipe(3, 60f, with(alumina, 2, petroleumCoke, 1), with(hotAluminium, 1)).liquidsOut(carbonDioxide, 1f / 60f).vented(); //the coke anodes burn to CO2
             recipe(2, 60f, with(Items.scrap, 2), with(Items.copper, 2, Items.lead, 1)).liquidsIn(sulfuricAcid, 4f / 60f).liquidsOut(acidicWaste, 1f / 60f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 4f),
@@ -150,23 +154,6 @@ public class ChemicalBlocks{
 
     
         // ---- waste and emissions (flue gas comes from methane turbines and industrial heaters) ----
-
-        // Flue gas + sodium hydroxide -> recovered sulfur + wastewater (wet flue-gas desulfurization).
-        industrialScrubber = new GenericCrafter("industrial-scrubber"){{
-            requirements(Category.crafting, with(Items.lead, 60, Items.titanium, 40, Items.metaglass, 40, Items.silicon, 20, pressureCasing, 10));
-            size = 2;
-            health = 320;
-            liquidCapacity = 30f;
-            itemCapacity = 10;
-            craftTime = 120f;
-            consumeLiquids(LiquidStack.with(flueGas, 12f / 60f, sodiumHydroxide, 2f / 60f));
-            consumePower(0.5f);
-            outputItem = new ItemStack(sulfur, 1);
-            outputLiquid = new LiquidStack(wastewater, 4f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(flueGas, 3f),
-                new DrawBubbles(Color.valueOf("d8dff0")){{ amount = 8; radius = 4f; spread = 7f; }},
-                new DrawDefault());
-        }};
 
         // Flue gas -> nitrogen + carbon dioxide through selective membranes. Nitrogen without cryofluid.
         gasSeparator = new GenericCrafter("gas-separator"){{

@@ -17,7 +17,7 @@ import static mindustry.type.ItemStack.*;
  * chemistry and heat. On Serpulo, Erekir's silicon arc furnace and electrolyzer can't be built, so nothing is duplicated.
  */
 public class RefiningBlocks{
-    public static Block methanePyrolysisReactor, chlorideTitaniumPlant;
+    public static Block methanePyrolysisReactor;
 
     public static void load(){
         // CH4 -> C + 2 H2 (methane pyrolysis): graphite without coal, with hydrogen as a by-product.
@@ -36,24 +36,6 @@ public class RefiningBlocks{
             outputLiquid = new LiquidStack(Liquids.hydrogen, 8f / 60f);
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff8a3d"); }}, new DrawHeatInput());
-        }};
-
-        // Mineral sands chlorinated with coal as reductant, then reduced (chloride process) -> titanium from sand instead of ore.
-        chlorideTitaniumPlant = new HeatCrafter("chloride-titanium-plant"){{
-            requirements(Category.crafting, with(Items.titanium, 80, Items.silicon, 60, Items.metaglass, 50, pressureCasing, 15, industrialBearing, 5, copperWire, 20));
-            size = 3;
-            health = 700;
-            itemCapacity = 20;
-            liquidCapacity = 30f;
-            craftTime = 60f;
-            heatRequirement = 10f;
-            maxEfficiency = 2f;
-            consumeItems(with(Items.sand, 4, Items.coal, 2));
-            consumeLiquid(chlorine, 4f / 60f);
-            consumePower(2f);
-            outputItem = new ItemStack(hotTitanium, 2); //cooled in the vacuum freezer
-            craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("8da1e3"); }}, new DrawHeatInput());
         }};
 
     }

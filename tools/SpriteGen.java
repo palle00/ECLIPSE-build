@@ -209,6 +209,7 @@ public class SpriteGen{
         // ---- heat recovery, electronics, components ----
         pellets("alumina", 0xece8e2);
         ingot("aluminium", 0xb9c4cf);
+        ingot("magnesium", 0xd2d7dc);
         wafer("high-purity-silicon", 0x6d7a99);
         chip("microchip", 0x3f9a5c);
         pane("reinforced-glass", 0x9fc7d6);
@@ -262,7 +263,6 @@ public class SpriteGen{
         gas("carbon-dioxide", 0xc8ccd0);
         liquid("wastewater", 0x6f7f5a);
         chunks("industrial-sludge", 0x5c5140);
-        scrubber("industrial-scrubber");
         gasSeparator("gas-separator");
         nozzles("gas-separator", 3, "nitrogen", 0xefefef);
         nozzles("gas-separator", 3, "eclipse-carbon-dioxide", 0xc8ccd0);
@@ -365,7 +365,6 @@ public class SpriteGen{
 
         // ---- upgraded vanilla production ----
         pyrolysisReactor("methane-pyrolysis-reactor");
-        chloridePlant("chloride-titanium-plant");
 
         // ---- strategic defence and support ----
         scanner("wave-intelligence-scanner");
@@ -4108,26 +4107,6 @@ public class SpriteGen{
         for(int i = 0; i < 3; i++) rot.fill(rot.bar(c, c, 3, 15, 4, i * 120), 12, metal, 1);
         rot.fill(rot.circle(c, c, 4), 13, steel, 1);
         save(rot, name + "-rotator");
-    }
-
-    /** Chloride Titanium Plant (3×3, heat): sand and coal hoppers, a heavy chlorinator, a closed stack and the titanium tray. */
-    static void chloridePlant(String name) throws IOException{
-        int s = 3 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 5, 5, steel);
-        hopper(r, 4, 4, 22, 12, sandM);
-        hopper(r, 4, 30, 22, 12, coalM);
-        r.fill(r.circle(54, 48, 28), 12, metal, 4);
-        r.fill(r.circle(54, 48, 17), 4, deep, 1);
-        r.fill(r.circle(54, 48, 9), 5, molten, 0);
-        //closed exhaust stack and the titanium output
-        r.fill(r.circle(80, 14, 10), 15, steel, 2);
-        r.fill(r.circle(80, 14, 5), 7, deep, 0);
-        r.fill(r.rect(30, 80, 56, 12), 8, steel, 2);
-        r.fill(r.rect(34, 83, 48, 6), 9, titaniumM, 1);
-        save(r, name);
-        glowOf(r, name);
-        heatLayer(r, name, r.circle(54, 48, 17));
     }
 
     /** Ore Crusher (2×2): opposed crusher jaws ("-press") over a dark crushing gap, a feed hopper above, fragments below. */
