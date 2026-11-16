@@ -297,14 +297,14 @@ public class AugmentContent{
             m -> { m.overchargeBonus = 3f; m.legendary = true; m.compatible = producers; m.compatibleKey = "production"; });
 
         militaryInterface = new AugmentationCoupler("military-augmentation-interface"){{
-            requirements(Category.effect, with(Items.titanium, 40, microchip, 5, Items.silicon, 30, Items.graphite, 20, precisionComponent, 5, titaniumGear, 10, circuitBoard, 4));
+            requirements(Category.effect, with(Items.titanium, 40, Items.silicon, 30, microchip, 5, titaniumGear, 10, precisionComponent, 5, circuitBoard, 4));
             health = 260;
             slots = 3;
             onlyCategory = ModuleCategory.military;
         }};
 
         experimentalFacility = new ModuleAssembler("experimental-augmentation-facility"){{
-            requirements(Category.crafting, with(Items.phaseFabric, 40, surgeSuperalloy, 30, microchip, 60, Items.titanium, 120, Items.silicon, 120, precisionComponent, 20, superalloyFrame, 20, carbonFiber, 20));
+            requirements(Category.crafting, with(Items.titanium, 120, Items.phaseFabric, 40, microchip, 60, surgeSuperalloy, 30, superalloyFrame, 20, precisionComponent, 20));
             size = 4;
             health = 1200;
             minTier = maxTier = 4;
@@ -333,13 +333,13 @@ public class AugmentContent{
         }};
 
         advancedCoupler = new AugmentationCoupler("advanced-coupler"){{
-            requirements(Category.effect, with(microchip, 5, Items.titanium, 20, Items.silicon, 20, aluminium, 10, precisionComponent, 2, titaniumGear, 5, circuitBoard, 2));
+            requirements(Category.effect, with(Items.titanium, 20, Items.silicon, 20, aluminium, 10, microchip, 5, precisionComponent, 2, circuitBoard, 2));
             health = 180;
             slots = 2;
         }};
 
         augmentationHub = new AugmentationCoupler("augmentation-hub"){{
-            requirements(Category.effect, with(microchip, 20, superalloy, 20, Items.titanium, 60, Items.silicon, 40, superalloyFrame, 10, precisionComponent, 10, carbonFiber, 10, controlUnit, 5));
+            requirements(Category.effect, with(Items.titanium, 60, Items.silicon, 40, microchip, 20, superalloyFrame, 10, precisionComponent, 10, controlUnit, 5));
             size = 2;
             health = 500;
             slots = 4;
@@ -354,7 +354,7 @@ public class AugmentContent{
         }};
 
         advancedModuleAssembler = new ModuleAssembler("advanced-module-assembler"){{
-            requirements(Category.crafting, with(microchip, 30, Items.titanium, 80, Items.silicon, 80, superalloy, 20, precisionComponent, 10, industrialBearing, 10, controlUnit, 5));
+            requirements(Category.crafting, with(Items.titanium, 80, Items.silicon, 80, microchip, 30, industrialBearing, 10, precisionComponent, 10, controlUnit, 5));
             size = 3;
             health = 700;
             minTier = 2;

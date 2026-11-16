@@ -22,7 +22,7 @@ public class PetrochemicalBlocks{
     public static void load(){
         // Oil -> naphtha + methane, sulfur recovered from the bottoms.
         distillationColumn = new GenericCrafter("distillation-column"){{
-            requirements(Category.crafting, with(Items.lead, 100, Items.titanium, 60, Items.metaglass, 60, Items.silicon, 40, Items.graphite, 40, titaniumRod, 20, pressureCasing, 10));
+            requirements(Category.crafting, with(Items.lead, 100, Items.metaglass, 60, Items.titanium, 60, Items.silicon, 40, pressureCasing, 10, pumpUnit, 2));
             size = 3;
             health = 700;
             rotate = true;
@@ -40,7 +40,7 @@ public class PetrochemicalBlocks{
 
         // Naphtha + steam (purified water) + heat -> ethylene.
         steamCracker = new HeatCrafter("steam-cracker"){{
-            requirements(Category.crafting, with(Items.lead, 80, Items.titanium, 80, Items.silicon, 60, Items.metaglass, 40, Items.graphite, 50, pressureCasing, 10, industrialBearing, 5));
+            requirements(Category.crafting, with(Items.lead, 80, Items.metaglass, 40, Items.titanium, 80, Items.silicon, 60, pressureCasing, 10, industrialBearing, 5));
             size = 3;
             health = 700;
             liquidCapacity = 40f;
@@ -90,7 +90,7 @@ public class PetrochemicalBlocks{
 
         // CO2 + 3 H2 -> methanol (+ water). Runs at pressure over a copper-zinc bed.
         methanolSynthesizer = new ChemicalReactor("methanol-synthesizer"){{
-            requirements(Category.crafting, with(Items.lead, 100, Items.titanium, 80, Items.silicon, 60, reinforcedGlass, 30, Items.copper, 80, superalloyFrame, 10, pressureCasing, 15));
+            requirements(Category.crafting, with(Items.lead, 100, Items.titanium, 80, Items.silicon, 60, reinforcedGlass, 30, pressureCasing, 15, superalloyFrame, 10));
             size = 3;
             health = 750;
             liquidCapacity = 40f;
@@ -104,7 +104,7 @@ public class PetrochemicalBlocks{
 
         // Methanol -> propylene (methanol-to-olefins). The split-off water leaves as wastewater.
         olefinReactor = new ChemicalReactor("olefin-reactor"){{
-            requirements(Category.crafting, with(Items.lead, 80, Items.titanium, 60, Items.silicon, 50, Items.metaglass, 40, Items.graphite, 40, pressureCasing, 10, titaniumRod, 10));
+            requirements(Category.crafting, with(Items.lead, 80, Items.metaglass, 40, Items.titanium, 60, Items.silicon, 50, pressureCasing, 10, pumpUnit, 2));
             size = 3;
             health = 650;
             rotate = true;
@@ -119,7 +119,7 @@ public class PetrochemicalBlocks{
 
         // Propylene + chlorine -> epichlorohydrin, cured with sodium hydroxide -> epoxy resin. Salty wastewater remains.
         epoxyPlant = new GenericCrafter("epoxy-plant"){{
-            requirements(Category.crafting, with(Items.lead, 60, Items.titanium, 50, Items.metaglass, 40, Items.silicon, 30, polyethylene, 20, pressureCasing, 5, titaniumGear, 5));
+            requirements(Category.crafting, with(Items.lead, 60, Items.metaglass, 40, Items.titanium, 50, polyethylene, 20, pressureCasing, 5, pumpUnit, 1));
             size = 2;
             health = 340;
             liquidCapacity = 30f;
@@ -135,7 +135,7 @@ public class PetrochemicalBlocks{
 
         // Ethylene + propylene over the Ziegler-Natta catalyst -> EPDM rubber, vulcanized with sulfur.
         rubberPlant = new ChemicalReactor("rubber-plant"){{
-            requirements(Category.crafting, with(Items.lead, 80, Items.titanium, 60, Items.silicon, 60, Items.metaglass, 40, polyethylene, 30, pressureCasing, 10, industrialBearing, 5));
+            requirements(Category.crafting, with(Items.lead, 80, Items.metaglass, 40, Items.titanium, 60, polyethylene, 30, pressureCasing, 10, industrialBearing, 5));
             size = 3;
             health = 650;
             liquidCapacity = 40f;
@@ -153,7 +153,7 @@ public class PetrochemicalBlocks{
 
         // Propylene + ammonia + oxygen -> acrylonitrile (ammoxidation) over a molybdate catalyst.
         acrylonitrileReactor = new ChemicalReactor("acrylonitrile-reactor"){{
-            requirements(Category.crafting, with(Items.lead, 80, Items.titanium, 80, Items.silicon, 60, reinforcedGlass, 30, syntheticRubber, 20, pressureCasing, 15, industrialBearing, 5));
+            requirements(Category.crafting, with(Items.lead, 80, Items.titanium, 80, Items.silicon, 60, reinforcedGlass, 30, syntheticRubber, 20, pressureCasing, 15));
             size = 3;
             health = 700;
             liquidCapacity = 40f;
@@ -169,7 +169,7 @@ public class PetrochemicalBlocks{
 
         // Acrylonitrile is spun into fiber, then oxidized and carbonized in a very hot furnace. Off-gases leave as flue gas.
         carbonFiberFurnace = new HeatCrafter("carbon-fiber-furnace"){{
-            requirements(Category.crafting, with(Items.titanium, 80, Items.silicon, 60, Items.graphite, 60, superalloy, 20, syntheticRubber, 20, superalloyFrame, 10, industrialBearing, 10));
+            requirements(Category.crafting, with(Items.graphite, 60, Items.titanium, 80, Items.silicon, 60, superalloyPlate, 10, industrialBearing, 10, superalloyFrame, 10));
             size = 3;
             health = 700;
             liquidCapacity = 30f;
@@ -188,7 +188,7 @@ public class PetrochemicalBlocks{
 
         // Carbon fiber laid up in epoxy and cured -> carbon composite (CFRP), light and very strong.
         compositePress = new GenericCrafter("composite-press"){{
-            requirements(Category.crafting, with(Items.titanium, 60, Items.silicon, 40, Items.graphite, 40, syntheticRubber, 20, epoxyResin, 10, precisionComponent, 5, industrialBearing, 10));
+            requirements(Category.crafting, with(Items.graphite, 40, Items.titanium, 60, Items.silicon, 40, syntheticRubber, 20, piston, 4, precisionComponent, 5));
             size = 2;
             health = 380;
             itemCapacity = 10;

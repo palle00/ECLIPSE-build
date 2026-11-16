@@ -31,7 +31,7 @@ public class DefenseBlocks{
 
         // Stage 7: shared shield pool for friendly units only.
         unitShieldBeacon = new UnitShieldBeacon("unit-shield-beacon"){{
-            requirements(Category.effect, with(microchip, 20, aluminium, 40, highPuritySilicon, 30, reinforcedGlass, 30, precisionComponent, 10, alnicoMagnet, 10));
+            requirements(Category.effect, with(microchip, 20, aluminiumWire, 20, highPuritySilicon, 30, reinforcedGlass, 30, precisionComponent, 10, alnicoMagnet, 10));
             size = 3;
             health = 700;
             consumePower(3f);

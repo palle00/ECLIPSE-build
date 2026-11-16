@@ -129,7 +129,7 @@ public class ComponentBlocks{
 
         // Precision components + surge superalloy + platinum + phase fabric -> experimental cores for endgame machinery.
         coreAssembler = new GenericCrafter("experimental-core-assembler"){{
-            requirements(Category.crafting, with(Items.titanium, 120, Items.silicon, 100, Items.surgeAlloy, 40, precisionComponent, 20, superalloyFrame, 10, carbonComposite, 10, controlUnit, 5));
+            requirements(Category.crafting, with(Items.titanium, 120, Items.silicon, 100, Items.surgeAlloy, 40, superalloyFrame, 10, precisionComponent, 20, controlUnit, 5));
             size = 3;
             health = 800;
             itemCapacity = 10;
@@ -150,7 +150,12 @@ public class ComponentBlocks{
             health = 600;
             itemCapacity = 1000;
             accepted.addAll(copperGear, titaniumRod, titaniumGear, pressureCasing, industrialBearing, superalloyFrame, precisionComponent, experimentalCore,
-                copperWire, circuitBoard, controlUnit);
+                copperWire, circuitBoard, controlUnit,
+                //forms and parts: building costs use them too
+                copperPlate, leadPlate, titaniumPlate, aluminiumPlate, superalloyPlate, tungstenPlate, copperFoil, aluminiumFoil,
+                tungstenRod, aluminiumWire, magnetWire, titaniumBolt, titaniumScrew, titaniumRing, titaniumSpring, superalloyGear,
+                resistor, capacitor, transistor, insulatedCable,
+                electricMotor, permanentMagnetMotor, superconductingMotor, pumpUnit, piston, rotor, heatingCoil, sensor, emitter);
         }};
     }
 

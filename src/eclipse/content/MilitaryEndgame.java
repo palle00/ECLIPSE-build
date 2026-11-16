@@ -104,8 +104,7 @@ public class MilitaryEndgame{
         ((UnitFactory)Blocks.airFactory).plans.add(new UnitPlan(ewDrone, 60f * 45f, with(microchip, 15, controlUnit, 3, alnicoMagnet, 8, carbonComposite, 10)));
 
         titanComplex = new TitanComplex("titan-manufacturing-complex"){{
-            requirements(Category.units, with(Items.thorium, 1000, Items.plastanium, 500, Items.phaseFabric, 200, surgeSuperalloy, 300,
-                superalloyFrame, 200, superconductingMotor, 20, precisionComponent, 100, controlUnit, 50, experimentalCore, 20));
+            requirements(Category.units, with(Items.plastanium, 500, Items.phaseFabric, 200, surgeSuperalloy, 300, superalloyFrame, 200, experimentalCore, 20, superconductingMotor, 20));
             size = 7;
             health = 12000;
             plans.add(new UnitPlan(dreadnought, 60f * 240f, with(Items.phaseFabric, 150, surgeSuperalloy, 200, tungstenCarbide, 400,
@@ -114,8 +113,7 @@ public class MilitaryEndgame{
         }};
 
         orbitalPlatform = new OrbitalPlatform("orbital-weapons-platform"){{
-            requirements(Category.turret, with(Items.surgeAlloy, 300, Items.phaseFabric, 200, surgeSuperalloy, 300, superconductor, 150,
-                carbonComposite, 150, aetherite, 100, precisionComponent, 80, experimentalCore, 15));
+            requirements(Category.turret, with(Items.phaseFabric, 200, surgeSuperalloy, 300, carbonComposite, 150, experimentalCore, 15, aetherite, 100, emitter, 20));
             size = 5;
             health = 6000;
             consumePower(25f);

@@ -38,7 +38,7 @@ public class LogisticsBlocks{
         }};
 
         distributionHub = new FilterRouter("distribution-hub"){{
-            requirements(Category.distribution, with(Items.titanium, 30, Items.silicon, 30, Items.lead, 30, microchip, 4, titaniumGear, 4, precisionComponent, 2, circuitBoard, 2));
+            requirements(Category.distribution, with(Items.titanium, 30, Items.silicon, 30, microchip, 4, titaniumGear, 4, precisionComponent, 2, circuitBoard, 2));
             size = 2;
             health = 400;
             slots = 4;
@@ -65,7 +65,7 @@ public class LogisticsBlocks{
         }};
 
         lineBalancer = new ControlledSplitter("line-balancer"){{
-            requirements(Category.distribution, with(superalloyGear, 4, Items.titanium, 30, Items.silicon, 30, microchip, 6, precisionComponent, 2, industrialBearing, 2, controlUnit, 1));
+            requirements(Category.distribution, with(Items.titanium, 30, Items.silicon, 30, microchip, 6, precisionComponent, 2, controlUnit, 1, superalloyGear, 4));
             size = 2;
             health = 400;
             maxBranches = 4;

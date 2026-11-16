@@ -40,7 +40,7 @@ public class ChemicalBlocks{
 
         // Purified water -> hydrogen + oxygen (2:1).
         electrolysisPlant = new GenericCrafter("electrolysis-plant"){{
-            requirements(Category.crafting, with(Items.copper, 80, Items.lead, 60, Items.silicon, 50, Items.graphite, 40, Items.metaglass, 40, copperGear, 15, copperWire, 20));
+            requirements(Category.crafting, with(Items.copper, 80, Items.lead, 60, Items.metaglass, 40, Items.silicon, 50, copperGear, 15, copperWire, 20));
             size = 3;
             health = 600;
             rotate = true;
@@ -57,7 +57,7 @@ public class ChemicalBlocks{
 
         // Brine -> chlorine + hydrogen + sodium hydroxide.
         chlorAlkaliCell = new GenericCrafter("chlor-alkali-cell"){{
-            requirements(Category.crafting, with(Items.lead, 80, Items.silicon, 60, Items.titanium, 40, Items.metaglass, 50, pressureCasing, 10, titaniumRod, 10, copperWire, 20));
+            requirements(Category.crafting, with(Items.lead, 80, Items.metaglass, 50, Items.titanium, 40, Items.silicon, 60, pressureCasing, 10, copperWire, 20));
             size = 3;
             health = 600;
             rotate = true;
@@ -136,7 +136,7 @@ public class ChemicalBlocks{
 
         // Air + cryogenic cooling -> nitrogen + oxygen.
         airSeparationUnit = new GenericCrafter("air-separation-unit"){{
-            requirements(Category.crafting, with(Items.lead, 100, Items.titanium, 80, Items.silicon, 60, reinforcedGlass, 30, Items.graphite, 40, pumpUnit, 4, pressureCasing, 10));
+            requirements(Category.crafting, with(Items.lead, 100, Items.titanium, 80, Items.silicon, 60, reinforcedGlass, 30, pressureCasing, 10, pumpUnit, 4));
             size = 3;
             health = 700;
             rotate = true;
@@ -151,7 +151,7 @@ public class ChemicalBlocks{
 
         // N2 + 3 H2 -> 2 NH3 (Haber process). Must reach operating pressure first.
         highPressureReactor = new ChemicalReactor("high-pressure-reactor"){{
-            requirements(Category.crafting, with(Items.lead, 120, titaniumPlate, 50, Items.thorium, 40, Items.silicon, 60, reinforcedGlass, 40, superalloyFrame, 10, industrialBearing, 10, pressureCasing, 20));
+            requirements(Category.crafting, with(titaniumPlate, 50, Items.thorium, 40, Items.silicon, 60, pressureCasing, 20, superalloyFrame, 10, piston, 4));
             size = 3;
             health = 900;
             liquidCapacity = 40f;
@@ -259,7 +259,7 @@ public class ChemicalBlocks{
 
         // Flue gas -> nitrogen + carbon dioxide through selective membranes. Nitrogen without cryofluid.
         gasSeparator = new GenericCrafter("gas-separator"){{
-            requirements(Category.crafting, with(Items.lead, 80, Items.titanium, 60, Items.silicon, 50, Items.metaglass, 40, Items.plastanium, 20, pressureCasing, 10, industrialBearing, 5));
+            requirements(Category.crafting, with(Items.lead, 80, Items.metaglass, 40, Items.titanium, 60, Items.plastanium, 20, pressureCasing, 10, pumpUnit, 2));
             size = 3;
             health = 600;
             rotate = true;

@@ -146,7 +146,7 @@ public class MilitaryBlocks{
 
         //Kestrel: one guided missile at a time, at the strongest aircraft in range
         kestrel = new ItemTurret("kestrel"){{
-            requirements(Category.turret, with(Items.silicon, 70, Items.titanium, 50, aluminium, 60, polyethylene, 20, microchip, 6, titaniumGear, 6, precisionComponent, 2));
+            requirements(Category.turret, with(Items.titanium, 50, Items.silicon, 70, aluminium, 60, microchip, 6, titaniumGear, 6, precisionComponent, 2));
             size = 2;
             health = 900;
             range = 300f;
@@ -164,7 +164,7 @@ public class MilitaryBlocks{
 
         //Thunderhead: a discharge that jumps between aircraft, weaker with every jump
         thunderhead = new PowerTurret("thunderhead"){{
-            requirements(Category.turret, with(Items.titanium, 120, Items.surgeAlloy, 40, cobalt, 80, microchip, 10, leadAcidCell, 12, alnicoMagnet, 8, superalloyFrame, 4));
+            requirements(Category.turret, with(Items.titanium, 120, Items.surgeAlloy, 40, leadAcidCell, 12, microchip, 10, superalloyFrame, 4, alnicoMagnet, 8));
             size = 3;
             health = 1800;
             range = 170f;
@@ -284,7 +284,7 @@ public class MilitaryBlocks{
 
         //T4 Apiary: launches drones that circle over the enemy and shoot whatever is near, ground or air; at most 6 at once
         apiary = new Armory.DroneTurret("apiary"){{
-            requirements(Category.turret, with(Items.silicon, 150, Items.titanium, 100, Items.plastanium, 60, aluminium, 60, microchip, 20, precisionComponent, 6, industrialBearing, 6));
+            requirements(Category.turret, with(Items.titanium, 100, Items.silicon, 150, Items.plastanium, 60, microchip, 20, industrialBearing, 6, precisionComponent, 6));
             size = 3;
             health = 1700;
             range = 240f;
@@ -303,8 +303,7 @@ public class MilitaryBlocks{
 
         //T5 Event Horizon: a singularity that pulls every enemy around it in, ground and air, then collapses
         eventHorizon = new ItemTurret("event-horizon"){{
-            requirements(Category.turret, with(Items.surgeAlloy, 400, Items.phaseFabric, 200, Items.thorium, 300, surgeSuperalloy, 200, superconductor, 120,
-                aetherite, 150, superalloyFrame, 30, precisionComponent, 30, experimentalCore, 12));
+            requirements(Category.turret, with(Items.thorium, 300, Items.phaseFabric, 200, Items.surgeAlloy, 400, experimentalCore, 12, aetherite, 150, superconductor, 120));
             size = 4;
             health = 5200;
             range = 300f;

@@ -67,8 +67,7 @@ public class EndgameBlocks{
 
         //Lattice Drill: grows a mining lattice over the whole ore patch it stands on
         latticeDrill = new LatticeDrill("lattice-drill"){{
-            requirements(Category.production, with(Items.thorium, 200, Items.phaseFabric, 40, tungstenCarbide, 150, surgeSuperalloy, 120,
-                superalloyFrame, 20, superconductingMotor, 6, experimentalCore, 6));
+            requirements(Category.production, with(Items.thorium, 200, Items.phaseFabric, 40, tungstenCarbide, 150, surgeSuperalloy, 120, experimentalCore, 6, superconductingMotor, 6));
             size = 3;
             health = 2200;
         }};
