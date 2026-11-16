@@ -4,6 +4,7 @@ import arc.*;
 import arc.graphics.*;
 import arc.util.*;
 import eclipse.world.blocks.ChemicalReactor.*;
+import eclipse.world.blocks.RecipeCrafter.*;
 import mindustry.ctype.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
@@ -24,13 +25,15 @@ import static mindustry.Vars.*;
  * stall on a full waste output, missing heat, a missing catalyst or pressure.
  */
 public class MachineStatus{
-    public enum Kind{working, disabled, outputFull, noPower, missing, noCatalyst, noHeat, pressurizing, lowHeat}
+    public enum Kind{working, disabled, outputFull, noPower, missing, noCatalyst, noHeat, pressurizing, lowHeat, noRecipe, underpowered}
 
     public static class Status{
         public Kind kind = Kind.working;
         public @Nullable UnlockableContent content;
-        /** Heat required (noHeat), or a fraction 0-1 (lowHeat speed, pressurizing progress). */
+        /** Heat required (noHeat), or a fraction 0-1 (lowHeat speed, pressurizing progress, underpowered grid satisfaction). */
         public float value;
+        /** Power per second needed (underpowered). */
+        public float need;
 
         Status set(Kind kind, @Nullable UnlockableContent content, float value){
             this.kind = kind;
@@ -55,6 +58,8 @@ public class MachineStatus{
                 case noHeat -> Core.bundle.format("eclipse-status.no-heat", Strings.autoFixed(value, 1));
                 case pressurizing -> Core.bundle.format("eclipse-status.pressurizing", Math.round(value * 100));
                 case lowHeat -> Core.bundle.format("eclipse-status.low-heat", Math.round(value * 100));
+                case noRecipe -> Core.bundle.get("eclipse-status.no-recipe");
+                case underpowered -> Core.bundle.format("eclipse-status.underpowered", Strings.autoFixed(need, 1), (int)(value * 100));
             };
         }
 
@@ -68,8 +73,14 @@ public class MachineStatus{
         Status s = new Status();
         if(!b.enabled) return s.set(Kind.disabled, null, 0f);
 
+        //universal machines: a recipe must be chosen, and only its own outputs can block it
+        if(b instanceof RecipeBuild r){
+            if(r.recipe == null) return s.set(Kind.noRecipe, null, 0f);
+            for(ItemStack out : r.recipe.outputs) if(b.items.get(out.item) + out.amount > b.block.itemCapacity) return s.set(Kind.outputFull, out.item, 0f);
+        }
+
         //outputs that have nowhere to go stop the machine
-        if(b.block instanceof GenericCrafter g && b instanceof GenericCrafterBuild){
+        if(b.block instanceof GenericCrafter g && b instanceof GenericCrafterBuild && !(b instanceof RecipeBuild)){
             if(g.outputItems != null){
                 for(ItemStack out : g.outputItems) if(b.items.get(out.item) + out.amount > g.itemCapacity) return s.set(Kind.outputFull, out.item, 0f);
             }
@@ -93,6 +104,12 @@ public class MachineStatus{
             return s.set(Kind.missing, missingOf(b, c), 0f);
         }
 
+        //tier recipes stop below full power instead of slowing down
+        if(b instanceof RecipeBuild r && r.underpowered()){
+            s.need = r.powerNeeded() * 60f;
+            return s.set(Kind.underpowered, null, r.power.status);
+        }
+
         if(b instanceof ReactorBuild r){
             eclipse.world.blocks.ChemicalReactor block = (eclipse.world.blocks.ChemicalReactor)b.block;
             if(!r.catalystSatisfied()) return s.set(Kind.noCatalyst, block.catalyst, 0f);
@@ -110,6 +127,9 @@ public class MachineStatus{
     static @Nullable UnlockableContent missingOf(Building b, Consume c){
         if(c instanceof ConsumeItems ci){
             for(ItemStack st : ci.items) if(b.items.get(st.item) < st.amount) return st.item;
+        }
+        if(c instanceof ConsumeItemDynamic cd){
+            for(ItemStack st : cd.items.get(b)) if(b.items.get(st.item) < st.amount) return st.item;
         }
         if(c instanceof ConsumeLiquid cl) return cl.liquid;
         if(c instanceof ConsumeLiquids cls){

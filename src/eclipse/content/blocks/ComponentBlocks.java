@@ -13,25 +13,24 @@ import static eclipse.content.EclipseItems.*;
 import static mindustry.type.ItemStack.*;
 
 /**
- * Mechanical manufacturing: one fixed-recipe machine per component. Components go into the build costs of
+ * Mechanical manufacturing: the universal Gear Press ({@link RecipeCrafter}) and one fixed-recipe machine per other component. Components go into the build costs of
  * ECLIPSE buildings, module recipes and a few late vanilla buildings (see {@link #patchVanilla()}).
  * Each producer only needs earlier components to build, so there are no circular costs (checked by the test).
  */
 public class ComponentBlocks{
-    public static Block gearPress, metalExtruder, heavyGearPress, casingForge, bearingPress, frameForge, precisionAssembler, coreAssembler,
+    public static Block gearPress, metalExtruder, casingForge, bearingPress, frameForge, precisionAssembler, coreAssembler,
         componentDepot;
 
     public static void load(){
-        // Copper -> copper gears. Early game: basic machinery, pumps, sorters, tier I modules.
-        gearPress = new GenericCrafter("gear-press"){{
+        // Every gear: copper gears (tier I) for basic machinery, pumps, sorters and tier I modules;
+        // titanium gears (tier II) for industrial machinery, reactors and tier II modules.
+        gearPress = new RecipeCrafter("gear-press"){{
             requirements(Category.crafting, with(Items.copper, 40, Items.lead, 25));
             size = 2;
             health = 220;
             itemCapacity = 10;
-            craftTime = 30f;
-            consumeItem(Items.copper, 2);
-            consumePower(0.25f);
-            outputItem = new ItemStack(copperGear, 1);
+            recipe(1, 30f, with(Items.copper, 2), with(copperGear, 1));
+            recipe(2, 60f, with(Items.titanium, 3), with(titaniumGear, 2));
             craftEffect = Fx.pulverizeSmall;
         }};
 
@@ -45,19 +44,6 @@ public class ComponentBlocks{
             consumeItems(with(Items.titanium, 2, Items.graphite, 1));
             consumePower(0.6f);
             outputItem = new ItemStack(titaniumRod, 2);
-            craftEffect = Fx.pulverizeSmall;
-        }};
-
-        // Titanium -> titanium gears. Industrial machinery, reactors, tier II modules.
-        heavyGearPress = new GenericCrafter("heavy-gear-press"){{
-            requirements(Category.crafting, with(Items.titanium, 40, Items.lead, 40, Items.graphite, 20, copperGear, 15));
-            size = 2;
-            health = 300;
-            itemCapacity = 10;
-            craftTime = 60f;
-            consumeItem(Items.titanium, 3);
-            consumePower(0.8f);
-            outputItem = new ItemStack(titaniumGear, 2);
             craftEffect = Fx.pulverizeSmall;
         }};
 

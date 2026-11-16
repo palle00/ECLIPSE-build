@@ -8,6 +8,7 @@ import arc.scene.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import eclipse.world.blocks.*;
 import mindustry.content.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
@@ -63,6 +64,11 @@ public class SetupDiagram extends Element{
     }
 
     public SetupDiagram(Block b){
+        this(b, b instanceof RecipeCrafter rc ? rc.recipes.first() : null);
+    }
+
+    /** The setup for one recipe of a universal machine. */
+    public SetupDiagram(Block b, @Nullable RecipeCrafter.Recipe recipe){
         block = b;
         n = b.size;
         grid = n + margin * 2;
@@ -74,9 +80,15 @@ public class SetupDiagram extends Element{
             else if(c instanceof ConsumeLiquids cls) for(LiquidStack s : cls.liquids) liquidsIn.addUnique(s.liquid);
             else if(c instanceof ConsumePower cp && (cp.usage > 0f || cp.buffered)) power = true;
         }
+        if(recipe != null){
+            for(ItemStack s : recipe.inputs) itemsIn.addUnique(s.item);
+            power = true;
+        }
         Seq<LiquidStack> liquidsOut = new Seq<>();
         int[] dirs = null;
-        if(b instanceof GenericCrafter g){
+        if(recipe != null){
+            for(ItemStack s : recipe.outputs) itemsOut.addUnique(s.item);
+        }else if(b instanceof GenericCrafter g){
             if(g.outputItems != null) for(ItemStack s : g.outputItems) itemsOut.addUnique(s.item);
             if(g.outputLiquids != null) liquidsOut.addAll(g.outputLiquids);
             dirs = g.liquidOutputDirections;

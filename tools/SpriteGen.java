@@ -323,7 +323,6 @@ public class SpriteGen{
         //art pass (art.md §5.1): mechanical components
         gearPress("gear-press");
         metalExtruder("metal-extruder");
-        heavyGearPress("heavy-gear-press");
         casingForge("casing-forge");
         bearingPress("bearing-press");
         frameForge("frame-forge");
@@ -2861,39 +2860,6 @@ public class SpriteGen{
         p.fill(p.oct(6, 21, 52, 20, 3), 14, metal, 3);
         p.fill(p.oct(23, 17, 18, 28, 3), 17, metal, 3);
         p.fill(p.rect(28, 26, 8, 10), 15, steel, 2);
-        save(p, name + "-press");
-    }
-
-    /**
-     * Heavy Gear Press (2×2): heavier and darker than the Gear Press. A thick steel frame on all four sides with
-     * hydraulic rams in the corners, a broad pressure plate ("-press") with a round central die, a feed slot on the left.
-     */
-    static void heavyGearPress(String name) throws IOException{
-        int s = 2 * T;
-        R r = canvas(s);
-        slab(r, 0, 0, s, s, 8, 6, steel);
-        r.fill(r.oct(9, 9, 46, 46, 6), 3, deep, 1);
-        //titanium gear in the die bed
-        r.fill(r.ring(32, 32, 5, 9), 4, titaniumM, 1);
-        for(int i = 0; i < 10; i++) r.fill(r.bar(32, 32, 8, 3, 3, i * 36), 4, titaniumM, 0);
-        //hydraulic rams in the corners, outside the plate
-        for(int[] c : new int[][]{{9, 9}, {55, 9}, {9, 55}, {55, 55}}){
-            r.fill(r.circle(c[0], c[1], 6), 11, steel, 2);
-            r.fill(r.circle(c[0], c[1], 3), 13, metal, 1);
-        }
-        //feed slot, left edge
-        r.fill(r.rect(0, 24, 7, 16), 8, steel, 1);
-        r.fill(r.rect(1, 27, 4, 10), 3, deep, 0);
-        r.fill(r.rect(2, 30, 1, 4), 6, lit(0x8da1e3), 0);
-        save(r, name);
-        glowOf(r, name);
-
-        R p = canvas(s);
-        p.fill(p.oct(14, 14, 36, 36, 5), 14, steel, 3);
-        p.fill(p.oct(17, 17, 30, 30, 4), 15, metal, 2);
-        p.fill(p.circle(32, 32, 9), 18, metal, 2);
-        p.fill(p.circle(32, 32, 4), 16, steel, 1);
-        p.fill(p.rect(22, 47, 20, 2), 16, titaniumM, 0);
         save(p, name + "-press");
     }
 

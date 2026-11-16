@@ -6,6 +6,7 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import eclipse.augment.*;
+import eclipse.world.blocks.*;
 import mindustry.ctype.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -277,7 +278,8 @@ public class EclipseWiki extends BaseDialog{
         if(c instanceof AugmentModule && c.description != null && !key.equals("wiki." + c.name)) page.add("[lightgray]" + c.description).wrap().width(textWidth()).padBottom(8f).row();
 
         //an animated minimal setup for crafters, built from the recipe
-        if(c instanceof Block sb && SetupDiagram.supports(sb)){
+        //universal machines get one setup picture per recipe, in their recipe list
+        if(c instanceof Block sb && SetupDiagram.supports(sb) && !(sb instanceof RecipeCrafter)){
             sub(page, "eclipse-wiki.setup");
             page.add(new SetupDiagram(sb)).left().padBottom(6f).row();
             page.add("[lightgray]" + Core.bundle.get("eclipse-wiki.setup.hint")).wrap().width(textWidth()).left().padBottom(8f).row();
@@ -316,6 +318,11 @@ public class EclipseWiki extends BaseDialog{
         if(b.requirements != null && b.requirements.length > 0){
             sub(page, "eclipse-wiki.cost");
             stacks(page, b.requirements);
+        }
+
+        if(b instanceof RecipeCrafter rc){
+            recipeFacts(rc);
+            return;
         }
 
         //what it needs to run
@@ -366,6 +373,22 @@ public class EclipseWiki extends BaseDialog{
             sub(page, "eclipse-wiki.ammo");
             page.add(ammo).left().row();
         }
+    }
+
+    /** A universal machine: every recipe with its power tier and its own setup picture. */
+    void recipeFacts(RecipeCrafter rc){
+        sub(page, "eclipse-wiki.recipes");
+        for(RecipeCrafter.Recipe r : rc.recipes){
+            float seconds = r.time / 60f;
+            Table row = new Table().left();
+            for(ItemStack s : r.inputs) link(row, s.item, perCraft(s.amount, seconds));
+            row.add(" -> ").padRight(4f);
+            for(ItemStack s : r.outputs) link(row, s.item, perCraft(s.amount, seconds));
+            page.add(row).left().row();
+            page.add("[lightgray]" + Core.bundle.format("eclipse-recipe.tier", RecipeCrafter.roman(r.tier), Strings.autoFixed(r.power() * 60f, 1))).left().row();
+            page.add(new SetupDiagram(rc, r)).left().padBottom(8f).row();
+        }
+        page.add("[lightgray]" + Core.bundle.get("eclipse-wiki.recipes.hint")).wrap().width(textWidth()).left().padBottom(8f).row();
     }
 
     void materialFacts(UnlockableContent mat){
@@ -482,6 +505,7 @@ public class EclipseWiki extends BaseDialog{
             if(cons instanceof ConsumeLiquidFilter f && mat instanceof Liquid l && f.filter.get(l)) return true;
         }
         if(b instanceof eclipse.world.blocks.ChemicalReactor r && r.catalyst == mat) return true;
+        if(b instanceof RecipeCrafter rc && mat instanceof Item i && rc.usesItem(i)) return true;
         if(b instanceof ItemTurret it && mat instanceof Item i && it.ammoTypes.containsKey(i)) return true;
         if(b instanceof LiquidTurret lt && mat instanceof Liquid l && lt.ammoTypes.containsKey(l)) return true;
         return false;

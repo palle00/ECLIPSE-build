@@ -31,12 +31,12 @@ public class EclipseTechTree{
     public static void load(){
         //mechanical manufacturing
         TechNode gears = child(find(Blocks.graphitePress), gearPress);
-        TechNode heavyGears = child(child(gears, metalExtruder), heavyGearPress);
-        child(heavyGears, casingForge);
-        TechNode bearings = child(heavyGears, bearingPress);
+        TechNode rods = child(gears, metalExtruder);
+        child(rods, casingForge);
+        TechNode bearings = child(rods, bearingPress);
         child(bearings, frameForge);
         child(child(bearings, precisionAssembler), coreAssembler);
-        child(heavyGears, componentDepot);
+        child(rods, componentDepot);
         TechNode gearItem = child(find(Items.copper), copperGear);
         TechNode rodItem = child(find(Items.titanium), titaniumRod);
         child(rodItem, titaniumGear);

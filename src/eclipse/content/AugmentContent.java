@@ -75,7 +75,7 @@ public class AugmentContent{
 
     /** Crafters that consume items each cycle. */
     public static final Boolf<Block> itemConsumers = b ->
-        b instanceof GenericCrafter && b.findConsumer(c -> c instanceof ConsumeItems) != null;
+        b instanceof RecipeCrafter || (b instanceof GenericCrafter && b.findConsumer(c -> c instanceof ConsumeItems) != null);
 
     /** Machines that make things: crafters (vanilla and ECLIPSE), separators, drills and solid pumps. */
     public static final Boolf<Block> producers = b ->

@@ -337,14 +337,18 @@ public class AugmentationCoupler extends Block{
             if(e.yield > 0f){
                 if(target instanceof DrillBuild d && d.dominantItem != null){
                     grant(yieldAccumulator, d.dominantItem, e.yield);
+                }else if(target instanceof eclipse.world.blocks.RecipeCrafter.RecipeBuild r){
+                    if(r.recipe != null) for(ItemStack s : r.recipe.outputs) grant(yieldAccumulator, s.item, s.amount * e.yield);
                 }else if(target.block instanceof mindustry.world.blocks.production.GenericCrafter g && g.outputItems != null){
                     for(ItemStack s : g.outputItems) grant(yieldAccumulator, s.item, s.amount * e.yield);
                 }
             }
             if(e.inputSaving > 0f || e.recycle > 0f){
-                ConsumeItems inputs = target.block.findConsumer(c -> c instanceof ConsumeItems);
+                ConsumeItems consumer = target.block.findConsumer(c -> c instanceof ConsumeItems);
+                ItemStack[] inputs = target instanceof eclipse.world.blocks.RecipeCrafter.RecipeBuild r ? (r.recipe == null ? null : r.recipe.inputs)
+                    : consumer == null ? null : consumer.items;
                 if(inputs != null){
-                    for(ItemStack s : inputs.items){
+                    for(ItemStack s : inputs){
                         if(e.inputSaving > 0f) grant(savingAccumulator, s.item, s.amount * e.inputSaving);
                         scrapAccumulator += s.amount * e.recycle;
                     }

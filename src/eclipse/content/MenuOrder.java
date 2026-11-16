@@ -84,7 +84,7 @@ public class MenuOrder{
         after(Blocks.overdriveDome, augmentationCoupler, advancedCoupler, chemicalInterface, militaryInterface, augmentationHub);
 
         //---- crafting: each ECLIPSE production chain follows the vanilla machine it grows out of ----
-        after(Blocks.multiPress, methanePyrolysisReactor, gearPress, metalExtruder, heavyGearPress, casingForge, bearingPress, frameForge,
+        after(Blocks.multiPress, methanePyrolysisReactor, gearPress, metalExtruder, casingForge, bearingPress, frameForge,
             precisionAssembler, coreAssembler); //mechanical manufacturing
         after(Blocks.siliconSmelter, siliconReductionFurnace, siliconRefinery, chipFabricator, wireDrawer, circuitPrinter, controlUnitAssembler);
         after(Blocks.kiln, sodaGlassFurnace, glassKiln);
