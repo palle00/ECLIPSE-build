@@ -12,7 +12,7 @@ public class EclipseLiquids{
         ammonia, nitricAcid, steam, liquidNitrogen, aquaRegia,
         flueGas, carbonDioxide, wastewater,
         methanol, propylene, acrylonitrile, biofuel, chilledWater,
-        diesel, argon;
+        diesel, argon, heavyWater, deuterium, liquidSodium;
 
     public static void load(){
         steam = new Liquid("steam", Color.valueOf("e8edf0")){{
@@ -190,6 +190,32 @@ public class EclipseLiquids{
         //about 1% of air: the inert shielding gas of electric arcs
         argon = new Liquid("argon", Color.valueOf("c9d6ff")){{
             gas = true;
+        }};
+
+        //D2O, concentrated in the electrolyte left by long water electrolysis (the historic Norsk Hydro route);
+        //only electrolysed further into deuterium, so it is not offered as a coolant
+        heavyWater = new Liquid("heavy-water", Color.valueOf("6fa8e8")){{
+            heatCapacity = 0.45f;
+            effect = StatusEffects.wet;
+            coolant = false;
+        }};
+
+        //the fusion fuel: electrolysed out of heavy water; burns like hydrogen
+        deuterium = new Liquid("deuterium", Color.valueOf("ffb3c8")){{
+            gas = true;
+            flammability = 1f;
+            barColor = Color.valueOf("ff9ab6");
+            coolant = false;
+        }};
+
+        //the breeder reactor's coolant: a molten metal that carries heat without slowing the fast neutrons;
+        //it burns in air, and is kept out of turrets and modules (not a coolant for them)
+        liquidSodium = new Liquid("liquid-sodium", Color.valueOf("e0e2e8")){{
+            temperature = 0.6f;
+            heatCapacity = 0.6f;
+            viscosity = 0.4f;
+            flammability = 0.6f;
+            coolant = false;
         }};
     }
 }

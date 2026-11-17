@@ -40,12 +40,12 @@ public class Polish{
         kind(Kind.chemical, "chemical-reactor", "pressure-reactor", "acid-leaching-vat", "sulfuric-acid-plant", "platinum-refinery", "reprocessing-plant",
             "chemical-synthesis-complex", "lithium-extractor", "mineral-separator", "water-treatment-plant", "wastewater-treatment-plant", "distillation-column");
         kind(Kind.steam, "industrial-boiler", "steam-turbine", "cooling-tower", "steam-cracker", "geothermal-heat-tap");
-        kind(Kind.combustion, "industrial-heater", "methane-turbine", "biofuel-engine");
-        kind(Kind.reactor, "fission-reactor");
+        kind(Kind.combustion, "industrial-heater", "methane-turbine", "combined-cycle-turbine", "biofuel-engine");
+        kind(Kind.reactor, "fission-reactor", "breeder-reactor", "fusion-reactor");
         kind(Kind.cryo, "hydrogen-fuel-cell", "air-separation-unit", "cryogenic-condenser", "gas-separator", "vacuum-freezer");
         kind(Kind.press, "gear-press", "extruder", "metal-press", "composite-press");
         kind(Kind.grind, "ore-crusher", "flotation-cell", "ore-washer", "lathe");
-        kind(Kind.electronics, "circuit-assembler", "chip-fabricator", "experimental-core-assembler", "silicon-refinery");
+        kind(Kind.electronics, "solar-farm", "circuit-assembler", "chip-fabricator", "experimental-core-assembler", "silicon-refinery");
         kind(Kind.bio, "biomass-cultivator", "algae-photobioreactor", "enzyme-extractor", "biochemical-fermenter", "anaerobic-digester");
         kind(Kind.assembler, "assembler", "basic-module-assembler", "advanced-module-assembler", "experimental-augmentation-facility", "aetherite-module-forge", "module-recycling-facility");
     }

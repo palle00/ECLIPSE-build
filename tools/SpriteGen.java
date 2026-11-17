@@ -264,6 +264,13 @@ public class SpriteGen{
         electricHeater("electric-heater");
         flowBattery("flow-battery");
         fissionReactor("fission-reactor");
+        breederReactor("breeder-reactor");
+        combinedCycleTurbine("combined-cycle-turbine");
+        solarFarm("solar-farm");
+        fusionReactor("fusion-reactor");
+        liquid("heavy-water", 0x6fa8e8);
+        gas("deuterium", 0xffb3c8);
+        liquid("liquid-sodium", 0xe0e2e8);
         reprocessingPlant("reprocessing-plant");
 
         // ---- waste and emissions ----
@@ -3632,6 +3639,117 @@ public class SpriteGen{
         BufferedImage top = port(s, 22, acc(shade(0xff7ad1, 0.75f))).render();
         save(top, name + "-top1");
         save(flipY(top), name + "-top2");
+    }
+
+    /** Breeder Reactor (4x4): a fission core inside a ring of thorium blanket tubes, with silver liquid-sodium loops. */
+    static void breederReactor(String name) throws IOException{
+        int s = 4 * T;
+        float c = s / 2f;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 6, 5, steel);
+        r.fill(r.oct(6, 6, s - 12, s - 12, 28), 11, metal, 5);
+        //the thorium blanket: a ring of tubes around the core
+        for(int i = 0; i < 16; i++){
+            float a = i * 22.5f;
+            r.fill(r.circle(c + (float)Math.cos(Math.toRadians(a)) * 40, c + (float)Math.sin(Math.toRadians(a)) * 40, 5f), 13, dull(0x8a6a80), 2);
+        }
+        r.fill(r.oct(c - 28, c - 28, 56, 56, 14), 12, steel, 3);
+        r.fill(r.oct(c - 20, c - 20, 40, 40, 10), 5, deep, 1);
+        for(int i = -1; i <= 1; i++) for(int j = -1; j <= 1; j++) r.fill(r.circle(c + i * 10, c + j * 10, 3.5f), 6, (i == 0 && j == 0) ? lit(0xffb46a) : dull(0x9a7a60), 1);
+        //sodium loops in the corners
+        for(int[] k : new int[][]{{14, 14}, {s - 14, 14}, {14, s - 14}, {s - 14, s - 14}}) r.fill(r.ring(k[0], k[1], 4, 8), 12, acc(0xd8dae2), 2);
+        save(r, name);
+        BufferedImage glow = img(s);
+        boolean[] core = r.oct(c - 20, c - 20, 40, 40, 10);
+        for(int i = 0; i < core.length; i++) if(core[i]) glow.setRGB(i % s, i / s, 0x46ffb46a);
+        save(glow, name + "-glow");
+        edgeGlow(name + "-heat", 4);
+        BufferedImage top = port(s, 26, acc(shade(0xffb46a, 0.75f))).render();
+        save(top, name + "-top1");
+        save(flipY(top), name + "-top2");
+    }
+
+    /** Combined-Cycle Turbine (4x4): combustor and stepped gas turbine at the back, the heat-recovery duct at the front (right). */
+    static void combinedCycleTurbine(String name) throws IOException{
+        int s = 4 * T;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 5, 5, metal);
+        //combustor can on the left
+        r.fill(r.circle(22, s / 2f, 16), 11, steel, 3);
+        r.fill(r.circle(22, s / 2f, 9), 5, deep, 1);
+        r.fill(r.circle(22, s / 2f, 5), 6, lit(0xff9a4a), 0);
+        //turbine stages widening toward the exhaust
+        int[][] stages = {{38, 46, 16, 36}, {54, 40, 18, 48}, {72, 34, 20, 60}};
+        for(int[] st : stages){
+            r.fill(r.rect(st[0], st[1], st[2], st[3]), 11, steel, 3);
+            for(int x = st[0] + 3; x < st[0] + st[2] - 2; x += 4) r.fill(r.rect(x, st[1] + 3, 2, st[3] - 6), 12, metal, 0);
+        }
+        //heat-recovery duct along the front edge, with a glowing hot section
+        r.fill(r.rect(94, 14, 28, 100), 10, steel, 3);
+        for(int y = 20; y < 108; y += 8) r.fill(r.rect(98, y, 20, 3), 11, metal, 0);
+        r.fill(r.rect(100, 54, 16, 20), 6, lit(0xff7a3a), 0);
+        //generator housing and flue stack
+        r.fill(r.oct(36, 4, 54, 24, 6), 12, metal, 2);
+        r.fill(r.circle(20, 110, 9), 9, metal, 2);
+        r.fill(r.circle(20, 110, 5), 4, deep, 0);
+        save(r, name);
+        glowOf(r, name);
+        edgeGlow(name + "-heat", 4);
+        BufferedImage top = port(s, 26, acc(shade(0xff9a4a, 0.75f))).render();
+        save(top, name + "-top1");
+        save(flipY(top), name + "-top2");
+    }
+
+    /** Solar Farm (3x3): a frame holding a 3x3 grid of blue silicon cells. */
+    static void solarFarm(String name) throws IOException{
+        int s = 3 * T;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 4, 5, metal);
+        for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++){
+            int x = 6 + i * 28, y = 6 + j * 28;
+            r.fill(r.rect(x, y, 26, 26), 8, glass(0x3a5fb0), 1);
+            for(int k = 1; k < 4; k++){
+                r.fill(r.rect(x + k * 6 + 1, y + 2, 1, 22), 9, acc(0x8fb0e8), 0);
+                r.fill(r.rect(x + 2, y + k * 6 + 1, 22, 1), 9, acc(0x8fb0e8), 0);
+            }
+        }
+        save(r, name);
+    }
+
+    /** Fusion Reactor (5x5): a tokamak seen from above, a torus wrapped in magnet coils around a dark central column; plasma layers. */
+    static void fusionReactor(String name) throws IOException{
+        int s = 5 * T;
+        float c = s / 2f;
+        R bottom = canvas(s);
+        slab(bottom, 0, 0, s, s, 6, 5, steel);
+        bottom.fill(bottom.circle(c, c, 66), 3, deep, 2);
+        save(bottom, name + "-bottom");
+
+        R r = canvas(s);
+        //outer vessel ring, magnet coils around it and the central solenoid; the plasma shows through the gap
+        r.fill(r.ring(c, c, 52, 70), 11, metal, 4);
+        for(int i = 0; i < 18; i++) r.fill(r.bar(c, c, 46, 30, 9, i * 20), 13, acc(0x8fd0ff), 2);
+        r.fill(r.circle(c, c, 20), 12, steel, 3);
+        r.fill(r.circle(c, c, 11), 13, metal, 2);
+        //corner cryostat ports
+        for(int[] k : new int[][]{{14, 14}, {s - 14, 14}, {14, s - 14}, {s - 14, s - 14}}){
+            r.fill(r.circle(k[0], k[1], 10), 10, steel, 2);
+            r.fill(r.circle(k[0], k[1], 5), 11, acc(0xbfe3ff), 1);
+        }
+        save(r, name);
+
+        //plasma: soft rings in the torus gap, from wide and faint to narrow and bright (tinted by the block)
+        for(int p = 0; p < 4; p++){
+            BufferedImage img = img(s);
+            float mid = 36f, half = 14f - p * 3f;
+            for(int y = 0; y < s; y++) for(int x = 0; x < s; x++){
+                float d = (float)Math.hypot(x + 0.5f - c, y + 0.5f - c), t = 1f - Math.abs(d - mid) / half;
+                if(t <= 0f) continue;
+                int a = (int)(Math.min(1f, t * t) * (110 + p * 40));
+                img.setRGB(x, y, (a << 24) | 0xffffff);
+            }
+            save(img, name + "-plasma-" + p);
+        }
     }
 
     /** Walls: edge-to-edge plates that tile; layered armour, kind 0 superalloy, 1 composite, 2 surge superalloy. */

@@ -75,6 +75,15 @@ public class ChemicalBlocks{
                 .liquidsOut(Liquids.hydrogen, 8f / 60f, oxygen, 4f / 60f).sides(1, 3);
             recipe(2, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(brine, 6f / 60f)
                 .liquidsOut(chlorine, 3f / 60f, Liquids.hydrogen, 3f / 60f, sodiumHydroxide, 6f / 60f).sides(1, 3, 0); //2 NaCl + 2 H2O -> Cl2 + H2 + 2 NaOH
+            //heavy water: light water electrolyses faster, so D2O concentrates in the cell (Norsk Hydro); a trickle out of the front
+            recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(purifiedWater, 24f / 60f)
+                .liquidsOut(heavyWater, 0.6f / 60f, Liquids.hydrogen, 15f / 60f, oxygen, 7.5f / 60f).sides(0, 1, 3);
+            //2 D2O -> 2 D2 + O2: the fusion fuel
+            recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(heavyWater, 6f / 60f)
+                .liquidsOut(deuterium, 8f / 60f, oxygen, 4f / 60f).sides(1, 3);
+            //sodium metal and chlorine from salt (Downs cell; simplified: from brine, see INDUSTRY_OVERHAUL accepted simplifications)
+            recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(brine, 6f / 60f)
+                .liquidsOut(liquidSodium, 2f / 60f, chlorine, 3f / 60f).sides(1, 3);
             recipe(3, 90f, ItemStack.empty, with(magnesium, 1)).liquidsIn(brine, 6f / 60f, hydrochloricAcid, 2f / 60f)
                 .liquidsOut(chlorine, 2f / 60f).vented(); //Dow: magnesium chloride from brine, electrolysed molten (chlorine vented if unused)
             recipe(3, 60f, with(alumina, 2, petroleumCoke, 1), with(hotAluminium, 1)).liquidsOut(carbonDioxide, 1f / 60f).vented(); //the coke anodes burn to CO2

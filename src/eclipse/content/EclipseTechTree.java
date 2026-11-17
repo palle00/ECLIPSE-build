@@ -180,6 +180,7 @@ public class EclipseTechTree{
         //nuclear
         TechNode fission = child(find(Blocks.thoriumReactor), fissionReactor); //fuel rods come from the Assembler
         child(fission, reprocessingPlant);
+        child(fission, breederReactor); //cooled with liquid sodium; its spent rods reprocess into more thorium
 
         //metallurgy
         TechNode mineralSep = child(find(Blocks.separator), mineralSeparator);
@@ -202,6 +203,8 @@ public class EclipseTechTree{
         TechNode exchanger = child(sulfuric, heatExchanger);
         TechNode boiler = child(exchanger, industrialBoiler);
         child(boiler, steamTurbine);
+        child(find(methaneTurbine), combinedCycleTurbine); //its exhaust heat drives a boiler
+        child(find(Blocks.largeSolarPanel), solarFarm);
 
         //materials
         TechNode sulfurNode = child(find(Items.coal), sulfur);
@@ -244,6 +247,8 @@ public class EclipseTechTree{
         TechNode chlorineNode = child(brineNode, chlorine);
         child(chlorineNode, hydrochloricAcid);
         child(brineNode, sodiumHydroxide);
+        child(brineNode, liquidSodium);
+        child(child(pure, heavyWater), deuterium);
         child(pure, acidicWaste);
         child(pure, wastewater);
         child(pure, sulfuricAcid);
@@ -283,7 +288,8 @@ public class EclipseTechTree{
 
         //endgame: exotic chemistry, the long wave delay, the World Engine
         TechNode synthesis = child(find(platinumRefinery), synthesisComplex);
-        child(find(Blocks.impactReactor), worldEngine);
+        TechNode fusion = child(find(Blocks.impactReactor), fusionReactor);
+        child(fusion, worldEngine); //its Confinement stage needs the fusion industry's deuterium
         child(find(aetherite), superconductor);
 
         //specialist robotics: built in the vanilla air factory, run from the dispatch hub

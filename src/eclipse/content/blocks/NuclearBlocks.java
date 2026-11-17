@@ -15,7 +15,7 @@ import static mindustry.type.ItemStack.*;
 
 /** Nuclear fuel cycle: fabrication -> fission heat -> reprocessing. */
 public class NuclearBlocks{
-    public static Block fissionReactor, reprocessingPlant;
+    public static Block fissionReactor, reprocessingPlant, breederReactor;
 
     public static void load(){
         // Fuel rods -> a large amount of heat out of the front (drives the boiler / steam turbine chain).
@@ -30,6 +30,24 @@ public class NuclearBlocks{
             consumeItem(thoriumFuelRod, 1);
             outputItem = new ItemStack(spentFuelRod, 1);
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff7ad1"); }}, new DrawHeatOutput());
+        }};
+
+        // Fast breeder: a thorium blanket around the core breeds new fissile fuel, so each fuel rod comes out as two spent
+        // rods (four thorium after reprocessing). 2.5x the fission reactor's heat; cooled by liquid sodium, which keeps
+        // the neutrons fast. Its heat drives one Industrial Boiler at full output.
+        breederReactor = new HeatProducer("breeder-reactor"){{
+            requirements(Category.power, with(Items.thorium, 300, Items.lead, 400, tungstenPlate, 60, pressureCasing, 60, superalloyFrame, 40, controlUnit, 20));
+            size = 4;
+            health = 2200;
+            itemCapacity = 10;
+            liquidCapacity = 40f;
+            craftTime = 600f;
+            heatOutput = 100f;
+            warmupRate = 0.04f;
+            consumeItem(thoriumFuelRod, 1);
+            consumeLiquid(liquidSodium, 2f / 60f); //coolant lost to the cover gas and to activation
+            outputItem = new ItemStack(spentFuelRod, 2);
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ffb46a"); }}, new DrawHeatOutput());
         }};
 
         // Spent fuel + nitric acid -> recovered thorium (PUREX), leaving acidic waste.

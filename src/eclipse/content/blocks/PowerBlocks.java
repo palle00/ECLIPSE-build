@@ -19,7 +19,7 @@ import static mindustry.type.ItemStack.*;
 public class PowerBlocks{
     public static Block thermalStorage, coolingTower,
         hydrogenFuelCell, methaneTurbine, industrialBattery, lithiumBattery, industrialHeater,
-        heatExchanger, industrialBoiler, steamTurbine, electricHeater, flowBattery;
+        heatExchanger, industrialBoiler, steamTurbine, electricHeater, flowBattery, combinedCycleTurbine, solarFarm;
 
     public static void load(){
         // ---- heat recovery: waste heat -> exchanger -> boiler -> steam turbine ----
@@ -40,7 +40,7 @@ public class PowerBlocks{
             health = 650;
             liquidCapacity = 60f;
             heatRequirement = 10f;
-            maxEfficiency = 4f; //one fission reactor drives one boiler at full output
+            maxEfficiency = 10f; //up to 100 heat: a fission reactor (40) drives it at 4x, a breeder reactor (100) at 10x
             consumeLiquid(purifiedWater, 6f / 60f);
             outputLiquid = new LiquidStack(steam, 12f / 60f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 4f),
@@ -74,7 +74,7 @@ public class PowerBlocks{
             size = 3;
             health = 600;
             liquidCapacity = 40f;
-            powerProduction = 3f;
+            powerProduction = 15f; //900/s: a fission reactor + boiler + 4 turbines gives 3600/s, twice a thorium reactor
             consumeLiquid(steam, 12f / 60f);
             outputLiquid = new LiquidStack(purifiedWater, 5f / 60f);
             generateEffect = Fx.steam;
@@ -88,7 +88,7 @@ public class PowerBlocks{
             size = 2;
             health = 300;
             liquidCapacity = 20f;
-            powerProduction = 0.9f;
+            powerProduction = 1.5f; //90/s
             consumeLiquids(LiquidStack.with(Liquids.hydrogen, 6f / 60f, oxygen, 3f / 60f));
             outputLiquid = new LiquidStack(purifiedWater, 3f / 60f);
             generateEffect = Fx.none;
@@ -101,12 +101,36 @@ public class PowerBlocks{
             size = 2;
             health = 320;
             liquidCapacity = 20f;
-            powerProduction = 4f;
+            powerProduction = 6f; //360/s
             consumeLiquid(methane, 6f / 60f);
             outputLiquid = new LiquidStack(flueGas, 12f / 60f); //vented when not piped away
             generateEffect = Fx.generatespark;
             effectChance = 0.05f;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff9a4a"); }});
+        }};
+
+        // Combined cycle: a large gas turbine (about 1.7x the Methane Turbine's power per methane) whose hot exhaust
+        // also gives heat out of the front, so a boiler and steam turbine there add even more power.
+        combinedCycleTurbine = new CombinedCycleTurbine("combined-cycle-turbine"){{
+            requirements(Category.power, with(Items.titanium, 200, superalloyFrame, 20, pressureCasing, 20, industrialBearing, 20, rotor, 10, permanentMagnetMotor, 6));
+            size = 4;
+            health = 1100;
+            liquidCapacity = 80f;
+            powerProduction = 40f; //2400/s
+            heatOutput = 10f; //drives one Industrial Boiler -> one Steam Turbine (+900/s)
+            consumeLiquid(methane, 35f / 60f);
+            outputLiquid = new LiquidStack(flueGas, 40f / 60f); //vented when not piped away
+            generateEffect = Fx.generatespark;
+            effectChance = 0.08f;
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff9a4a"); }}, new DrawHeatOutput());
+        }};
+
+        // Photovoltaic field of high-purity silicon cells: no fuel, follows the map's light like vanilla solar panels.
+        solarFarm = new SolarGenerator("solar-farm"){{
+            requirements(Category.power, with(highPuritySilicon, 60, reinforcedGlass, 30, aluminiumPlate, 30, copperWire, 40, Items.lead, 60));
+            size = 3;
+            health = 500;
+            powerProduction = 5f; //300/s in full light
         }};
 
         // Lead-acid bank: better storage density than the large battery, costs processed cells.

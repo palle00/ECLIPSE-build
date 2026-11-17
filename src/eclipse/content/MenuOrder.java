@@ -53,9 +53,10 @@ public class MenuOrder{
 
         //---- power ----
         after(Blocks.batteryLarge, industrialBattery, lithiumBattery, flowBattery, aetheriteCapacitor);
-        after(Blocks.steamGenerator, hydrogenFuelCell, methaneTurbine, biofuelEngine, industrialBoiler, steamTurbine);
-        after(Blocks.thoriumReactor, fissionReactor);
-        after(Blocks.impactReactor, worldEngine);
+        after(Blocks.steamGenerator, hydrogenFuelCell, methaneTurbine, combinedCycleTurbine, biofuelEngine, industrialBoiler, steamTurbine);
+        after(Blocks.largeSolarPanel, solarFarm);
+        after(Blocks.thoriumReactor, fissionReactor, breederReactor);
+        after(Blocks.impactReactor, fusionReactor, worldEngine);
 
         //---- turrets ----
         after(Blocks.hail, MilitaryBlocks.minelayer);
@@ -121,10 +122,11 @@ public class MenuOrder{
         after(Items.blastCompound, ammoniumNitrate);
 
         //---- liquids ----
-        after(Liquids.water, chilledWater, purifiedWater, EclipseLiquids.steam, brine, sodiumHydroxide, chlorine, hydrochloricAcid, sulfuricAcid, acidicWaste,
+        after(Liquids.water, chilledWater, purifiedWater, heavyWater, EclipseLiquids.steam, brine, sodiumHydroxide, liquidSodium, chlorine, hydrochloricAcid, sulfuricAcid, acidicWaste,
             wastewater, ammonia, nitricAcid, aquaRegia);
         after(Liquids.oil, methane, naphtha, diesel, ethylene, flueGas, carbonDioxide, methanol, propylene, acrylonitrile, biofuel);
         after(Liquids.cryofluid, oxygen, argon, liquidNitrogen);
+        after(Liquids.hydrogen, deuterium);
 
         apply(ContentType.block);
         apply(ContentType.item);

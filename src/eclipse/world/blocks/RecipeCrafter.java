@@ -28,7 +28,8 @@ import static mindustry.Vars.*;
  * grid covers that draw in full ({@link #minSatisfaction}); below it the machine stops instead of slowing down.
  *
  * Overclocking: level 0-III, set next to the recipe. Each level doubles speed for a steeply rising power cost
- * ({@link #overclockSpeed}, {@link #overclockPower}); recipe tier + level may not go above tier V for now.
+ * ({@link #overclockSpeed}, {@link #overclockPower}). Every recipe can reach III; a tier V recipe at III wants about
+ * 1.5 million power/s, which only a World Engine base can supply.
  *
  * Declare a machine as a list of recipes:
  * <pre>
@@ -164,8 +165,9 @@ public class RecipeCrafter extends GenericCrafter{
             return tierPower[tier];
         }
 
+        /** Every recipe can overclock to III; the power cost (up to x200) is the limit, not the tier. */
         public int maxOverclock(){
-            return Math.min(overclockSpeed.length - 1, maxTier - tier);
+            return overclockSpeed.length - 1;
         }
 
         public boolean uses(Item item){
@@ -345,7 +347,7 @@ public class RecipeCrafter extends GenericCrafter{
         public @Nullable Recipe fixed;
         /** The recipe running now: the chosen one, or the one picked automatically. */
         public @Nullable Recipe recipe;
-        /** Overclock level the player chose (0-III), and the level in effect for the running recipe (capped by its tier). */
+        /** Overclock level the player chose (0-III), and the level in effect for the running recipe. */
         public int level, overclock;
         /** The recipe's liquid inputs scaled by the overclock speed (what the liquid consumer takes per tick). */
         public LiquidStack[] liquidInputs = {};
