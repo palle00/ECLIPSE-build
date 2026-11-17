@@ -65,6 +65,7 @@ public class Arsenal{
     public static class AerialMineBulletType extends BasicBulletType{
         public float armTime = 45f, triggerRange = 44f, accel = 0.45f, maxSpeed = 6f;
         public Color lightColor = Color.valueOf("ff795e");
+        static final Color shellColor = Color.valueOf("4d4e58"), capColor = Color.valueOf("8a8b94");
 
         public AerialMineBulletType(float damage){
             super(3.2f, damage);
@@ -96,9 +97,9 @@ public class Arsenal{
         @Override
         public void draw(Bullet b){
             boolean armed = b.time >= armTime;
-            Draw.color(Color.valueOf("4d4e58"));
+            Draw.color(shellColor);
             Fill.circle(b.x, b.y, 2.6f);
-            Draw.color(Color.valueOf("8a8b94"));
+            Draw.color(capColor);
             Fill.circle(b.x, b.y, 1.8f);
             //a blinking light once armed
             Draw.color(lightColor, armed ? 0.5f + Mathf.absin(Time.time + b.id, 6f, 0.5f) : 0.25f);

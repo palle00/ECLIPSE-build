@@ -21,6 +21,7 @@ public class EclipseMod extends Mod{
     public static final String showcaseName = "ECLIPSE Showcase";
 
     public EclipseMod(){
+        CrashLog.init(); //first: ECLIPSE context in the game log if the game crashes, from here on
         Corrosion.init();
         Augmentation.init();
         TurretStats.init(); //after Augmentation, so its extra laser damage is counted
@@ -36,11 +37,12 @@ public class EclipseMod extends Mod{
 
         Events.on(ClientLoadEvent.class, e -> {
             Log.info("[ECLIPSE] client loaded");
-            CompactCoreDisplay.install();
-            EclipseWiki.install();
-            MenuBackdrop.install();
-            LiveMap.install(); //the map screen (M) turns into the live game when zoomed in
-            BlockSearch.install(); //search box above the build menu
+            //optional UI extras that hook into vanilla's UI: one that no longer fits a game update stays off (logged), the game runs on
+            CrashLog.optional("compact core display", CompactCoreDisplay::install);
+            CrashLog.optional("wiki", EclipseWiki::install);
+            CrashLog.optional("menu backdrop", MenuBackdrop::install);
+            CrashLog.optional("live map", LiveMap::install); //the map screen (M) turns into the live game when zoomed in
+            CrashLog.optional("block search", BlockSearch::install); //search box above the build menu
         });
 
         //developer convenience: showcase.ps1 -Open drops this one-shot flag to jump straight into the showcase map
@@ -57,6 +59,8 @@ public class EclipseMod extends Mod{
 
     @Override
     public void loadContent(){
+        long start = Time.millis();
+        CrashLog.contentLoading();
         EclipseItems.load();
         EclipseLiquids.load();
         eclipse.exploration.Biomes.load(); //before the blocks that use its floor attribute
@@ -93,5 +97,6 @@ public class EclipseMod extends Mod{
 
         //new procedurally generated Serpulo sectors also get ECLIPSE ores
         Planets.serpulo.generator = new EclipseSerpuloGenerator();
+        CrashLog.contentLoaded(start);
     }
 }

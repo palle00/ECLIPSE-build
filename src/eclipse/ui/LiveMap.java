@@ -35,9 +35,22 @@ public class LiveMap{
     static final arc.math.geom.Vec2 savedPos = new arc.math.geom.Vec2();
     static float savedW, savedH;
     static boolean moved;
+    /** Vanilla's private pan and zoom of the map screen, looked up once (they are read every frame while the map is open). */
+    static java.lang.reflect.Field zoomField, panxField, panyField;
 
-    /** Call on ClientLoadEvent. */
-    public static void install(){
+    /** The private float field of the map screen that this feature reads; throws if a game update renamed or changed it. */
+    public static java.lang.reflect.Field mapField(String name) throws NoSuchFieldException{
+        java.lang.reflect.Field f = MinimapFragment.class.getDeclaredField(name);
+        if(f.getType() != float.class) throw new NoSuchFieldException(name + " is no longer a float");
+        f.setAccessible(true);
+        return f;
+    }
+
+    /** Call on ClientLoadEvent. Throws, leaving the vanilla map screen untouched, if this game version's map screen differs. */
+    public static void install() throws NoSuchFieldException{
+        zoomField = mapField("zoom");
+        panxField = mapField("panx");
+        panyField = mapField("pany");
         frag = ui.minimapfrag;
         Element vanilla = frag.elem;
         vanilla.visible(() -> frag.shown() && live < 0f);
@@ -78,8 +91,8 @@ public class LiveMap{
             @Override
             public void pan(InputEvent event, float x, float y, float deltaX, float deltaY){
                 float zoom = LiveMap.zoom();
-                Reflect.set(frag, "panx", (float)Reflect.get(frag, "panx") + deltaX / zoom);
-                Reflect.set(frag, "pany", (float)Reflect.get(frag, "pany") + deltaY / zoom);
+                set(panxField, get(panxField) + deltaX / zoom);
+                set(panyField, get(panyField) + deltaY / zoom);
             }
 
             @Override
@@ -94,13 +107,29 @@ public class LiveMap{
         Events.run(Trigger.postDraw, LiveMap::restoreCamera);
     }
 
+    static float get(java.lang.reflect.Field f){
+        try{
+            return f.getFloat(frag);
+        }catch(IllegalAccessException e){
+            throw new RuntimeException(e); //cannot happen: made accessible in install()
+        }
+    }
+
+    static void set(java.lang.reflect.Field f, float value){
+        try{
+            f.setFloat(frag, value);
+        }catch(IllegalAccessException e){
+            throw new RuntimeException(e);
+        }
+    }
+
     static float zoom(){
-        return Reflect.get(frag, "zoom");
+        return get(zoomField);
     }
 
     /** Same limits as vanilla's map zoom. */
     static void setZoom(float zoom){
-        Reflect.set(frag, "zoom", Mathf.clamp(zoom, 0.25f, 10f));
+        set(zoomField, Mathf.clamp(zoom, 0.25f, 10f));
     }
 
     /** Screen pixels per world unit the map is drawn at (vanilla draws one tile as 5 scaled pixels per zoom step). */
@@ -123,7 +152,7 @@ public class LiveMap{
         float zoom = zoom();
         float size = Scl.scl(5f) * zoom * world.width();
         float ratio = (float)renderer.minimap.getTexture().height / renderer.minimap.getTexture().width;
-        float panx = Reflect.get(frag, "panx"), pany = Reflect.get(frag, "pany");
+        float panx = get(panxField), pany = get(panyField);
         out.set((size / 2f - panx * zoom) / size * world.unitWidth() - tilesize / 2f,
             (size * ratio / 2f - pany * zoom) / (size * ratio) * world.unitHeight() - tilesize / 2f);
     }
@@ -158,7 +187,7 @@ public class LiveMap{
             float zoom = zoom();
             float size = Scl.scl(5f) * zoom * world.width();
             float ratio = (float)renderer.minimap.getTexture().height / renderer.minimap.getTexture().width;
-            float panx = Reflect.get(frag, "panx"), pany = Reflect.get(frag, "pany");
+            float panx = get(panxField), pany = get(panyField);
             Draw.color(Color.black, 1f - t);
             Fill.crect(0, 0, w, h);
             Draw.color(1f, 1f, 1f, 1f - t);

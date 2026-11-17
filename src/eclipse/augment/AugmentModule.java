@@ -3,6 +3,7 @@ package eclipse.augment;
 import arc.*;
 import arc.func.*;
 import arc.graphics.*;
+import arc.struct.*;
 import arc.util.*;
 import mindustry.type.*;
 import mindustry.world.*;
@@ -134,6 +135,14 @@ public class AugmentModule extends Item{
     public AugmentModule(String name, Color color){
         super(name, color);
         family = name.replaceAll("-\\d+$", "");
+    }
+
+    static @Nullable Seq<AugmentModule> all;
+
+    /** Every module, in content order. Only call once content has loaded (the list is built on first use). */
+    public static Seq<AugmentModule> all(){
+        if(all == null) all = mindustry.Vars.content.items().select(i -> i instanceof AugmentModule).as();
+        return all;
     }
 
     @Override

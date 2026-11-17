@@ -168,10 +168,9 @@ public class AugmentationCoupler extends Block{
         /** All modules held, one entry per module item. */
         public Seq<AugmentModule> modules(){
             modules.clear();
+            //called several times per tick: look at the module kinds only, not at every item in the game
             if(items != null){
-                items.each((item, amount) -> {
-                    if(item instanceof AugmentModule m) for(int i = 0; i < amount; i++) modules.add(m);
-                });
+                for(AugmentModule m : AugmentModule.all()) for(int i = items.get(m); i > 0; i--) modules.add(m);
             }
             return modules;
         }
@@ -530,6 +529,12 @@ public class AugmentationCoupler extends Block{
         public boolean acceptItem(Building source, Item item){
             return item instanceof AugmentModule m && moduleCount() < slots && (onlyCategory == null || m.category == onlyCategory)
                 && (target == null || m.compatible.get(target.block));
+        }
+
+        /** A dropped stack (player or robot) only fills the free slots; vanilla would allow up to the item capacity. */
+        @Override
+        public int acceptStack(Item item, int amount, Teamc source){
+            return Math.max(0, Math.min(super.acceptStack(item, amount, source), slots - moduleCount()));
         }
 
         @Override

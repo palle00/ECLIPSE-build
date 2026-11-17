@@ -39,6 +39,7 @@ public class BlockSearch{
         return true;
     }
 
+    /** Throws if a game update removed the build menu's private "toggler" table (the headless test checks it still exists). */
     public static void install(){
         Table toggler = Reflect.get(ui.hudfrag.blockfrag, "toggler");
         if(toggler == null) return;

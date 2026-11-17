@@ -238,6 +238,7 @@ public class Armory{
         public BulletType bolt;
         public float fireInterval = 30f, fireRange = 90f, seekRange = 160f, orbitRadius = 22f, accel = 0.25f, maxSpeed = 3.2f;
         public Color lightColor = Color.valueOf("f8c166");
+        static final Color hullColor = Color.valueOf("4d4e58"), plateColor = Color.valueOf("8a8b94"), rotorColor = Color.valueOf("c8ccd8");
 
         public DroneBulletType(BulletType bolt){
             super(3f, 0f);
@@ -285,17 +286,17 @@ public class Armory{
         @Override
         public void draw(Bullet b){
             float rot = b.vel.angle() - 90f;
-            Draw.color(Color.valueOf("4d4e58"));
+            Draw.color(hullColor);
             Fill.poly(b.x, b.y, 4, 4.5f, rot + 45f);
-            Draw.color(Color.valueOf("8a8b94"));
+            Draw.color(plateColor);
             Fill.poly(b.x, b.y, 4, 3f, rot + 45f);
             //four rotor blurs
-            Draw.color(Color.valueOf("c8ccd8"), 0.45f);
+            Draw.color(rotorColor, 0.45f);
             for(int i = 0; i < 4; i++){
                 Tmp.v1.trns(rot + 45f + i * 90f, 4.5f);
                 Fill.circle(b.x + Tmp.v1.x, b.y + Tmp.v1.y, 2f + Mathf.absin(Time.time + i * 3f, 1f, 0.5f));
             }
-            Draw.color(b.team.color.cpy().lerp(lightColor, 0.4f));
+            Draw.color(Tmp.c1.set(b.team.color).lerp(lightColor, 0.4f));
             Fill.circle(b.x, b.y, 1.3f);
             Draw.reset();
         }

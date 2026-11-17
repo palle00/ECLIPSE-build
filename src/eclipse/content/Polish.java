@@ -183,6 +183,8 @@ public class Polish{
     // ---- effects in a machine's colour (one instance per colour: craft effects are spawned without one) ----
 
     static final ObjectMap<String, Effect> made = new ObjectMap<>();
+    /** Shared by effect renderers (drawing is single-threaded); reseeded per effect so each one draws the same every frame. */
+    static final Rand rand = new Rand();
 
     static Effect cached(String kind, Color c, arc.func.Prov<Effect> e){
         return made.get(kind + c, e);
@@ -213,7 +215,7 @@ public class Polish{
         return cached("electric", c, () -> new Effect(18f, e -> {
             Draw.color(Color.white, c, e.fin());
             Lines.stroke(e.fout() * 0.9f);
-            Rand rand = new Rand(e.id);
+            rand.setSeed(e.id);
             for(int i = 0; i < 3; i++){
                 float x = e.x + rand.range(4f), y = e.y + rand.range(4f);
                 for(int s = 0; s < 3; s++){

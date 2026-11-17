@@ -93,6 +93,12 @@ public class LogisticsBuffer extends Block{
             return source.team == team && relativeTo(source) != rotation && items.total() < capacity;
         }
 
+        /** A dropped stack only fills the room left in the total capacity; vanilla would count each item type separately. */
+        @Override
+        public int acceptStack(Item item, int amount, Teamc source){
+            return Math.max(0, Math.min(super.acceptStack(item, amount, source), capacity - items.total()));
+        }
+
         @Override
         public void updateTile(){
             budget = Math.min(budget + itemsPerSecond / 60f * delta() * efficiency, Math.max(1f, itemsPerSecond / 60f * 2f));

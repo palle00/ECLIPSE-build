@@ -48,7 +48,7 @@ public class ModuleRecycler extends Block{
         public float progress;
 
         public @Nullable AugmentModule module(){
-            for(Item item : content.items()) if(item instanceof AugmentModule m && items.has(m)) return m;
+            for(AugmentModule m : AugmentModule.all()) if(items.has(m)) return m;
             return null;
         }
 
