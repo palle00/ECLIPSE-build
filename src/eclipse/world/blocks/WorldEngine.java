@@ -12,6 +12,7 @@ import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.*;
+import mindustry.core.*;
 import mindustry.world.blocks.power.*;
 import mindustry.world.meta.*;
 
@@ -20,7 +21,16 @@ import static mindustry.Vars.*;
 /**
  * The World Engine: ECLIPSE's capstone mega project. After the frame is placed it is completed in {@link #stages},
  * each needing large deliveries from a different production branch (belts, pipes or Logistics Drones). It only accepts
- * what the current stage still needs. Once every stage is complete it comes online as a planetary power source.
+ * what the current stage still needs. Once every stage is complete it comes online:
+ * <ul>
+ * <li>a planetary power source ({@link #powerProduction});</li>
+ * <li>a built-in energy store of {@link #storeCapacity}: it keeps back what its grid doesn't use, and adds it on top
+ * when the grid runs short (the grid's own batteries charge once the store is full);</li>
+ * <li>a planetary uplink: it also produces {@link #generationBonus} of everything the team's other generators on the map
+ * produce (one engine per team gives the bonus; the power comes out of the engine, so it reaches the grids linked to it);</li>
+ * <li>an overdrive field: buildings within {@link #overdriveRange} work {@link #overdriveSpeed} times as fast, like an
+ * overdrive projector (the strongest boost applies; boosts never stack).</li>
+ * </ul>
  */
 public class WorldEngine extends PowerGenerator{
     public static final Stat stagesStat = new Stat("eclipse-world-engine-stages", StatCat.function);
@@ -38,6 +48,11 @@ public class WorldEngine extends PowerGenerator{
     }
 
     public Stage[] stages = {};
+    public float storeCapacity = 5_000_000f;
+    public float generationBonus = 0.15f;
+    public float overdriveRange = 40f * 8f, overdriveSpeed = 1.5f;
+    public static final Stat storeStat = new Stat("eclipse-engine-store", StatCat.power), bonusStat = new Stat("eclipse-engine-bonus", StatCat.power),
+        overdriveStat = new Stat("eclipse-engine-overdrive", StatCat.function);
     public Color glowColor = Color.valueOf("ffb648");
     public TextureRegion glowRegion;
 
@@ -61,6 +76,15 @@ public class WorldEngine extends PowerGenerator{
     public void setStats(){
         super.setStats();
         stats.add(stagesStat, stages.length);
+        stats.add(storeStat, Core.bundle.format("stat.eclipse-engine-store-value", UI.formatAmount((long)storeCapacity)));
+        stats.add(bonusStat, Core.bundle.format("stat.eclipse-engine-bonus-value", Math.round(generationBonus * 100)));
+        stats.add(overdriveStat, Core.bundle.format("stat.eclipse-engine-overdrive-value", Math.round((overdriveSpeed - 1f) * 100), (int)(overdriveRange / tilesize)));
+    }
+
+    @Override
+    public void drawPlace(int x, int y, int rotation, boolean valid){
+        super.drawPlace(x, y, rotation, valid);
+        Drawf.dashCircle(x * tilesize + offset, y * tilesize + offset, overdriveRange, glowColor);
     }
 
     @Override
@@ -71,12 +95,19 @@ public class WorldEngine extends PowerGenerator{
                 : Core.bundle.format("bar.eclipse-engine-stage", e.stage + 1, stages.length, Core.bundle.get("eclipse-engine.stage-" + stages[e.stage].key)),
             () -> glowColor,
             e::progress));
+        addBar("eclipse-engine-store", (EngineBuild e) -> new Bar(
+            () -> Core.bundle.format("bar.eclipse-engine-store", UI.formatAmount((long)e.stored), UI.formatAmount((long)storeCapacity)),
+            () -> Pal.powerBar,
+            () -> e.stored / storeCapacity));
     }
 
     public class EngineBuild extends GeneratorBuild{
         public int stage;
         /** Delivered amounts for the current stage: items, then liquids, in the stage's order. */
         public float[] delivered = new float[16];
+        /** Energy in the built-in store; power out per tick right now; the uplink bonus per tick (0 unless this is the team's lead engine). */
+        public float stored, output, bonus;
+        float lastContribution, scanTimer, overdriveTimer;
 
         public boolean complete(){
             return stage >= stages.length;
@@ -164,6 +195,63 @@ public class WorldEngine extends PowerGenerator{
         @Override
         public void updateTile(){
             productionEfficiency = complete() ? 1f : 0f;
+            if(!complete()){
+                output = lastContribution = 0f;
+                return;
+            }
+            if((scanTimer -= delta()) <= 0f){
+                scanTimer = 60f;
+                bonus = uplinkBonus();
+            }
+            updateStore();
+            if((overdriveTimer += delta()) >= 60f){
+                overdriveTimer = 0f;
+                indexer.eachBlock(this, overdriveRange, b -> b != this && b.block.canOverdrive, b -> b.applyBoost(overdriveSpeed, 70f));
+            }
+        }
+
+        /** What the rest of the team's generators on the map produce, times the bonus; 0 if another engine of the team leads. */
+        public float uplinkBonus(){
+            float others = 0f;
+            for(Building b : team.data().buildings){
+                if(b instanceof EngineBuild e){
+                    if(e != this && e.complete() && e.id < id) return 0f;
+                    continue;
+                }
+                if(b.block instanceof PowerGenerator && b.enabled) others += b.getPowerProduction();
+            }
+            return others * generationBonus;
+        }
+
+        /** Keeps back what the grid doesn't use (up to the store's room) and adds the store on top when the grid runs short. */
+        void updateStore(){
+            float full = powerProduction + bonus, dt = delta();
+            output = full;
+            if(power == null || power.graph == null || dt <= 0.0001f) return;
+            //last update's balance, as if this engine had given its full output
+            float others = power.graph.getLastPowerProduced() - lastContribution;
+            float surplus = others + full * dt - power.graph.getLastPowerNeeded();
+            if(surplus > 0f){
+                float charge = Math.min(Math.min(surplus, full * dt), storeCapacity - stored);
+                stored += charge;
+                output = full - charge / dt;
+            }else{
+                float give = Math.min(-surplus, stored);
+                stored -= give;
+                output = full + give / dt;
+            }
+            lastContribution = output * dt;
+        }
+
+        @Override
+        public float getPowerProduction(){
+            return complete() && enabled ? output : 0f;
+        }
+
+        @Override
+        public void drawSelect(){
+            super.drawSelect();
+            if(complete()) Drawf.dashCircle(x, y, overdriveRange, glowColor);
         }
 
         @Override
@@ -210,7 +298,7 @@ public class WorldEngine extends PowerGenerator{
 
         @Override
         public byte version(){
-            return 1;
+            return 2;
         }
 
         @Override
@@ -219,6 +307,7 @@ public class WorldEngine extends PowerGenerator{
             write.b(stage);
             write.b(delivered.length);
             for(float f : delivered) write.f(f);
+            write.f(stored);
         }
 
         @Override
@@ -229,6 +318,7 @@ public class WorldEngine extends PowerGenerator{
             int n = read.b();
             delivered = new float[Math.max(16, n)];
             for(int i = 0; i < n; i++) delivered[i] = read.f();
+            if(revision >= 2) stored = read.f();
         }
     }
 }

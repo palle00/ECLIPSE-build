@@ -55,7 +55,7 @@ public class EndgameBlocks{
             requirements(Category.power, with(Items.titanium, 2000, Items.silicon, 1500, superalloyFrame, 100, superconductor, 50, Items.thorium, 1000));
             size = 6;
             health = 12000;
-            powerProduction = 500f; //30,000 power per second once online
+            powerProduction = 5000f; //300,000 power per second once online
             stages = new Stage[]{
                 new Stage("foundation", with(superalloyFrame, 300, pressureCasing, 400, carbonComposite, 400, Items.titanium, 4000)),
                 new Stage("energy", with(aetherite, 300, superconductor, 200, lithium, 600), new LiquidStack(liquidNitrogen, 2000f)),

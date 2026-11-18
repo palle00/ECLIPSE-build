@@ -40,7 +40,7 @@ public class PowerBlocks{
             health = 650;
             liquidCapacity = 60f;
             heatRequirement = 10f;
-            maxEfficiency = 4f; //one fission reactor drives one boiler at full output
+            maxEfficiency = 10f; //up to 100 heat: a fission reactor (40) drives it at 4x
             consumeLiquid(purifiedWater, 6f / 60f);
             outputLiquid = new LiquidStack(steam, 12f / 60f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 4f),
@@ -74,7 +74,7 @@ public class PowerBlocks{
             size = 3;
             health = 600;
             liquidCapacity = 40f;
-            powerProduction = 3f;
+            powerProduction = 15f; //900/s: a fission reactor + boiler + 4 turbines gives 3600/s, twice a thorium reactor
             consumeLiquid(steam, 12f / 60f);
             outputLiquid = new LiquidStack(purifiedWater, 5f / 60f);
             generateEffect = Fx.steam;
@@ -88,7 +88,7 @@ public class PowerBlocks{
             size = 2;
             health = 300;
             liquidCapacity = 20f;
-            powerProduction = 0.9f;
+            powerProduction = 1.5f; //90/s
             consumeLiquids(LiquidStack.with(Liquids.hydrogen, 6f / 60f, oxygen, 3f / 60f));
             outputLiquid = new LiquidStack(purifiedWater, 3f / 60f);
             generateEffect = Fx.none;
@@ -101,7 +101,7 @@ public class PowerBlocks{
             size = 2;
             health = 320;
             liquidCapacity = 20f;
-            powerProduction = 4f;
+            powerProduction = 6f; //360/s
             consumeLiquid(methane, 6f / 60f);
             outputLiquid = new LiquidStack(flueGas, 12f / 60f); //vented when not piped away
             generateEffect = Fx.generatespark;
