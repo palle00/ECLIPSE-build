@@ -19,7 +19,7 @@ import static mindustry.type.ItemStack.*;
 public class PowerBlocks{
     public static Block thermalStorage, coolingTower,
         hydrogenFuelCell, methaneTurbine, industrialBattery, lithiumBattery, industrialHeater,
-        heatExchanger, industrialBoiler, steamTurbine, electricHeater, flowBattery;
+        heatExchanger, industrialBoiler, steamTurbine, electricHeater, flowBattery, combinedCycleTurbine, solarFarm;
 
     public static void load(){
         // ---- heat recovery: waste heat -> exchanger -> boiler -> steam turbine ----
@@ -107,6 +107,30 @@ public class PowerBlocks{
             generateEffect = Fx.generatespark;
             effectChance = 0.05f;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff9a4a"); }});
+        }};
+
+        // Combined cycle: a large gas turbine (about 1.7x the Methane Turbine's power per methane) whose hot exhaust
+        // also gives heat out of the front, so a boiler and steam turbine there add even more power.
+        combinedCycleTurbine = new CombinedCycleTurbine("combined-cycle-turbine"){{
+            requirements(Category.power, with(Items.titanium, 200, superalloyFrame, 20, pressureCasing, 20, industrialBearing, 20, titaniumGear, 10, alnicoMagnet, 10));
+            size = 4;
+            health = 1100;
+            liquidCapacity = 80f;
+            powerProduction = 40f; //2400/s
+            heatOutput = 10f; //drives one Industrial Boiler -> one Steam Turbine (+900/s)
+            consumeLiquid(methane, 35f / 60f);
+            outputLiquid = new LiquidStack(flueGas, 40f / 60f); //vented when not piped away
+            generateEffect = Fx.generatespark;
+            effectChance = 0.08f;
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff9a4a"); }}, new DrawHeatOutput());
+        }};
+
+        // Photovoltaic field of high-purity silicon cells: no fuel, follows the map's light like vanilla solar panels.
+        solarFarm = new SolarGenerator("solar-farm"){{
+            requirements(Category.power, with(highPuritySilicon, 60, reinforcedGlass, 30, aluminium, 30, copperWire, 40, Items.lead, 60));
+            size = 3;
+            health = 500;
+            powerProduction = 5f; //300/s in full light
         }};
 
         // Lead-acid bank: better storage density than the large battery, costs processed cells.

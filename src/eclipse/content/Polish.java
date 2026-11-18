@@ -43,13 +43,13 @@ public class Polish{
             "methanol-synthesizer", "high-pressure-reactor", "industrial-neutralizer", "industrial-scrubber", "fertilizer-plant", "reprocessing-plant",
             "chemical-synthesis-complex", "lithium-extractor", "mineral-separator", "water-treatment-plant", "wastewater-treatment-plant", "distillation-column");
         kind(Kind.steam, "industrial-boiler", "steam-turbine", "cooling-tower", "steam-cracker", "geothermal-heat-tap");
-        kind(Kind.combustion, "industrial-heater", "methane-turbine", "biofuel-engine");
+        kind(Kind.combustion, "industrial-heater", "methane-turbine", "combined-cycle-turbine", "biofuel-engine");
         kind(Kind.reactor, "fission-reactor");
         kind(Kind.cryo, "hydrogen-fuel-cell", "air-separation-unit", "cryogenic-condenser", "gas-separator");
         kind(Kind.press, "gear-press", "heavy-gear-press", "metal-extruder", "wire-drawing-machine", "bearing-press", "composite-press",
             "battery-assembly-plant", "explosives-plant");
         kind(Kind.grind, "ore-crusher", "ore-washer");
-        kind(Kind.electronics, "circuit-board-printer", "chip-fabricator", "control-unit-assembler", "precision-assembler", "experimental-core-assembler", "silicon-refinery");
+        kind(Kind.electronics, "solar-farm", "circuit-board-printer", "chip-fabricator", "control-unit-assembler", "precision-assembler", "experimental-core-assembler", "silicon-refinery");
         kind(Kind.bio, "biomass-cultivator", "algae-photobioreactor", "enzyme-extractor", "biochemical-fermenter", "anaerobic-digester");
         kind(Kind.assembler, "basic-module-assembler", "advanced-module-assembler", "experimental-augmentation-facility", "aetherite-module-forge", "module-recycling-facility");
     }

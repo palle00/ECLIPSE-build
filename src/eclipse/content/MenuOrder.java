@@ -53,7 +53,8 @@ public class MenuOrder{
 
         //---- power ----
         after(Blocks.batteryLarge, industrialBattery, lithiumBattery, flowBattery, aetheriteCapacitor);
-        after(Blocks.steamGenerator, hydrogenFuelCell, methaneTurbine, biofuelEngine, industrialBoiler, steamTurbine);
+        after(Blocks.steamGenerator, hydrogenFuelCell, methaneTurbine, combinedCycleTurbine, biofuelEngine, industrialBoiler, steamTurbine);
+        after(Blocks.largeSolarPanel, solarFarm);
         after(Blocks.thoriumReactor, fissionReactor);
         after(Blocks.impactReactor, worldEngine);
 

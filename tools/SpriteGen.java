@@ -262,6 +262,8 @@ public class SpriteGen{
         flowBattery("flow-battery");
         fuelRodFabricator("fuel-rod-fabricator");
         fissionReactor("fission-reactor");
+        combinedCycleTurbine("combined-cycle-turbine");
+        solarFarm("solar-farm");
         reprocessingPlant("reprocessing-plant");
 
         // ---- waste and emissions ----
@@ -3541,6 +3543,53 @@ public class SpriteGen{
         glowOf(r, name);
         liquidBottom(name, s);
         heatLayer(r, name, r.rect(18, 78, 60, 8));
+    }
+
+    /** Combined-Cycle Turbine (4x4): combustor and stepped gas turbine at the back, the heat-recovery duct at the front (right). */
+    static void combinedCycleTurbine(String name) throws IOException{
+        int s = 4 * T;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 5, 5, metal);
+        //combustor can on the left
+        r.fill(r.circle(22, s / 2f, 16), 11, steel, 3);
+        r.fill(r.circle(22, s / 2f, 9), 5, deep, 1);
+        r.fill(r.circle(22, s / 2f, 5), 6, lit(0xff9a4a), 0);
+        //turbine stages widening toward the exhaust
+        int[][] stages = {{38, 46, 16, 36}, {54, 40, 18, 48}, {72, 34, 20, 60}};
+        for(int[] st : stages){
+            r.fill(r.rect(st[0], st[1], st[2], st[3]), 11, steel, 3);
+            for(int x = st[0] + 3; x < st[0] + st[2] - 2; x += 4) r.fill(r.rect(x, st[1] + 3, 2, st[3] - 6), 12, metal, 0);
+        }
+        //heat-recovery duct along the front edge, with a glowing hot section
+        r.fill(r.rect(94, 14, 28, 100), 10, steel, 3);
+        for(int y = 20; y < 108; y += 8) r.fill(r.rect(98, y, 20, 3), 11, metal, 0);
+        r.fill(r.rect(100, 54, 16, 20), 6, lit(0xff7a3a), 0);
+        //generator housing and flue stack
+        r.fill(r.oct(36, 4, 54, 24, 6), 12, metal, 2);
+        r.fill(r.circle(20, 110, 9), 9, metal, 2);
+        r.fill(r.circle(20, 110, 5), 4, deep, 0);
+        save(r, name);
+        glowOf(r, name);
+        edgeGlow(name + "-heat", 4);
+        BufferedImage top = port(s, 26, acc(shade(0xff9a4a, 0.75f))).render();
+        save(top, name + "-top1");
+        save(flipY(top), name + "-top2");
+    }
+
+    /** Solar Farm (3x3): a frame holding a 3x3 grid of blue silicon cells. */
+    static void solarFarm(String name) throws IOException{
+        int s = 3 * T;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 4, 5, metal);
+        for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++){
+            int x = 6 + i * 28, y = 6 + j * 28;
+            r.fill(r.rect(x, y, 26, 26), 8, glass(0x3a5fb0), 1);
+            for(int k = 1; k < 4; k++){
+                r.fill(r.rect(x + k * 6 + 1, y + 2, 1, 22), 9, acc(0x8fb0e8), 0);
+                r.fill(r.rect(x + 2, y + k * 6 + 1, 22, 1), 9, acc(0x8fb0e8), 0);
+            }
+        }
+        save(r, name);
     }
 
     static void fissionReactor(String name) throws IOException{

@@ -38,7 +38,7 @@ public class EclipseWiki extends BaseDialog{
         {"heat", "eclipse-industrial-heater", "eclipse-electric-heater", "eclipse-geothermal-heat-tap", "eclipse-thermal-storage", "eclipse-heat-exchanger"},
         {"chemistry", "eclipse-sulfuric-acid", "eclipse-acidic-waste", "eclipse-polymer-conduit", "eclipse-industrial-neutralizer", "eclipse-catalyst-plant", "eclipse-high-pressure-reactor"},
         {"electronics", "eclipse-copper-wire", "eclipse-circuit-board", "eclipse-microchip", "eclipse-control-unit"},
-        {"power", "eclipse-steam-turbine", "eclipse-hydrogen-fuel-cell", "eclipse-fission-reactor", "eclipse-industrial-battery", "eclipse-world-engine"},
+        {"power", "eclipse-steam-turbine", "eclipse-combined-cycle-turbine", "eclipse-hydrogen-fuel-cell", "eclipse-fission-reactor", "eclipse-industrial-battery", "eclipse-world-engine"},
         {"logistics", "eclipse-three-way-sorter", "eclipse-distribution-hub", "eclipse-priority-merger", "eclipse-controlled-splitter", "eclipse-line-balancer", "eclipse-smart-unloader", "eclipse-batch-gate", "eclipse-liquid-overflow-valve"},
         {"augmentation", "eclipse-augmentation-coupler", "eclipse-basic-module-assembler", "eclipse-production-accelerator-1", "eclipse-module-recycling-facility"},
         {"robotics", "eclipse-robot-dispatch-hub", "eclipse-logistics-drone", "eclipse-repair-drone", "eclipse-shield-drone"},

@@ -62,7 +62,8 @@ public class EclipseTechTree{
         child(leaching, industrialNeutralizer);
 
         TechNode distillation = child(treatment, distillationColumn);
-        child(distillation, methaneTurbine);
+        child(child(distillation, methaneTurbine), combinedCycleTurbine); //its exhaust heat drives a boiler
+        child(find(Blocks.largeSolarPanel), solarFarm);
         TechNode heater = child(distillation, industrialHeater);
         TechNode cracker = child(heater, steamCracker);
         TechNode polymerization = child(cracker, polymerizationReactor);
