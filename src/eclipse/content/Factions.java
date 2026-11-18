@@ -14,13 +14,13 @@ import static eclipse.content.MilitaryUnits.*;
 import static mindustry.Vars.*;
 
 /**
- * Military phase M4: enemy factions that join the waves of every new custom game. The map's own (vanilla) waves keep
+ * Military phase M4: enemy factions that join the waves of every custom game and campaign sector. The map's own (vanilla) waves keep
  * running every wave; the factions come on top of them in their own rhythms, so they take turns instead of stacking:
  * - The Swarm, every 2nd wave: many cheap self-repairing biological machines, acid and spores, units that split or breed;
  * - The Dominion, every 3rd wave: few heavy, armoured units from the ECLIPSE tank and strike lines, shields on later waves;
  * - every 6th wave both arrive together (a joint assault).
- * Applied once per game, on a new game or the first load of an older custom-game save (tag "eclipse-faction" in the rules,
- * so the save keeps it). Campaign, PvP and the editor are never touched.
+ * Applied once per game, on a new game or the first load of an older save (tag "eclipse-faction" in the rules,
+ * so the save keeps it). PvP and the editor are never touched.
  */
 public class Factions{
     public static final String tag = "eclipse-faction";
@@ -150,7 +150,7 @@ public class Factions{
         });
 
         Events.on(EventType.PlayEvent.class, e -> apply());
-        //custom-game saves from before the factions get them the first time they load (once: the tag marks it)
+        //saves from before the factions (custom games and campaign sectors) get them the first time they load (once: the tag marks it)
         Events.on(EventType.WorldLoadEndEvent.class, e -> apply());
     }
 
@@ -181,9 +181,9 @@ public class Factions{
         return r;
     }
 
-    /** New custom game: the map's waves stay, and both factions join them in their own rhythms. */
+    /** New custom game or campaign sector: the map's waves stay, and both factions join them in their own rhythms. */
     public static void apply(){
-        if(net.client() || state.isCampaign() || state.rules.editor || state.rules.pvp || !state.rules.waves || state.rules.tags.containsKey(tag)) return;
+        if(net.client() || state.rules.editor || state.rules.pvp || !state.rules.waves || state.rules.tags.containsKey(tag)) return;
         //a new list, so the map's own wave list is never changed
         state.rules.spawns = new Seq<>(state.rules.spawns).addAll(waves(swarm)).addAll(waves(dominion));
         state.rules.tags.put(tag, "swarm+dominion");

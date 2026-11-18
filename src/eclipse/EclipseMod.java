@@ -83,7 +83,7 @@ public class EclipseMod extends Mod{
         Munitions.load(); //military M1: ECLIPSE ammunition for vanilla turrets
         MilitaryBlocks.load(); //military M2: new turrets
         MilitaryUnits.load(); //military M3: tank and strike unit lines in the vanilla factories
-        Factions.load(); //military M4: Swarm and Dominion join the waves of new custom games
+        Factions.load(); //military M4: Swarm and Dominion join the waves of custom games and the campaign
         MilitaryEndgame.load(); //military M5: titan complex, orbital platform, EW drone
         EclipseTechTree.load();
         Animations.load(); //after every crafter exists: product-coloured glow and turning parts while working
