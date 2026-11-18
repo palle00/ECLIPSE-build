@@ -4,7 +4,9 @@ import arc.graphics.*;
 import arc.math.geom.*;
 import eclipse.content.blocks.*;
 import eclipse.type.*;
+import mindustry.ai.types.*;
 import mindustry.content.*;
+import mindustry.entities.*;
 import mindustry.entities.abilities.*;
 import mindustry.entities.bullet.*;
 import mindustry.gen.*;
@@ -24,7 +26,7 @@ import static mindustry.type.ItemStack.*;
  * Each tier carries an M1/M2 mechanic instead of only more health:
  * - Tank line (Serpulo has no tanks): Reaper, Bulwark, Rampart, Annihilator, Colossus. Armour-piercing carbide guns;
  *   the Rampart adds a frontal shield arc, the Annihilator etching siege shells, the Colossus a piercing cannon and acid mortars.
- * - Strike line: Wraith (marks targets with Etched), Interceptor (anti-air only), Valkyrie (armour-piercing gunship),
+ * - Strike line: Wraith (marks targets with Etched), Interceptor (hunts aircraft and anti-air turrets, then players; never the core), Valkyrie (armour-piercing gunship),
  *   Tempest (bomber that scatters mines), Leviathan (command ship: jamming pulse and point defence).
  */
 public class MilitaryUnits{
@@ -216,7 +218,25 @@ public class MilitaryUnits{
             t.hitSize = 11f;
             t.accel = 0.1f;
             t.drag = 0.04f;
-            t.targetGround = false;
+            //hunts anti-air: aircraft in range, then the nearest turret that can shoot aircraft; with neither it chases the
+            //nearest enemy player. It never goes for the core or other buildings, and with no target at all it waits
+            t.aiController = () -> new FlyingAI(){
+                @Override
+                public Teamc findTarget(float x, float y, float range, boolean air, boolean ground){
+                    return findMainTarget(x, y, range, air, ground); //no fallback to the closest building
+                }
+
+                @Override
+                public Teamc findMainTarget(float x, float y, float range, boolean air, boolean ground){
+                    Unit flyer = Units.closestEnemy(unit.team, x, y, range, u -> u.isFlying() && u.checkTarget(air, ground));
+                    if(flyer != null) return flyer;
+                    Building antiAir = Geometry.findClosest(x, y, mindustry.Vars.indexer.getEnemy(unit.team, BlockFlag.turret),
+                        b -> b.block instanceof mindustry.world.blocks.defense.turrets.Turret tur && tur.targetAir);
+                    if(antiAir != null) return antiAir;
+                    Player player = Geometry.findClosest(x, y, Groups.player, p -> p.team() != unit.team && !p.dead() && p.unit().checkTarget(air, ground));
+                    return player != null ? player.unit() : null;
+                }
+            };
             t.weapons.add(new Weapon("eclipse-interceptor-launcher"){{
                 x = 4f;
                 reload = 30f;
@@ -226,7 +246,6 @@ public class MilitaryUnits{
                     homingPower = 0.15f;
                     splashDamage = 16f;
                     splashDamageRadius = 18f;
-                    collidesGround = false;
                     width = 7f;
                     height = 10f;
                 }};
