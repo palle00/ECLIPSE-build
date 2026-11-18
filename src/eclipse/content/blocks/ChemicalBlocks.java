@@ -32,7 +32,7 @@ public class ChemicalBlocks{
             rotateDraw = false;
             liquidCapacity = 30f;
             consumeLiquid(Liquids.water, 18f / 60f);
-            consumePower(0.5f);
+            consumePower(0.2f); //12/s
             outputLiquids = LiquidStack.with(purifiedWater, 13f / 60f, brine, 5f / 60f);
             liquidOutputDirections = new int[]{1, 3};
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 3f), new DrawDefault(), new DrawLiquidOutputs());
@@ -47,7 +47,7 @@ public class ChemicalBlocks{
             rotateDraw = false;
             liquidCapacity = 40f;
             consumeLiquid(purifiedWater, 12f / 60f);
-            consumePower(1.5f);
+            consumePower(0.75f); //45/s
             outputLiquids = LiquidStack.with(Liquids.hydrogen, 8f / 60f, oxygen, 4f / 60f);
             liquidOutputDirections = new int[]{1, 3};
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 4f),

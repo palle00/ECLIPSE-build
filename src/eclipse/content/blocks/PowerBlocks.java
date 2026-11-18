@@ -82,13 +82,13 @@ public class PowerBlocks{
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("9fd8ff"); }});
         }};
 
-        // H2 + O2 -> power + purified water. ~80% round trip vs. electrolysis; free power from chlor-alkali hydrogen.
+        // H2 + O2 -> power + purified water. Turns a profit over electrolysis + water treatment (about +110/s per cell), so water -> power works as a chain.
         hydrogenFuelCell = new ConsumeGenerator("hydrogen-fuel-cell"){{
             requirements(Category.power, with(Items.copper, 50, Items.lead, 40, Items.silicon, 40, Items.graphite, 30, Items.metaglass, 20, copperGear, 10, copperWire, 15));
             size = 2;
             health = 300;
             liquidCapacity = 20f;
-            powerProduction = 1.5f; //90/s
+            powerProduction = 2.5f; //150/s
             consumeLiquids(LiquidStack.with(Liquids.hydrogen, 6f / 60f, oxygen, 3f / 60f));
             outputLiquid = new LiquidStack(purifiedWater, 3f / 60f);
             generateEffect = Fx.none;
