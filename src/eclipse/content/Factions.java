@@ -40,6 +40,7 @@ public class Factions{
             t.abilities.add(regen(0.1f));
             t.weapons.add(new Weapon(){{
                 mirror = false;
+                x = 0f;
                 reload = 24f;
                 shootCone = 30f;
                 shootSound = Sounds.none;
@@ -61,6 +62,7 @@ public class Factions{
             t.abilities.add(regen(0.15f));
             t.weapons.add(new Weapon(){{
                 mirror = false;
+                x = 0f;
                 reload = 30f;
                 shootSound = Sounds.shoot;
                 bullet = new BasicBulletType(3.5f, 10f){{
@@ -82,6 +84,7 @@ public class Factions{
             t.abilities.add(regen(0.25f));
             t.weapons.add(new Weapon(){{
                 mirror = false;
+                x = 0f;
                 reload = 70f;
                 shootSound = Sounds.shootArtillerySap;
                 bullet = new ArtilleryBulletType(2.2f, 10f){{
@@ -108,6 +111,7 @@ public class Factions{
             t.abilities.add(regen(0.5f), new SpawnDeathAbility(mite, 4, 12f));
             t.weapons.add(new Weapon(){{
                 mirror = false;
+                x = 0f;
                 reload = 40f;
                 shoot.shots = 3;
                 inaccuracy = 15f;
@@ -130,6 +134,7 @@ public class Factions{
             t.abilities.add(regen(2f), new UnitSpawnAbility(mite, 60f * 6f, 0f, -8f));
             t.weapons.add(new Weapon(){{
                 mirror = false;
+                x = 0f;
                 reload = 90f;
                 shootSound = Sounds.shootArtillerySapBig;
                 bullet = new ArtilleryBulletType(2.4f, 30f){{

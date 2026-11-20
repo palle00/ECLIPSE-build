@@ -45,6 +45,7 @@ public class MilitaryUnits{
             t.rotateSpeed = 3.5f;
             t.weapons.add(new Weapon("eclipse-reaper-gun"){{
                 mirror = false;
+                x = 0f;
                 rotate = true;
                 rotateSpeed = 5f;
                 reload = 22f;
@@ -62,6 +63,7 @@ public class MilitaryUnits{
             t.hitSize = 13f;
             t.weapons.add(new Weapon("eclipse-bulwark-cannon"){{
                 mirror = false;
+                x = 0f;
                 rotate = true;
                 rotateSpeed = 3f;
                 reload = 45f;
@@ -106,6 +108,7 @@ public class MilitaryUnits{
             t.crushDamage = 2f;
             t.weapons.add(new Weapon("eclipse-annihilator-mortar"){{
                 mirror = false;
+                x = 0f;
                 rotate = true;
                 rotateSpeed = 1.5f;
                 reload = 90f;
@@ -142,6 +145,7 @@ public class MilitaryUnits{
             t.crushDamage = 4f;
             t.weapons.add(new Weapon("eclipse-colossus-cannon"){{
                 mirror = false;
+                x = 0f;
                 rotate = true;
                 rotateSpeed = 1f;
                 reload = 110f;
@@ -312,6 +316,7 @@ public class MilitaryUnits{
                 }};
             }}, new Weapon("eclipse-leviathan-lance"){{
                 mirror = false;
+                x = 0f;
                 y = 8f;
                 rotate = true;
                 rotateSpeed = 2f;

@@ -68,6 +68,7 @@ public class MilitaryEndgame{
                 }};
             }}, new Weapon("eclipse-dreadnought-lance"){{
                 mirror = false;
+                x = 0f;
                 y = -10f;
                 rotate = true;
                 rotateSpeed = 1.5f;
