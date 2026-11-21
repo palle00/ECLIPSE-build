@@ -75,6 +75,12 @@ public class PhotoShoot{
         if(!f.exists()) return false;
         String path = f.readString().trim();
         f.delete();
+        if(path.equals("menu-review")){
+            menuReview();
+            return true;
+        }
+        //the menu shot shows the finished menu, not the intro
+        MenuBackdrop.skipIntro();
         //first a shot of the main menu with the ECLIPSE backdrop, then the map
         Time.runTask(150f, () -> {
             save("menu");
@@ -105,6 +111,41 @@ public class PhotoShoot{
         }
         shots = showcaseShots;
         start(0);
+    }
+
+    /**
+     * Main menu review (photos.ps1 -MenuReview): the menu at rest (menu-1), the Play panel open (menu-2), the wiki
+     * opened from the menu (menu-3), then the intro at 0.9 s, 1.37 s and 2.5 s (menu-4 to menu-6).
+     */
+    static void menuReview(){
+        MenuBackdrop.skipIntro();
+        Time.runTask(90f, () -> {
+            save("menu-1");
+            EclipseMenu.openPlay();
+            Time.runTask(45f, () -> {
+                save("menu-2");
+                EclipseMenu.close();
+                if(EclipseWiki.instance != null) EclipseWiki.instance.show();
+                Time.runTask(60f, () -> {
+                    save("menu-3");
+                    if(EclipseWiki.instance != null) EclipseWiki.instance.hide();
+                    Time.runTask(40f, () -> {
+                        MenuBackdrop.playIntro();
+                        Time.runTask(54f, () -> {
+                            save("menu-4");
+                            Time.runTask(28f, () -> {
+                                save("menu-5");
+                                Time.runTask(70f, () -> {
+                                    save("menu-6");
+                                    Log.info("[ECLIPSE] photo mode (menu review) done");
+                                    Time.runTask(20f, Core.app::exit);
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
     }
 
     /**

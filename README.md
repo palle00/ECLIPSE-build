@@ -127,7 +127,7 @@ Custom games and campaign sectors with waves get three factions on top of the ma
 - Placement hints show liquid output sides, how much heat a heater delivers, and how many machines it takes to feed the one you are placing.
 - **Logic:** processors can read ECLIPSE machines (status, recipe, overclock, heat, pressure, the next wave...) with `esensor`, set overclock, recipe or the Orbital Platform's target with `econtrol`, and look up recipes with `recipe`. Every block's wiki page lists what it answers, and a Logic guide has ready-to-paste programs.
 - **Upgrade Section:** hold Alt with a better belt, conduit or wall selected to upgrade a whole connected line at once.
-- A new **ECLIPSE main menu**: a dusk landscape under the eclipse.
+- A new **ECLIPSE main menu**: Continue your last game in one click, a Play panel with your planets and recent saves, the wiki, news and tips; the eclipse forms while the game loads.
 - A **Showcase** custom map with every ECLIPSE block running side by side, and a numbered tour.
 
 | In-game wiki | Main menu |

@@ -22,6 +22,7 @@ public class EclipseMod extends Mod{
 
     public EclipseMod(){
         CrashLog.init(); //first: ECLIPSE context in the game log if the game crashes, from here on
+        eclipse.ui.EclipseLoading.install(); //the rest of the startup loading screen in ECLIPSE's look
         eclipse.logic.EclipseLogic.register(); //esensor, econtrol and recipe instructions (servers parse logic too)
         Corrosion.init();
         Augmentation.init();
