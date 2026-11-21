@@ -2,6 +2,9 @@ package eclipse.content.blocks;
 
 import eclipse.defense.*;
 import mindustry.content.*;
+import arc.graphics.*;
+import mindustry.world.draw.*;
+import eclipse.content.*;
 import mindustry.type.*;
 import mindustry.world.*;
 
@@ -27,6 +30,8 @@ public class DefenseBlocks{
             size = 3;
             health = 800;
             consumePower(4f);
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff8a3d"); }},
+                new DrawRegion("-antennas", 0.4f, true), new DrawRegion("-emitter"));
         }};
 
         // Stage 7: shared shield pool for friendly units only.
@@ -35,6 +40,8 @@ public class DefenseBlocks{
             size = 3;
             health = 700;
             consumePower(3f);
+            drawer = new DrawMulti(new DrawDefault(), new DrawRegion("-prongs", 0.6f, true),
+                new DrawGlowRegion("-crystal"){{ color = Color.valueOf("8ae4ff"); alpha = 0.8f; glowScale = 6f; }});
         }};
 
         // Stage 6-7: targeted repair from titanium-rod stock.
@@ -44,6 +51,7 @@ public class DefenseBlocks{
             health = 600;
             stock = titaniumRod;
             consumePower(2f);
+            drawer = new DrawMulti(new DrawDefault(), new Animations.DrawMove("-arm"){{ slideX = 4f; period = 150f; }});
         }};
     }
 }

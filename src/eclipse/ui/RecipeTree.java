@@ -13,9 +13,9 @@ import mindustry.world.consumers.*;
 import static mindustry.Vars.*;
 
 /**
- * The full production chain of an item down to raw materials, for a target rate: which ECLIPSE machine makes each
- * step, how many of them it takes, and what goes in. Raw materials are vanilla items, ore drops and anything nothing
- * makes; liquids are listed per second but not followed further. Machines run at base speed (no overclock, modules
+ * The full production chain of an item down to raw materials, for a target rate: which machine makes each step, how
+ * many of them it takes, and what goes in. Raw materials are what the loaded map lets drills mine and anything no
+ * machine here makes; liquids are listed per second but not followed further. Machines run at base speed (no overclock, modules
  * or heat bonus). Shown in the ECLIPSE Wiki on every item page.
  */
 public class RecipeTree{
@@ -26,6 +26,9 @@ public class RecipeTree{
         public LiquidStack[] liquids = {};
         public int amount;
         public float seconds;
+        /** Power per tick while running, and the recipe's power tier (0: a fixed crafter outside the tier system). */
+        public float power;
+        public int tier;
     }
 
     /** One node: an item at a rate, the machines making it (none for raw materials) and its inputs. */
@@ -60,19 +63,52 @@ public class RecipeTree{
         return s;
     }
 
-    /** Raw materials: vanilla items (vanilla machines and ores make them) and ECLIPSE ore drops. */
+    /** Items that can be mined on the loaded map (ore overlays, ore walls, floors such as sand), and the map they were read from. */
+    static final ObjectSet<Item> minable = new ObjectSet<>();
+    static @Nullable Object scannedTiles;
+
+    /**
+     * Raw materials: what can be mined on the loaded map, and what no machine available here makes. So graphite is raw on
+     * Erekir (graphitic walls) but made from coal on Serpulo, and titanium on a map without its ore comes from a process.
+     * With no map loaded (or one without any ore), vanilla items and ECLIPSE ore drops count as raw.
+     */
     public static boolean raw(Item item){
+        scan();
+        if(!minable.isEmpty()) return minable.contains(item) || sourceOf(item) == null;
         if(!item.name.startsWith("eclipse-")) return true;
         for(Block b : content.blocks()) if(b instanceof OreBlock o && o.itemDrop == item) return true;
         return false;
     }
 
-    /** The ECLIPSE machine that makes an item: universal machines first, then fixed-recipe crafters. */
+    /** Reads which items the loaded map can give drills, once per map. */
+    static void scan(){
+        if(world == null || world.tiles == null || scannedTiles == world.tiles) return;
+        scannedTiles = world.tiles;
+        minable.clear();
+        for(Tile t : world.tiles){
+            if(t.drop() != null) minable.add(t.drop());
+            if(t.wallDrop() != null) minable.add(t.wallDrop());
+        }
+    }
+
+    /** A machine the player can build here: visible, fits this planet and environment, not banned by the map. */
+    static boolean available(Block b){
+        if(!b.isVisible()) return false;
+        if(!state.isGame()) return true;
+        return b.environmentBuildable() && (state.rules.planet == null || b.isOnPlanet(state.rules.planet)) && !state.rules.isBanned(b);
+    }
+
+    /**
+     * The machine that makes an item, among those available here. Vanilla items come from vanilla machines first (the
+     * Graphite Press, the Silicon Smelter), ECLIPSE items from ECLIPSE universal machines, then fixed-recipe crafters.
+     */
     public static @Nullable Source sourceOf(Item item){
-        Source fixed = null;
+        Source recipe = null, eclipseFixed = null, vanillaFixed = null;
         for(Block b : content.blocks()){
-            if(!b.name.startsWith("eclipse-")) continue;
+            if(!(b instanceof GenericCrafter) || !available(b)) continue;
+            boolean eclipse = b.name.startsWith("eclipse-");
             if(b instanceof RecipeCrafter rc){
+                if(recipe != null) continue;
                 for(RecipeCrafter.Recipe r : rc.recipes){
                     ItemStack out = Structs.find(r.outputs, o -> o.item == item);
                     if(out == null || r.uses(item)) continue;
@@ -82,9 +118,12 @@ public class RecipeTree{
                     s.liquids = r.liquidInputs;
                     s.amount = out.amount;
                     s.seconds = r.time / 60f;
-                    return s;
+                    s.power = r.power();
+                    s.tier = r.tier;
+                    recipe = s;
+                    break;
                 }
-            }else if(fixed == null && b instanceof GenericCrafter g && g.outputItems != null){
+            }else if((eclipse ? eclipseFixed : vanillaFixed) == null && b instanceof GenericCrafter g && g.outputItems != null){
                 ItemStack out = Structs.find(g.outputItems, o -> o.item == item);
                 if(out == null) continue;
                 Source s = new Source();
@@ -101,10 +140,13 @@ public class RecipeTree{
                 s.liquids = liquids.toArray(LiquidStack.class);
                 s.amount = out.amount;
                 s.seconds = g.craftTime / 60f;
-                fixed = s;
+                s.power = b.consPower == null ? 0f : b.consPower.usage;
+                if(eclipse) eclipseFixed = s;
+                else vanillaFixed = s;
             }
         }
-        return fixed;
+        if(!item.name.startsWith("eclipse-") && vanillaFixed != null) return vanillaFixed;
+        return recipe != null ? recipe : eclipseFixed != null ? eclipseFixed : vanillaFixed;
     }
 
     /** Total raw materials per second: leaf items and every liquid in the chain. */
@@ -118,6 +160,20 @@ public class RecipeTree{
         if(s.source == null) out.increment(s.item, 0f, s.perSecond);
         for(LiquidStack l : s.liquids) out.increment(l.liquid, 0f, l.amount);
         for(Step in : s.inputs) add(in, out);
+    }
+
+    /** Power per tick for every machine in the chain. */
+    public static float power(Step s){
+        float p = s.source == null ? 0f : s.source.power * s.machines;
+        for(Step in : s.inputs) p += power(in);
+        return p;
+    }
+
+    /** The highest power tier any recipe in the chain needs (0: none on the tier system). */
+    public static int maxTier(Step s){
+        int t = s.source == null ? 0 : s.source.tier;
+        for(Step in : s.inputs) t = Math.max(t, maxTier(in));
+        return t;
     }
 
     /** Total machines per block in the chain. */

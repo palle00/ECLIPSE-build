@@ -2,6 +2,7 @@ package eclipse.content.blocks;
 
 import arc.graphics.*;
 import eclipse.world.blocks.*;
+import eclipse.content.*;
 import mindustry.content.*;
 import mindustry.type.*;
 import mindustry.world.*;
@@ -9,6 +10,7 @@ import mindustry.world.blocks.power.*;
 import mindustry.world.blocks.production.*;
 import mindustry.world.draw.*;
 import mindustry.world.meta.*;
+import mindustry.world.consumers.*;
 
 import static eclipse.content.EclipseItems.*;
 import static eclipse.content.EclipseLiquids.*;
@@ -39,7 +41,9 @@ public class BiologyBlocks{
             consumeLiquid(purifiedWater, 6f / 60f);
             consumePower(0.6f);
             outputItem = new ItemStack(biomass, 3);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 3f), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 3f),
+                new DrawCultivator(){{ plantColor = Color.valueOf("4f9a3e"); plantColorLight = Color.valueOf("9fe07a"); }}, new DrawDefault(),
+                new DrawGlowRegion("-lights"){{ color = Color.valueOf("f0c8ff"); alpha = 0.9f; glowScale = 12f; glowIntensity = 0.3f; }});
         }};
 
         // Algae grown in lit tubes: water + CO2 + fertilizer -> biomass + oxygen. A use for captured carbon dioxide.
@@ -56,8 +60,10 @@ public class BiologyBlocks{
             outputItem = new ItemStack(biomass, 3);
             outputLiquid = new LiquidStack(oxygen, 3f / 60f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.water, 4f),
-                new DrawBubbles(Color.valueOf("7bd96a")){{ amount = 14; radius = 4f; spread = 10f; }},
-                new DrawDefault());
+                new DrawBubbles(Color.valueOf("7bd96a")){{ amount = 18; radius = 1.2f; spread = 7f; timeScl = 40f; }},
+                new DrawDefault(),
+                new DrawGlowRegion("-algae"){{ color = Color.valueOf("5fbf4a"); alpha = 0.55f; blending = Blending.normal; glowIntensity = 0.15f; glowScale = 25f; }},
+                new DrawGlowRegion("-lights"){{ color = Color.valueOf("f0c8ff"); alpha = 0.9f; glowScale = 12f; glowIntensity = 0.3f; }});
         }};
 
         // Biomass + spore pods -> enzyme extract.
@@ -71,7 +77,7 @@ public class BiologyBlocks{
             consumePower(0.8f);
             outputItem = new ItemStack(enzymeExtract, 1);
             craftEffect = Fx.pulverizeSmall;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("e86fd0"); }});
+            drawer = new DrawMulti(new DrawDefault(), Animations.spin("-centrifuge", 10f, 1.5f, 2f), new DrawGlowRegion(){{ color = Color.valueOf("e86fd0"); }});
         }};
 
         // Biomass + purified water -> biofuel (ethanol) + CO2. Enzyme extract doubles the speed and is slowly used up.
@@ -94,7 +100,7 @@ public class BiologyBlocks{
             outputLiquids = LiquidStack.with(biofuel, 6f / 60f, carbonDioxide, 2f / 60f);
             liquidOutputDirections = new int[]{1, 3};
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(biofuel, 4f),
-                new DrawBubbles(Color.valueOf("f0e6a0")){{ amount = 10; radius = 4f; spread = 9f; }},
+                new DrawBubbles(Color.valueOf("fff8c8")){{ amount = 14; radius = 1.4f; spread = 4f; timeScl = 35f; }},
                 new DrawDefault(), new DrawLiquidOutputs());
         }};
 
@@ -105,11 +111,11 @@ public class BiologyBlocks{
             health = 300;
             liquidCapacity = 20f;
             powerProduction = 2.5f;
-            consumeLiquid(biofuel, 4f / 60f);
+            consume(new ConsumeLiquidFilter(l -> l == biofuel || l == diesel, 4f / 60f)); //diesel too: the distillation column makes more than anything else uses
             outputLiquid = new LiquidStack(flueGas, 6f / 60f); //vented when not piped away
             generateEffect = Fx.generatespark;
             effectChance = 0.05f;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("f0c64a"); }});
+            drawer = new DrawMulti(new DrawDefault(), Animations.spin("-flywheel", 6f, 4.75f, -3f), new DrawGlowRegion(){{ color = Color.valueOf("f0c64a"); }});
         }};
 
         // Industrial sludge + biomass digested by bacteria -> biogas (methane) + fertilizer (digestate). Needs no power.
@@ -123,7 +129,8 @@ public class BiologyBlocks{
             consumeItems(with(industrialSludge, 2, biomass, 1));
             outputItem = new ItemStack(fertilizer, 1);
             outputLiquid = new LiquidStack(methane, 4f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(methane, 4f), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(methane, 4f), new DrawDefault(),
+                new DrawGlowRegion("-flame"){{ color = Color.valueOf("ff8a3d"); alpha = 0.9f; glowScale = 2f; glowIntensity = 0.5f; }});
         }};
     }
 }

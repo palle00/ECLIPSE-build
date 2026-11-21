@@ -37,7 +37,7 @@ public class MilitaryUnits{
 
     public static void load(){
         // ---- tank line ----
-        reaper = tank("reaper", 32, 6, 26, t -> {
+        reaper = tank("reaper", 48, 5, 38, t -> {
             t.health = 170f;
             t.armor = 3f;
             t.speed = 1.05f;
@@ -45,34 +45,36 @@ public class MilitaryUnits{
             t.rotateSpeed = 3.5f;
             t.weapons.add(new Weapon("eclipse-reaper-gun"){{
                 mirror = false;
+                x = 0f;
                 rotate = true;
                 rotateSpeed = 5f;
                 reload = 22f;
-                shootY = 5f;
+                shootY = 4f; //the barrel tip of the gun sprite
                 recoil = 1f;
                 shootSound = Sounds.shootDuo;
                 bullet = ap(3.6f, 12f, 38f, 7f, 10f);
                 bullet.buildingDamageMultiplier = 1.6f; //sabotage: rips into buildings
             }});
         });
-        bulwark = tank("bulwark", 48, 9, 38, t -> {
+        bulwark = tank("bulwark", 72, 7, 58, t -> {
             t.health = 620f;
             t.armor = 9f;
             t.speed = 0.72f;
             t.hitSize = 13f;
             t.weapons.add(new Weapon("eclipse-bulwark-cannon"){{
                 mirror = false;
+                x = 0f;
                 rotate = true;
                 rotateSpeed = 3f;
                 reload = 45f;
-                shootY = 9f;
+                shootY = 5.5f; //the barrel tip of the cannon sprite
                 recoil = 2f;
                 shake = 1f;
                 shootSound = Sounds.shootSalvo;
                 bullet = ap(4.5f, 34f, 42f, 10f, 14f);
             }});
         });
-        rampart = tank("rampart", 64, 12, 52, t -> {
+        rampart = tank("rampart", 96, 10, 80, t -> {
             t.health = 1150f;
             t.armor = 11f;
             t.speed = 0.6f;
@@ -86,19 +88,19 @@ public class MilitaryUnits{
                 width = 6f;
             }});
             t.weapons.add(new Weapon("eclipse-rampart-cannon"){{
-                x = 7f;
-                y = -2f;
+                x = 6.5f;
+                y = -3f;
                 rotate = true;
                 rotateSpeed = 2.5f;
                 alternate = true;
                 reload = 40f;
-                shootY = 8f;
+                shootY = 6.5f; //the barrel tips of the cannon sprite
                 recoil = 2f;
                 shootSound = Sounds.shootSalvo;
                 bullet = ap(4.5f, 32f, 44f, 10f, 14f);
             }});
         });
-        annihilator = tank("annihilator", 96, 18, 80, t -> {
+        annihilator = tank("annihilator", 128, 10, 108, t -> {
             t.health = 9000f;
             t.armor = 14f;
             t.speed = 0.5f;
@@ -106,15 +108,16 @@ public class MilitaryUnits{
             t.crushDamage = 2f;
             t.weapons.add(new Weapon("eclipse-annihilator-mortar"){{
                 mirror = false;
+                x = 0f;
                 rotate = true;
                 rotateSpeed = 1.5f;
                 reload = 90f;
-                shootY = 14f;
+                shootY = 8.5f; //the muzzle brake of the mortar sprite
                 recoil = 3f;
                 shake = 3f;
                 shootSound = Sounds.shootRipple;
-                bullet = new ArtilleryBulletType(2.6f, 30f){{
-                    splashDamage = 85f;
+                bullet = new ArtilleryBulletType(2.6f, 75f){{ //x2.5 (1.0 balance: it dealt a third of a Scepter)
+                    splashDamage = 212f;
                     splashDamageRadius = 36f;
                     lifetime = 115f;
                     width = height = 16f;
@@ -131,10 +134,10 @@ public class MilitaryUnits{
                 rotate = true;
                 reload = 15f;
                 shootSound = Sounds.shootDuo;
-                bullet = ap(4f, 24f, 45f, 8f, 11f);
+                bullet = ap(4f, 60f, 45f, 8f, 11f);
             }});
         });
-        colossus = tank("colossus", 128, 24, 108, t -> {
+        colossus = tank("colossus", 200, 16, 168, t -> {
             t.health = 24000f;
             t.armor = 18f;
             t.speed = 0.4f;
@@ -142,14 +145,15 @@ public class MilitaryUnits{
             t.crushDamage = 4f;
             t.weapons.add(new Weapon("eclipse-colossus-cannon"){{
                 mirror = false;
+                x = 0f;
                 rotate = true;
                 rotateSpeed = 1f;
                 reload = 110f;
-                shootY = 26f;
+                shootY = 21f; //the muzzle brake of the cannon sprite
                 recoil = 5f;
                 shake = 5f;
                 shootSound = Sounds.shootSpectre;
-                bullet = new BasicBulletType(9f, 260f){{
+                bullet = new BasicBulletType(9f, 780f){{ //x3 (1.0 balance: it dealt a fifth of a Reign)
                     pierceArmor = true;
                     pierce = true;
                     pierceCap = 4;
@@ -165,14 +169,15 @@ public class MilitaryUnits{
                     hitEffect = Fx.hitBulletBig;
                 }};
             }}, new Weapon("eclipse-colossus-mortar"){{
-                x = 12f;
-                y = -8f;
+                x = 14f;
+                y = -10f;
+                shootY = 6f; //the mouth of the mortar sprite
                 rotate = true;
                 rotateSpeed = 2f;
                 reload = 70f;
                 shootSound = Sounds.shootArtillerySap;
                 bullet = new ArtilleryBulletType(2.6f, 0f){{
-                    splashDamage = 45f;
+                    splashDamage = 135f;
                     splashDamageRadius = 26f;
                     lifetime = 100f;
                     width = height = 12f;
@@ -218,6 +223,7 @@ public class MilitaryUnits{
             t.hitSize = 11f;
             t.accel = 0.1f;
             t.drag = 0.04f;
+            t.engineOffset = 7f; //the tail of the 64 px sprite
             //hunts anti-air: aircraft in range, then the nearest turret that can shoot aircraft; with neither it chases the
             //nearest enemy player. It never goes for the core or other buildings, and with no target at all it waits
             t.aiController = () -> new FlyingAI(){
@@ -258,9 +264,12 @@ public class MilitaryUnits{
             t.hitSize = 15f;
             t.accel = 0.06f;
             t.drag = 0.03f;
+            t.engineOffset = 11f; //the tail of the 96 px sprite
+            t.engineSize = 3.5f;
             t.weapons.add(new Weapon("eclipse-valkyrie-gun"){{
-                x = 5f;
+                x = 8f;
                 y = 1f;
+                shootY = 4.5f;
                 reload = 8f;
                 shootSound = Sounds.shootDuo;
                 bullet = ap(4f, 14f, 40f, 6f, 9f);
@@ -273,6 +282,8 @@ public class MilitaryUnits{
             t.hitSize = 26f;
             t.accel = 0.04f;
             t.drag = 0.02f;
+            t.engineOffset = 13f; //the tail of the 128 px flying wing
+            t.engineSize = 4.5f;
             t.targetAir = false;
             t.weapons.add(new Weapon(){{
                 mirror = false;
@@ -281,10 +292,10 @@ public class MilitaryUnits{
                 ignoreRotation = true;
                 reload = 40f;
                 shootSound = Sounds.none;
-                bullet = new BombBulletType(40f, 30f){{
+                bullet = new BombBulletType(120f, 30f){{ //x3 with its mines (1.0 balance)
                     width = height = 14f;
                     fragBullets = 4;
-                    fragBullet = MilitaryBlocks.mine(50f, 26f, 1.6f);
+                    fragBullet = MilitaryBlocks.mine(150f, 26f, 1.6f);
                     fragVelocityMin = 0.4f;
                     fragVelocityMax = 1f;
                 }};
@@ -297,10 +308,12 @@ public class MilitaryUnits{
             t.hitSize = 34f;
             t.accel = 0.03f;
             t.drag = 0.02f;
+            t.engineOffset = 26f; //the tail of the 224 px sprite
+            t.engineSize = 7f;
             t.abilities.add(new JamPulseAbility());
             t.weapons.add(new PointDefenseWeapon("eclipse-leviathan-point-defense"){{
-                x = 11f;
-                y = -4f;
+                x = 16f;
+                y = -6f;
                 reload = 8f;
                 targetInterval = 6f;
                 targetSwitchInterval = 6f;
@@ -312,13 +325,14 @@ public class MilitaryUnits{
                 }};
             }}, new Weapon("eclipse-leviathan-lance"){{
                 mirror = false;
-                y = 8f;
+                x = 0f;
+                y = 12f;
                 rotate = true;
                 rotateSpeed = 2f;
                 reload = 70f;
-                shootY = 10f;
+                shootY = 8.5f; //the lens of the lance sprite
                 shootSound = Sounds.shootLancer;
-                bullet = new LaserBulletType(120f){{
+                bullet = new LaserBulletType(360f){{ //x3 (1.0 balance: the point defence only shoots bullets)
                     length = 220f;
                     colors = new Color[]{Color.valueOf("b37aff66"), Color.valueOf("b37aff"), Color.white};
                 }};

@@ -24,7 +24,7 @@ import static mindustry.Vars.*;
 public class OrbitalPlatform extends Block{
     public float range = 150f * 8f, chargeTime = 60f * 120f, strikeDelay = 180f, strikeRadius = 10f * 8f, strikeDamage = 3000f;
     public Color color = Color.valueOf("ff8a3d");
-    public TextureRegion dishRegion;
+    public TextureRegion dishRegion, glowRegion;
 
     public static final Effect warning = new Effect(40f, 2000f, e -> {
         Draw.color(Color.scarlet, e.fout());
@@ -61,6 +61,7 @@ public class OrbitalPlatform extends Block{
     public void load(){
         super.load();
         dishRegion = Core.atlas.find(name + "-dish");
+        glowRegion = Core.atlas.find(name + "-glow");
     }
 
     @Override
@@ -82,7 +83,7 @@ public class OrbitalPlatform extends Block{
         return new TextureRegion[]{region, dishRegion};
     }
 
-    public class OrbitalBuild extends Building{
+    public class OrbitalBuild extends Building implements mindustry.logic.Ranged{
         /** Packed tile position of the target, or -1. */
         public int target = -1;
         public float charge, aim = 90f, strikeTimer = -1f, strikeX, strikeY;
@@ -91,6 +92,12 @@ public class OrbitalPlatform extends Block{
             if(target < 0) return false;
             Tile t = world.tile(target);
             return t != null && within(t.worldx(), t.worldy(), range);
+        }
+
+        /** Logic radar from the platform scans its whole strike range. */
+        @Override
+        public float range(){
+            return range;
         }
 
         public float chargeFraction(){
@@ -146,7 +153,9 @@ public class OrbitalPlatform extends Block{
         @Override
         public boolean onConfigureBuildTapped(Building other){
             if(other == this){
-                configure(-1);
+                //tapping it again closes it and keeps the target (it used to clear the target and stay selected,
+                //so the next tap on the map set a new one)
+                deselect();
                 return false;
             }
             if(!within(other, range)) return true;
@@ -167,6 +176,16 @@ public class OrbitalPlatform extends Block{
         @Override
         public void draw(){
             Draw.rect(block.region, x, y);
+            //the capacitor banks fill with light as the charge builds
+            if(glowRegion.found() && charge > 0f){
+                Draw.z(Layer.blockAdditive);
+                Draw.blend(Blending.additive);
+                Draw.color(Color.valueOf("8ae4ff"), chargeFraction() * (0.65f + Mathf.absin(Time.time, 8f, 0.3f)));
+                Draw.rect(glowRegion, x, y);
+                Draw.blend();
+                Draw.reset();
+                Draw.z(Layer.block);
+            }
             Draw.rect(dishRegion, x, y, aim - 90f);
             if(charge > 0f){
                 Draw.z(Layer.effect);
@@ -174,6 +193,17 @@ public class OrbitalPlatform extends Block{
                 Fill.circle(x + Angles.trnsx(aim, 6f), y + Angles.trnsy(aim, 6f), 3f * chargeFraction());
                 Draw.reset();
             }
+        }
+
+        //logic: "control shoot platform x y 1" aims it at that spot (world units, as vanilla turrets); shoot 0 changes nothing
+        @Override
+        public void control(mindustry.logic.LAccess type, double p1, double p2, double p3, double p4){
+            if(type == mindustry.logic.LAccess.shoot && p3 != 0){
+                Tile t = world.tileWorld((float)p1, (float)p2);
+                if(t != null && within(t.worldx(), t.worldy(), range) && t.pos() != target) configureAny(t.pos());
+                return;
+            }
+            super.control(type, p1, p2, p3, p4);
         }
 
         @Override

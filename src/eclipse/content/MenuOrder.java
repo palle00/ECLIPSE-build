@@ -57,16 +57,20 @@ public class MenuOrder{
         after(Blocks.largeSolarPanel, solarFarm);
         after(Blocks.thoriumReactor, fissionReactor, breederReactor);
         after(Blocks.impactReactor, fusionReactor, worldEngine);
+        after(Blocks.coreNucleus, CoreContent.coreBastion, CoreContent.coreCitadel);
 
         //---- turrets ----
         after(Blocks.hail, MilitaryBlocks.minelayer);
         after(Blocks.wave, MilitaryBlocks.acidMortar);
         after(Blocks.duo, MilitaryBlocks.rivet, MilitaryBlocks.sickle);
         after(Blocks.lancer, MilitaryBlocks.heatLance, MilitaryBlocks.tremor);
-        after(Blocks.cyclone, MilitaryBlocks.apiary);
+        after(Blocks.cyclone, MilitaryBlocks.apiary, MilitaryBlocks.primer, MilitaryBlocks.stardustLauncher);
         after(Blocks.meltdown, MilitaryBlocks.eventHorizon);
-        after(Blocks.arc, MilitaryBlocks.jammer, MilitaryBlocks.thunderhead);
+        after(Blocks.arc, MilitaryBlocks.jammer, MilitaryBlocks.sonar, MilitaryBlocks.thunderhead);
         after(Blocks.ripple, MilitaryBlocks.piledriver);
+        after(MilitaryBlocks.piledriver, MilitaryBlocks.bombard);
+        after(MilitaryBlocks.bombard, MilitaryBlocks.payloadCatapult);
+        after(Blocks.payloadRouter, MilitaryBlocks.casingFabricator);
         after(Blocks.scatter, MilitaryBlocks.kestrel);
         after(MilitaryBlocks.minelayer, MilitaryBlocks.cloudbreaker);
         after(Blocks.foreshadow, MilitaryEndgame.orbitalPlatform);

@@ -1,6 +1,7 @@
 package eclipse.content.blocks;
 
 import arc.graphics.*;
+import eclipse.content.*;
 import mindustry.content.*;
 import mindustry.type.*;
 import mindustry.world.*;
@@ -35,7 +36,10 @@ public class RefiningBlocks{
             outputItem = new ItemStack(Items.graphite, 2);
             outputLiquid = new LiquidStack(Liquids.hydrogen, 8f / 60f);
             craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff8a3d"); }}, new DrawHeatInput());
+            drawer = new DrawMulti(new DrawDefault(),
+                new DrawParticles(){{ color = Color.valueOf("ffb060"); x = -0.5f; y = -0.5f; particles = 14; particleRad = 3.6f; particleSize = 0.9f; particleLife = 50f; reverse = true; alpha = 0.8f; }},
+                Animations.spin("-fan", 8f, 8f, 8.5f), Animations.spin("-fan", 8f, 10f, 6.5f), Animations.spin("-fan", 8f, 8f, 4.5f),
+                new DrawGlowRegion(){{ color = Color.valueOf("ff8a3d"); }}, new DrawHeatInput());
         }};
 
     }

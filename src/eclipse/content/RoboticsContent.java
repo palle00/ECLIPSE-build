@@ -3,6 +3,8 @@ package eclipse.content;
 import eclipse.robotics.*;
 import eclipse.robotics.RobotType.*;
 import mindustry.content.*;
+import arc.graphics.*;
+import mindustry.world.draw.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.units.*;
@@ -48,6 +50,7 @@ public class RoboticsContent{
             health = 700;
             repairStock = titaniumRod;
             consumePower(2f);
+            drawer = new DrawMulti(new DrawDefault(), new DrawRegion("-ring", 1.2f, true), new DrawGlowRegion(){{ color = Color.valueOf("84f490"); }});
         }};
 
         //built in the vanilla Air Factory, next to the flare and mono

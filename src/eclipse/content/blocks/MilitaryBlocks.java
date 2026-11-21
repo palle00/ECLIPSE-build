@@ -6,11 +6,14 @@ import eclipse.defense.*;
 import mindustry.content.*;
 import mindustry.entities.*;
 import mindustry.entities.bullet.*;
+import mindustry.entities.part.*;
+import mindustry.world.draw.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.turrets.*;
+import mindustry.world.blocks.payloads.*;
 
 import static eclipse.content.EclipseItems.*;
 import static eclipse.content.EclipseLiquids.*;
@@ -27,9 +30,16 @@ public class MilitaryBlocks{
     public static Block acidMortar, minelayer, heatLance, jammer, piledriver, kestrel, thunderhead, cloudbreaker;
     /** Third set, one turret per tier from the first minutes to the endgame (mechanics in {@link Armory}). */
     public static Block rivet, sickle, tremor, apiary, eventHorizon;
+    /** 1.0 additions (player requests): the Bombard siege mortar ({@link Bombard}); the Supernova pair, Primer and Stardust Launcher ({@link Supernova}). */
+    public static Block bombard, primer, stardustLauncher;
+    /** 1.0 additions: the Payload Catapult and the Casing Fabricator that builds its empty shells ({@link PayloadCatapult}). */
+    public static Block payloadCatapult, casingFabricator;
+    /** 1.0 additions: the Sonar, which finds the Tide's submerged submarines (a {@link Jammer} that applies Sonar Contact). */
+    public static Block sonar;
 
     public static void load(){
         acidMortar = new LiquidTurret("acid-mortar"){{
+            drawer = new DrawTurret(){{ parts.add(new RegionPart("-tube"){{ progress = PartProgress.recoil; moveY = -1.5f; }}); }};
             requirements(Category.turret, with(Items.titanium, 60, Items.metaglass, 40, Items.graphite, 40, polyethylene, 20, pressureCasing, 6, titaniumGear, 6));
             size = 2;
             health = 900;
@@ -54,6 +64,7 @@ public class MilitaryBlocks{
         }};
 
         minelayer = new ItemTurret("minelayer"){{
+            drawer = new DrawTurret(){{ parts.add(new RegionPart("-hatch"){{ progress = PartProgress.recoil; moveY = -2f; }}); }};
             requirements(Category.turret, with(Items.copper, 80, Items.graphite, 50, Items.titanium, 40, copperGear, 10, industrialBearing, 4));
             size = 2;
             health = 800;
@@ -75,11 +86,12 @@ public class MilitaryBlocks{
         }};
 
         heatLance = new ContinuousTurret("heat-lance"){{
+            drawer = new DrawTurret(){{ parts.add(new RegionPart("-emitter"){{ progress = PartProgress.warmup; moveY = 2f; heatColor = Color.valueOf("ff8a3d"); }}); }};
             requirements(Category.turret, with(Items.silicon, 120, Items.graphite, 100, Items.titanium, 80, reinforcedGlass, 30, superalloyFrame, 8, precisionComponent, 4));
             size = 3;
             health = 1600;
             range = 170f;
-            shootY = 30f;
+            shootY = 11f; //the emitter lens at the tip of the sprite
             rotateSpeed = 2.5f;
             heatRequirement = 12f;
             maxHeatEfficiency = 2f;
@@ -88,7 +100,8 @@ public class MilitaryBlocks{
             shootSound = Sounds.none;
             loopSound = Sounds.beamMeltdown;
             loopSoundVolume = 1f;
-            shootType = new ContinuousLaserBulletType(14f){{
+            shootType = new ContinuousLaserBulletType(42f){{
+                damageInterval = 15f; //same damage per second as 14 every 5 ticks, in bigger hits that armour blunts less
                 length = 180f;
                 width = 4f;
                 colors = new Color[]{Color.valueOf("ff8a3d55"), Color.valueOf("ff8a3daa"), Color.valueOf("ffd29a"), Color.white};
@@ -112,6 +125,7 @@ public class MilitaryBlocks{
 
         //Piledriver: a slow carbide slug that punches through up to three ground units in a line; no splash, no air
         piledriver = new ItemTurret("piledriver"){{
+            drawer = new DrawTurret(){{ parts.add(new RegionPart("-ram"){{ progress = PartProgress.recoil; moveY = -3f; }}); }};
             requirements(Category.turret, with(Items.titanium, 160, Items.graphite, 120, tungstenPlate, 40, tungstenCarbide, 60, superalloyFrame, 6, piston, 4));
             size = 3;
             health = 2400;
@@ -124,7 +138,7 @@ public class MilitaryBlocks{
             shootY = 14f;
             shootSound = Sounds.shootSpectre;
             coolant = consumeCoolant(0.3f);
-            ammo(tungstenCarbide, new BasicBulletType(4.5f, 420f){{
+            ammo(tungstenCarbide, new BasicBulletType(4.5f, 600f){{
                 pierce = true;
                 pierceCap = 3;
                 pierceBuilding = false;
@@ -146,6 +160,7 @@ public class MilitaryBlocks{
 
         //Kestrel: one guided missile at a time, at the strongest aircraft in range
         kestrel = new ItemTurret("kestrel"){{
+            drawer = new DrawTurret(){{ parts.add(new RegionPart("-barrel"){{ progress = PartProgress.recoil; moveY = -1.5f; }}); }};
             requirements(Category.turret, with(Items.titanium, 50, Items.silicon, 70, aluminium, 60, microchip, 6, titaniumGear, 6, precisionComponent, 2));
             size = 2;
             health = 900;
@@ -157,13 +172,14 @@ public class MilitaryBlocks{
             shootY = 6f;
             shootSound = Sounds.shootMissile;
             ammo(
-                ammoniumNitrate, interceptor(110f, 18f, 1.5f),
-                Items.blastCompound, interceptor(150f, 26f, 1f)
+                ammoniumNitrate, interceptor(150f, 18f, 1.5f),
+                Items.blastCompound, interceptor(210f, 26f, 1f)
             );
         }};
 
         //Thunderhead: a discharge that jumps between aircraft, weaker with every jump
         thunderhead = new PowerTurret("thunderhead"){{
+            drawer = new DrawTurret(){{ parts.add(new RegionPart("-prong"){{ mirror = true; progress = PartProgress.warmup; moveX = 1.5f; moveRot = -6f; }}); }};
             requirements(Category.turret, with(Items.titanium, 120, Items.surgeAlloy, 40, leadAcidCell, 12, microchip, 10, superalloyFrame, 4, alnicoMagnet, 8));
             size = 3;
             health = 1800;
@@ -174,7 +190,7 @@ public class MilitaryBlocks{
             shootY = 10f;
             shootSound = Sounds.shootArc;
             consumePower(5f);
-            shootType = new Arsenal.ChainBulletType(9f, 90f){{
+            shootType = new Arsenal.ChainBulletType(9f, 130f){{
                 lifetime = 20f;
                 width = 7f;
                 height = 12f;
@@ -189,6 +205,7 @@ public class MilitaryBlocks{
 
         //Cloudbreaker: floating mines around itself that dart at aircraft passing through; at most 8 at once
         cloudbreaker = new Arsenal.MineTurret("cloudbreaker"){{
+            drawer = new DrawTurret(){{ parts.add(new RegionPart("-spine"){{ progress = PartProgress.recoil; moveY = -2f; }}); }};
             requirements(Category.turret, with(Items.titanium, 100, Items.plastanium, 40, aluminium, 80, carbonComposite, 40, microchip, 8, industrialBearing, 6));
             size = 3;
             health = 1600;
@@ -234,6 +251,7 @@ public class MilitaryBlocks{
 
         //T2 Sickle: a sawblade that flies out, turns and comes back, cutting through ground units both ways
         sickle = new ItemTurret("sickle"){{
+            drawer = new DrawTurret(){{ parts.add(new RegionPart("-barrels"){{ progress = PartProgress.recoil; moveY = -1.5f; }}); }};
             requirements(Category.turret, with(Items.titanium, 70, Items.lead, 50, Items.graphite, 40, titaniumGear, 8, industrialBearing, 4));
             size = 2;
             health = 900;
@@ -246,11 +264,11 @@ public class MilitaryBlocks{
             shootSound = Sounds.shootBreach;
             coolant = consumeCoolant(0.2f);
             ammo(
-                Items.titanium, new Armory.BoomerangBulletType(5f, 32f){{
+                Items.titanium, new Armory.BoomerangBulletType(5f, 96f){{
                     lifetime = 64f;
                     ammoMultiplier = 2f;
                 }},
-                tungstenCarbide, new Armory.BoomerangBulletType(5.5f, 60f){{
+                tungstenCarbide, new Armory.BoomerangBulletType(5.5f, 180f){{
                     lifetime = 60f;
                     ammoMultiplier = 3f;
                     status = Munitions.etched;
@@ -263,6 +281,7 @@ public class MilitaryBlocks{
 
         //T3 Tremor: a powered ground shockwave around itself; knocks ground units back and slows them
         tremor = new PowerTurret("tremor"){{
+            drawer = new DrawTurret(){{ parts.add(new RegionPart("-arm"){{ mirror = true; progress = PartProgress.recoil; moveX = 2f; }}); }};
             requirements(Category.turret, with(Items.titanium, 120, Items.silicon, 60, Items.lead, 80, Items.thorium, 40, piston, 4, pressureCasing, 4));
             size = 3;
             health = 1900;
@@ -277,13 +296,14 @@ public class MilitaryBlocks{
             predictTarget = false;
             shootSound = Sounds.shockwaveTower;
             consumePower(4f);
-            shootType = new Armory.ShockwaveBulletType(70f){{
+            shootType = new Armory.ShockwaveBulletType(175f){{
                 radius = 120f;
             }};
         }};
 
         //T4 Apiary: launches drones that circle over the enemy and shoot whatever is near, ground or air; at most 6 at once
         apiary = new Armory.DroneTurret("apiary"){{
+            drawer = new DrawTurret(){{ parts.add(new RegionPart("-bay"){{ mirror = true; progress = PartProgress.warmup; moveX = 2f; }}); }};
             requirements(Category.turret, with(Items.titanium, 100, Items.silicon, 150, Items.plastanium, 60, microchip, 20, industrialBearing, 6, precisionComponent, 6));
             size = 3;
             health = 1700;
@@ -310,6 +330,13 @@ public class MilitaryBlocks{
             reload = 360f;
             rotateSpeed = 1.5f;
             shootY = 14f;
+            heatColor = Color.valueOf("c88fff");
+            drawer = new DrawTurret(){{
+                parts.add(new RegionPart("-claw"){{
+                    mirror = true; progress = PartProgress.warmup; moveX = 3f; moveRot = -10f;
+                    heatColor = Color.valueOf("c88fff");
+                }});
+            }};
             recoil = 3f;
             shake = 4f;
             predictTarget = false;
@@ -317,14 +344,172 @@ public class MilitaryBlocks{
             consumePower(12f);
             coolant = consumeCoolant(0.5f);
             ammo(
-                aetherite, new Armory.SingularityBulletType(2.2f, 900f),
-                Items.phaseFabric, new Armory.SingularityBulletType(2.2f, 450f){{
+                aetherite, new Armory.SingularityBulletType(2.2f, 2700f){{
+                    tickDamage = 18f;
+                }},
+                Items.phaseFabric, new Armory.SingularityBulletType(2.2f, 1350f){{
                     pullRadius = 56f;
-                    tickDamage = 4f;
+                    tickDamage = 12f;
                     glowColor = Color.valueOf("ffd59e");
                     lightColor = glowColor;
                 }}
             );
+        }};
+
+        // ---- 1.0 additions ----
+
+        //Bombard: a siege mortar that outranges everything on Serpulo, but has a 15-tile blind spot around itself
+        bombard = new Bombard.BombardTurret("bombard"){{
+            requirements(Category.turret, with(Items.thorium, 200, Items.graphite, 250, Items.titanium, 300, tungstenPlate, 60, superalloyFrame, 10, piston, 8));
+            size = 4;
+            health = 3600;
+            range = 560f;
+            minRange = 120f;
+            reload = 60f * 7f;
+            targetAir = false;
+            rotateSpeed = 0.8f;
+            recoil = 5f;
+            shake = 6f;
+            shootY = 18f;
+            drawer = new DrawTurret(){{
+                parts.add(new RegionPart("-tube"){{ progress = PartProgress.recoil; moveY = -3.5f; }});
+            }};
+            inaccuracy = 2f;
+            velocityRnd = 0.05f;
+            shootSound = Sounds.shootArtillerySapBig;
+            shootEffect = Fx.shootBig2;
+            smokeEffect = Fx.shootBigSmoke2;
+            coolant = consumeCoolant(0.4f);
+            ammo(
+                Items.graphite, siegeShell(450f, 48f, Color.valueOf("bfbfd6"), Color.valueOf("7d7d93")),
+                ammoniumNitrate, siegeShell(670f, 60f, Color.valueOf("f2efe4"), Color.valueOf("b9b49c")),
+                Items.blastCompound, siegeShell(1050f, 76f, Color.valueOf("ff795e"), Color.valueOf("c4533d"))
+            );
+        }};
+        //Supernova, part 1: the Primer leaves a mark that detonates after 2.5 s, pulling in nearby stardust clouds
+        primer = new PowerTurret("primer"){{
+            drawer = new DrawTurret(){{ parts.add(new RegionPart("-barrel"){{ progress = PartProgress.recoil; moveY = -2f; }}); }};
+            requirements(Category.turret, with(Items.silicon, 150, Items.titanium, 120, Items.plastanium, 50, reinforcedGlass, 20, microchip, 10, precisionComponent, 4));
+            size = 3;
+            health = 1800;
+            range = 240f;
+            reload = 60f * 5f;
+            rotateSpeed = 3f;
+            shootY = 10f;
+            recoil = 2f;
+            shootSound = Sounds.shootLancer;
+            consumePower(5f);
+            shootType = new Supernova.PrimerBulletType(4f, 15f, new Supernova.FuseBulletType(60f * 2.5f){{
+                fragment = new BasicBulletType(2.5f, 22f){{
+                    width = 10f;
+                    height = 12f;
+                    lifetime = 30f;
+                    frontColor = Pal.plastaniumFront;
+                    backColor = Pal.plastaniumBack;
+                    despawnEffect = Fx.plasticExplosion;
+                }};
+            }}){{
+                lifetime = 60f;
+            }};
+        }};
+
+        //Supernova, part 2: the Stardust Launcher scatters clouds of any of these items for the Primer to set off
+        stardustLauncher = new ItemTurret("stardust-launcher"){{
+            drawer = new DrawTurret(){{ parts.add(new RegionPart("-tubes"){{ progress = PartProgress.recoil; moveY = -2f; }}); }};
+            requirements(Category.turret, with(Items.titanium, 120, Items.graphite, 80, Items.lead, 100, titaniumGear, 10, industrialBearing, 6, pressureCasing, 4));
+            size = 3;
+            health = 1500;
+            range = 240f;
+            reload = 12f;
+            rotateSpeed = 6f;
+            inaccuracy = 10f;
+            velocityRnd = 0.2f;
+            shootY = 9f;
+            recoil = 1f;
+            shootSound = Sounds.shoot;
+            coolant = consumeCoolant(0.2f);
+            Item[] items = stardustItems();
+            Object[] list = new Object[items.length * 2];
+            for(int i = 0; i < items.length; i++){
+                list[i * 2] = items[i];
+                list[i * 2 + 1] = new Supernova.DebrisShotBulletType(items[i], 8f){{
+                    ammoMultiplier = 2f;
+                }};
+            }
+            ammo(list);
+        }};
+
+        //Sonar: pings every 2 s; submerged submarines in range become targetable for 3 s
+        sonar = new Jammer("sonar"){{
+            requirements(Category.turret, with(Items.silicon, 60, Items.lead, 60, Items.metaglass, 40, circuitBoard, 4, emitter, 2));
+            size = 2;
+            health = 500;
+            status = Munitions.sonarContact;
+            range = 200f;
+            interval = 120f;
+            duration = 180f;
+            bossFactor = 1f;
+            color = Color.valueOf("7fe0ff");
+            consumePower(1.5f);
+        }};
+
+        //Payload Catapult: throws whole blocks (filled containers, tanks, batteries); they blow up as if destroyed where they land
+        payloadCatapult = new PayloadCatapult.CatapultTurret("payload-catapult"){{
+            requirements(Category.turret, with(Items.thorium, 400, Items.plastanium, 200, Items.surgeAlloy, 150, superalloyFrame, 20, experimentalCore, 4, piston, 12));
+            size = 5;
+            health = 6000;
+            range = 420f;
+            minRange = 64f;
+            reload = 60f * 4f;
+            targetAir = false;
+            rotateSpeed = 0.7f;
+            shootCone = 2f; //one expensive shot: aim properly before letting go
+            recoil = 6f;
+            shake = 7f;
+            shootY = 12f;
+            drawer = new DrawTurret(){{
+                parts.add(new RegionPart("-arm"){{ progress = PartProgress.recoil; moveY = 5f; }});
+            }};
+            shootSound = Sounds.shootArtillerySapBig;
+            shootEffect = Fx.shootBig2;
+            smokeEffect = Fx.shootBigSmoke2;
+            consumePower(5f); //runs the arm, and charges battery shells
+            shellType = new PayloadCatapult.PayloadShellBulletType(3f, 120f){{
+                lifetime = 140f;
+            }};
+        }};
+
+        //Casing Fabricator: Serpulo's answer to the Constructor, limited to the catapult's shells; builds them empty onto a payload conveyor
+        casingFabricator = new Constructor("casing-fabricator"){{
+            requirements(Category.units, with(Items.titanium, 120, Items.silicon, 80, Items.graphite, 80, industrialBearing, 6, precisionComponent, 4));
+            size = 3;
+            filter = PayloadCatapult.shells();
+            minBlockSize = 1;
+            maxBlockSize = 3;
+            consumePower(2f);
+        }};
+    }
+
+    /** Everything the Stardust Launcher fires: each item's properties set what its cloud adds to the blast. */
+    public static Item[] stardustItems(){
+        return new Item[]{Items.sand, Items.scrap, Items.coal, Items.copper, Items.lead, Items.graphite, Items.metaglass, Items.titanium, Items.silicon,
+            Items.thorium, Items.sporePod, Items.pyratite, Items.blastCompound, Items.plastanium, Items.phaseFabric, Items.surgeAlloy, sulfur, ammoniumNitrate};
+    }
+
+    /** The Bombard's shell: a slow, high arc (about 3.5 s to full range), a marked landing spot and a big blast. */
+    static BulletType siegeShell(float splash, float radius, Color front, Color back){
+        return new Bombard.SiegeShellBulletType(2.8f, splash, radius){{
+            lifetime = 205f;
+            width = height = 20f;
+            frontColor = front;
+            backColor = back;
+            trailEffect = Fx.artilleryTrailSmoke;
+            trailInterval = 3f;
+            hitEffect = Fx.massiveExplosion;
+            despawnEffect = Fx.none;
+            hitSound = Sounds.explosionArtilleryShockBig;
+            hitShake = 6f;
+            buildingDamageMultiplier = 1.5f; //a siege gun: it breaks enemy bases
         }};
     }
 
@@ -376,9 +561,10 @@ public class MilitaryBlocks{
     }
 
     /** Cloudbreaker's floating mine: bursts against aircraft only. */
-    static BulletType aerialMine(float damage, float radius, float ammoPerItem){
-        return new Arsenal.AerialMineBulletType(damage * 0.4f){{
-            splashDamage = damage;
+    static BulletType aerialMine(float dmg, float radius, float ammoPerItem){
+        //not "damage": inside {{ }} that would read the bullet's own field (dmg * 0.4)
+        return new Arsenal.AerialMineBulletType(dmg * 0.4f){{
+            splashDamage = dmg;
             splashDamageRadius = radius;
             ammoMultiplier = ammoPerItem;
         }};
@@ -408,8 +594,8 @@ public class MilitaryBlocks{
      * A mine: waits on the ground (up to 30 s) and goes off under the first ground unit; flying units pass over.
      * speed > 0 scatters it a little before it settles (dropped from a bomber).
      */
-    public static BasicBulletType mine(float splash, float radius, float speed){
-        return new BasicBulletType(speed, 0f, "eclipse-mine"){{
+    public static eclipse.type.MineBulletType mine(float splash, float radius, float speed){
+        return new eclipse.type.MineBulletType(speed, 0f, "eclipse-mine"){{
             drag = speed > 0f ? 0.08f : 0f;
             width = height = 10f;
             shrinkY = 0f;

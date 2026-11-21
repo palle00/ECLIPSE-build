@@ -26,6 +26,8 @@ import static mindustry.Vars.*;
 public class WaveScanner extends Block{
     public int maxLinks = 4;
     public float linkRange = 12f * 8f;
+    /** "-dish": the radar dish, sweeping while the scanner is powered. */
+    public TextureRegion dishRegion;
 
     public WaveScanner(String name){
         super(name);
@@ -35,6 +37,12 @@ public class WaveScanner extends Block{
         hasPower = true;
         saveConfig = false;
         config(Integer.class, (ScannerBuild b, Integer pos) -> b.toggleLink(pos));
+    }
+
+    @Override
+    public void load(){
+        super.load();
+        dishRegion = Core.atlas.find(name + "-dish");
     }
 
     /** One report line per unit type: "count Name (type)", plus BOSS. Used by the screens and the tests. */
@@ -59,7 +67,7 @@ public class WaveScanner extends Block{
 
     public class ScannerBuild extends Building{
         public IntSeq links = new IntSeq();
-        float refresh;
+        float refresh, dishAngle;
 
         void toggleLink(int pos){
             int i = links.indexOf(pos);
@@ -90,7 +98,14 @@ public class WaveScanner extends Block{
         }
 
         @Override
+        public void draw(){
+            super.draw();
+            if(dishRegion.found()) Drawf.spinSprite(dishRegion, x - 2f, y, dishAngle);
+        }
+
+        @Override
         public void updateTile(){
+            dishAngle += Time.delta * 1.5f * efficiency;
             //screens are drawn locally on each client, like logic processor graphics
             if(headless || links.isEmpty()) return;
             refresh -= Time.delta;

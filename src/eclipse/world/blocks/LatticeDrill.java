@@ -50,7 +50,7 @@ public class LatticeDrill extends Block{
     /** Coolant used while boosting (per tick), and how much boost one point of the coolant's heat capacity gives. */
     public float boostUse = 0.2f, boostPerHeatCapacity = 1.5f;
     public int tilesPerHead = 70, maxHeads = 3;
-    public TextureRegion nodeRegion, headRegion;
+    public TextureRegion nodeRegion, headRegion, coreRegion;
 
     /** Lattice tiles claimed by any lattice drill (tile position -> drill building id), so two never overlap. */
     static final IntIntMap claims = new IntIntMap();
@@ -90,6 +90,7 @@ public class LatticeDrill extends Block{
         super.load();
         nodeRegion = Core.atlas.find(name + "-node");
         headRegion = Core.atlas.find(name + "-head");
+        coreRegion = Core.atlas.find(name + "-core");
     }
 
     @Override
@@ -165,7 +166,7 @@ public class LatticeDrill extends Block{
         final Seq<Head> heads = new Seq<>();
         /** Covered count to regrow to after loading. */
         int target = -1;
-        float growTimer, checkTimer, progress;
+        float growTimer, checkTimer, progress, coreSpin;
 
         public float rate(){
             if(ore == null) return 0f;
@@ -247,6 +248,7 @@ public class LatticeDrill extends Block{
                 prune();
             }
             float speed = speed();
+            coreSpin += Time.delta * speed * 3f;
             if(covered.size < maxTiles && speed > 0f){
                 growTimer += Time.delta * speed;
                 float perTile = 60f / growPerSecond;
@@ -387,6 +389,8 @@ public class LatticeDrill extends Block{
                 Draw.z(Layer.block);
             }
             super.draw();
+            //the lattice core turns while the drill works
+            if(coreRegion.found()) Drawf.spinSprite(coreRegion, x, y, coreSpin);
         }
 
         @Override

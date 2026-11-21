@@ -25,6 +25,8 @@ import static mindustry.Vars.*;
  * game's own liquid icons) and while hovering a built ECLIPSE machine (icons and arrows).</li>
  * <li>Heat: while placing a heater, the block in front of it is outlined with how much heat it would get and what it
  * needs, or a warning if it does not use heat.</li>
+ * <li>Ratios: while placing a machine next to one that feeds it (or that it feeds), how many suppliers keep one
+ * consumer running, from both machines' rates.</li>
  * </ul>
  */
 public class PlacementHints{
@@ -43,17 +45,64 @@ public class PlacementHints{
             int tx = World.toTile(m.x - selected.offset), ty = World.toTile(m.y - selected.offset);
             int rotation = selected.rotate ? control.input.rotation : 0;
             if(selected instanceof eclipse.world.blocks.RecipeCrafter rc){
-                eclipse.world.blocks.RecipeCrafter.Recipe r = rc.lastConfig instanceof Integer v ? rc.recipes.get(Math.max((v & 0xff) - 1, 0) % rc.recipes.size)
-                    : rc.recipes.find(x -> x.liquidSides.length > 0);
+                //lastConfig is only set by a pick, and is then what the placed machine gets
+                eclipse.world.blocks.RecipeCrafter.Recipe r = rc.lastConfig instanceof Integer v ? rc.unpackRecipe(v) : null;
+                if(r == null) r = rc.recipes.find(x -> x.liquidSides.length > 0);
                 if(r != null) recipeArrows(rc, r, tx * tilesize + selected.offset, ty * tilesize + selected.offset, rotation);
             }else if(selected instanceof GenericCrafter g) outputArrows(g, tx * tilesize + selected.offset, ty * tilesize + selected.offset, rotation, false);
             if(selected instanceof HeatProducer heater) heatPreview(heater, tx, ty, rotation);
+            ratioHint(selected, tx, ty);
         }else{
             Building b = world.buildWorld(m.x, m.y);
             if(b instanceof eclipse.world.blocks.RecipeCrafter.RecipeBuild r && r.recipe != null) recipeArrows((eclipse.world.blocks.RecipeCrafter)b.block, r.recipe, b.x, b.y, b.rotation);
             else if(b != null && b.block instanceof GenericCrafter g && b.block.name.startsWith("eclipse-")) outputArrows(g, b.x, b.y, b.rotation, true);
         }
         Draw.reset();
+    }
+
+    static final arc.struct.ObjectFloatMap<mindustry.ctype.UnlockableContent> nIn = new arc.struct.ObjectFloatMap<>(), nOut = new arc.struct.ObjectFloatMap<>(),
+        bIn = new arc.struct.ObjectFloatMap<>(), bOut = new arc.struct.ObjectFloatMap<>();
+
+    /** Supplier/consumer ratios with the machines touching a crafter about to be placed at (tx, ty). */
+    static void ratioHint(Block block, int tx, int ty){
+        if(!(block instanceof GenericCrafter)) return;
+        int lo = (block.size - 1) / 2, hi = block.size / 2;
+        arc.struct.ObjectSet<Building> near = new arc.struct.ObjectSet<>();
+        for(int x = tx - lo - 1; x <= tx + hi + 1; x++){
+            for(int y = ty - lo - 1; y <= ty + hi + 1; y++){
+                boolean edgeX = x == tx - lo - 1 || x == tx + hi + 1, edgeY = y == ty - lo - 1 || y == ty + hi + 1;
+                if(edgeX == edgeY) continue; //inside the footprint, or a corner (not touching)
+                Building b = world.build(x, y);
+                if(b != null && b.team == player.team()) near.add(b);
+            }
+        }
+        if(near.isEmpty()) return;
+        eclipse.world.blocks.RecipeCrafter.Recipe picked = block instanceof eclipse.world.blocks.RecipeCrafter rc && rc.lastConfig instanceof Integer v ? rc.unpackRecipe(v) : null;
+        arc.struct.Seq<eclipse.world.blocks.RecipeCrafter.Recipe> candidates = new arc.struct.Seq<>();
+        if(block instanceof eclipse.world.blocks.RecipeCrafter rc) candidates.addAll(picked != null ? arc.struct.Seq.with(picked) : rc.recipes);
+        else candidates.add((eclipse.world.blocks.RecipeCrafter.Recipe)null);
+        arc.struct.Seq<String> lines = new arc.struct.Seq<>();
+        for(Building n : near){
+            nIn.clear();
+            nOut.clear();
+            if(!Rates.base(n, nIn, nOut)) continue;
+            for(eclipse.world.blocks.RecipeCrafter.Recipe r : candidates){
+                bIn.clear();
+                bOut.clear();
+                if(!Rates.base(block, r, bIn, bOut)) continue;
+                int before = lines.size;
+                for(var e : bIn) if(nOut.get(e.key, 0f) > 0f){
+                    lines.add(Core.bundle.format("eclipse-hint.ratio-in", Strings.autoFixed(e.value / nOut.get(e.key, 0f), 2), n.block.localizedName, e.key.localizedName));
+                }
+                for(var e : bOut) if(nIn.get(e.key, 0f) > 0f){
+                    lines.add(Core.bundle.format("eclipse-hint.ratio-out", Strings.autoFixed(nIn.get(e.key, 0f) / e.value, 2), n.block.localizedName, e.key.localizedName));
+                }
+                if(lines.size > before) break; //a universal machine: the first recipe that links to this neighbour
+            }
+            if(lines.size >= 3) break;
+        }
+        if(lines.isEmpty()) return;
+        block.drawPlaceText(lines.toString(" | "), tx, ty + hi + 1, true);
     }
 
     /** Arrows for a universal machine's recipe with fixed liquid output sides. */

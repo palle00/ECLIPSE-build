@@ -7,6 +7,7 @@ import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.production.*;
 import mindustry.world.draw.*;
+import eclipse.content.*;
 
 import static eclipse.content.EclipseItems.*;
 import static eclipse.content.EclipseLiquids.*;
@@ -30,7 +31,9 @@ public class ElectronicsBlocks{
             consumePower(1.5f);
             outputItem = new ItemStack(highPuritySilicon, 1);
             craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(hydrochloricAcid, 3f), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(hydrochloricAcid, 3f),
+                new DrawBubbles(Color.valueOf("fff8d0")){{ amount = 8; radius = 1f; spread = 3f; timeScl = 30f; }}, new DrawDefault(),
+                new DrawGlowRegion("-rods"){{ color = Color.valueOf("ffb070"); alpha = 0.9f; glowScale = 6f; glowIntensity = 0.4f; }});
         }};
 
         // High-purity silicon + copper traces + polyethylene packaging -> microchips.
@@ -40,11 +43,12 @@ public class ElectronicsBlocks{
             health = 320;
             itemCapacity = 10;
             craftTime = 90f;
-            consumeItems(with(highPuritySilicon, 1, Items.copper, 2, polyethylene, 1));
-            consumePower(2f);
-            outputItem = new ItemStack(microchip, 2);
+            consumeItems(with(highPuritySilicon, 1, transistor, 2, polyethylene, 1)); //a chip is many transistors: it costs more than its parts
+            consumePower(8f); //480/s, the transistor's tier
+            outputItem = new ItemStack(microchip, 1);
             craftEffect = Fx.pulverizeSmall;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("6dff9a"); }});
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("6dff9a"); }},
+                new Animations.DrawMove("-head"){{ slideX = 3f; period = 90f; }});
         }};
     
         // ---- wiring and control (wire comes from the Extruder) ----
@@ -66,7 +70,9 @@ public class ElectronicsBlocks{
             recipe(3, 60f, with(copperFoil, 2, polyethylene, 1, resistor, 2, capacitor, 1, transistor, 1), with(circuitBoard, 1))
                 .liquidsIn(hydrochloricAcid, 2f / 60f).liquidsOut(acidicWaste, 1f / 60f);
             recipe(4, 90f, with(microchip, 1, circuitBoard, 2, electricMotor, 1, titaniumScrew, 2), with(controlUnit, 1));
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(hydrochloricAcid, 3f), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(hydrochloricAcid, 3f),
+                new DrawBubbles(Color.valueOf("e8f0d0")){{ amount = 10; radius = 1.3f; spread = 6f; timeScl = 35f; }},
+                new DrawDefault(), new Animations.DrawMove("-head"){{ slideX = 6.5f; period = 140f; }});
         }};
 }
 }

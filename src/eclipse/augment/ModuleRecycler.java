@@ -2,6 +2,7 @@ package eclipse.augment;
 
 import arc.util.*;
 import arc.util.io.*;
+import eclipse.world.blocks.*;
 import mindustry.content.*;
 import mindustry.entities.*;
 import mindustry.gen.*;
@@ -14,7 +15,7 @@ import mindustry.world.meta.*;
 import static mindustry.Vars.*;
 
 /** Dismantles unwanted modules, recovering a fraction of their recipe. */
-public class ModuleRecycler extends Block{
+public class ModuleRecycler extends AnimatedBlock{
     public float recoveryFraction = 0.5f;
     public float craftTime = 300f;
     public Effect craftEffect = Fx.pulverizeMedium;
@@ -44,7 +45,7 @@ public class ModuleRecycler extends Block{
         addBar("progress", (RecyclerBuild e) -> new Bar("bar.progress", Pal.ammo, () -> e.progress));
     }
 
-    public class RecyclerBuild extends Building{
+    public class RecyclerBuild extends AnimatedBuild{
         public float progress;
 
         public @Nullable AugmentModule module(){
@@ -76,6 +77,7 @@ public class ModuleRecycler extends Block{
         @Override
         public void updateTile(){
             AugmentModule m = module();
+            animate(m != null && efficiency > 0f);
             if(m != null && efficiency > 0f){
                 progress += getProgressIncrease(craftTime);
                 if(progress >= 1f){

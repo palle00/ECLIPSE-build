@@ -6,6 +6,7 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
+import eclipse.world.blocks.*;
 import mindustry.entities.*;
 import mindustry.content.*;
 import mindustry.gen.*;
@@ -20,7 +21,7 @@ import mindustry.world.meta.*;
 import static mindustry.Vars.*;
 
 /** Manufactures the selected {@link AugmentModule} from its recipe. Each assembler handles a range of tiers. */
-public class ModuleAssembler extends Block{
+public class ModuleAssembler extends AnimatedBlock{
     public int minTier = 1, maxTier = 1;
     public Effect craftEffect = Fx.pulverizeMedium;
 
@@ -83,7 +84,7 @@ public class ModuleAssembler extends Block{
         addBar("progress", (AssemblerBuild e) -> new Bar("bar.progress", Pal.ammo, () -> e.progress));
     }
 
-    public class AssemblerBuild extends Building{
+    public class AssemblerBuild extends AnimatedBuild{
         public @Nullable AugmentModule selected;
         public float progress;
 
@@ -101,6 +102,7 @@ public class ModuleAssembler extends Block{
 
         @Override
         public void updateTile(){
+            animate(selected != null && efficiency > 0f);
             if(selected != null && efficiency > 0f){
                 progress += getProgressIncrease(selected.craftTime);
                 if(progress >= 1f){

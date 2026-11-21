@@ -79,6 +79,10 @@ Upgrade any machine, vanilla or ECLIPSE, without replacing it. Manufacture modul
 | **Tremor** | Slams the ground: a shockwave that throws enemies back and slows them. |
 | **Jammer** | Slows the weapons of every enemy in range. |
 | **Piledriver** | A carbide slug that punches through three tanks in a line. |
+| **Bombard** | Siege mortar with the longest range of any turret, but a blind spot around itself. |
+| **Primer** + **Stardust Launcher** | The Supernova: the Launcher scatters clouds of almost any item, the Primer pulls them into one blast that grows with every cloud. |
+| **Sonar** | Finds the Tide's submerged submarines so your turrets can hit them. |
+| **Payload Catapult** | Throws whole blocks: a container of blast compound, a tank of oil, a charged battery. They blow up where they land. |
 | **Kestrel** | Guided interceptors that always go for the strongest aircraft. |
 | **Thunderhead** | Chain lightning that jumps through a whole flock. |
 | **Cloudbreaker** | Fills the sky around it with floating mines. |
@@ -105,10 +109,13 @@ Custom games with waves get two factions on top of the map's own waves: **the Sw
 
 - **ECLIPSE Wiki** in the pause menu: a step-by-step Getting Started guide, guides for every system and an entry for every block, material and unit. Press **I** over any ECLIPSE block to open its page.
 - **Animated setup pictures:** every machine's wiki page shows a small working setup built from its real recipe.
-- Every item page has a **recipe tree**: the whole chain for 1 per second, down to raw materials, with how many machines it takes.
-- Machines tell you **why they stopped** ("Brine has nowhere to go", "No heat", "Underpowered: needs 480/s").
+- Every item page has a **production calculator**: type a target rate and get the whole chain down to raw materials, how many machines it takes, total power and the power tier the grid needs.
+- **Comparison tables** in the wiki: generators, turrets and units side by side, read from the game data.
+- Machines tell you **why they stopped** ("Brine has nowhere to go", "No heat", "Underpowered: needs 480/s"). Press **K** to mark every stopped machine on the map.
+- **Production panel** (**O**, or from the wiki): how much of every item and liquid your base makes and uses per second, and where a chain is short.
 - A **search box** above the build menu finds any block by name.
-- Placement hints show liquid output sides and how much heat a heater delivers.
+- Placement hints show liquid output sides, how much heat a heater delivers, and how many machines it takes to feed the one you are placing.
+- **Logic:** processors can read ECLIPSE machines (status, recipe, overclock, heat, pressure, the next wave...) with `esensor`, set overclock, recipe or the Orbital Platform's target with `econtrol`, and look up recipes with `recipe`. Every block's wiki page lists what it answers, and a Logic guide has ready-to-paste programs.
 - **Upgrade Section:** hold Alt with a better belt, conduit or wall selected to upgrade a whole connected line at once.
 - A new **ECLIPSE main menu**: a dusk landscape under the eclipse.
 - A **Showcase** custom map with every ECLIPSE block running side by side, and a numbered tour.

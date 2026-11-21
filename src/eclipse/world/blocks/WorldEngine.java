@@ -55,6 +55,18 @@ public class WorldEngine extends PowerGenerator{
         overdriveStat = new Stat("eclipse-engine-overdrive", StatCat.function);
     public Color glowColor = Color.valueOf("ffb648");
     public TextureRegion glowRegion;
+    /** "-stage1".."-stage5": what each finished stage adds to the frame (foundation braces, energy coils, chemistry tanks,
+     * control consoles, confinement magnets); the last stage, activation, lights the eclipse itself. */
+    public TextureRegion[] stageRegions = new TextureRegion[0];
+    /** Where each stage's work goes, in world units from the centre (x, y, width, height); drawn as a pulsing marker. */
+    static final float[][][] stageMarks = {
+        {{-15f, 15f, 6f, 6f}, {15f, 15f, 6f, 6f}, {-15f, -15f, 6f, 6f}, {15f, -15f, 6f, 6f}},
+        {{-19f, 0f, 7f, 18f}, {19f, 0f, 7f, 18f}},
+        {{0f, -19f, 18f, 7f}},
+        {{0f, 19f, 18f, 7f}},
+        {},
+        {}
+    };
 
     public WorldEngine(String name){
         super(name);
@@ -70,6 +82,16 @@ public class WorldEngine extends PowerGenerator{
     public void load(){
         super.load();
         glowRegion = Core.atlas.find(name + "-glow");
+        stageRegions = new TextureRegion[5];
+        for(int i = 0; i < stageRegions.length; i++) stageRegions[i] = Core.atlas.find(name + "-stage" + (i + 1));
+    }
+
+    /** The build menu shows the finished engine. */
+    @Override
+    public TextureRegion[] icons(){
+        arc.struct.Seq<TextureRegion> out = arc.struct.Seq.with(region);
+        for(TextureRegion r : stageRegions) if(r != null && r.found()) out.add(r);
+        return out.toArray(TextureRegion.class);
     }
 
     @Override
@@ -287,12 +309,53 @@ public class WorldEngine extends PowerGenerator{
         @Override
         public void draw(){
             super.draw();
-            if(!complete() || !glowRegion.found()) return;
+            //what the finished stages have added to the frame
+            for(int i = 0; i < Math.min(stage, stageRegions.length); i++){
+                if(stageRegions[i].found()) Draw.rect(stageRegions[i], x, y);
+            }
+            if(!complete()){
+                drawStageMarker();
+                return;
+            }
+            //online: the eclipse lights up - a pulsing corona, two rings turning opposite ways, a slow outward pulse
             Draw.z(Layer.blockAdditive);
             Draw.blend(Blending.additive);
-            Draw.color(glowColor, 0.55f + Mathf.absin(Time.time, 12f, 0.35f));
-            Draw.rect(glowRegion, x, y);
+            if(glowRegion.found()){
+                Draw.color(glowColor, 0.6f + Mathf.absin(Time.time, 14f, 0.35f));
+                Draw.rect(glowRegion, x, y);
+            }
+            float t = Time.time;
+            Lines.stroke(0.7f);
+            Draw.color(glowColor, 0.55f);
+            dashedRing(11.4f, t * 0.35f, 10);
+            Draw.color(Pal.accent, 0.35f);
+            dashedRing(13.2f, -t * 0.25f, 6);
+            float pulse = (t % 240f) / 240f;
+            Draw.color(glowColor, 0.4f * (1f - pulse));
+            Lines.stroke(1.4f * (1f - pulse));
+            Lines.circle(x, y, 9f + pulse * 30f);
             Draw.blend();
+            Draw.reset();
+        }
+
+        /** A ring of n dashes (half of the circle drawn), turned by rotation degrees. */
+        void dashedRing(float radius, float rotation, int n){
+            float step = 360f / n;
+            for(int i = 0; i < n; i++){
+                float a = rotation + i * step;
+                Lines.arc(x, y, radius, 0.5f / n, a);
+            }
+        }
+
+        /** Outlines where the current stage's work goes (bays, braces, the magnet ring or the core), pulsing gently. */
+        void drawStageMarker(){
+            if(stage >= stageMarks.length) return;
+            Draw.z(Layer.blockOver);
+            Draw.color(Pal.accent, 0.25f + Mathf.absin(Time.time, 10f, 0.35f));
+            Lines.stroke(1f);
+            for(float[] m : stageMarks[stage]) Lines.rect(x + m[0] - m[2] / 2f, y + m[1] - m[3] / 2f, m[2], m[3]);
+            if(stage == 4) Lines.circle(x, y, 10.8f);
+            if(stage == 5) Lines.circle(x, y, 8.2f);
             Draw.reset();
         }
 

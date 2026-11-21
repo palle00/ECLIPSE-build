@@ -292,6 +292,9 @@ public class EclipseTechTree{
         child(fusion, worldEngine); //its Confinement stage needs the fusion industry's deuterium
         child(find(aetherite), superconductor);
 
+        //core upgrades after the Nucleus
+        child(child(find(Blocks.coreNucleus), CoreContent.coreBastion), CoreContent.coreCitadel);
+
         //specialist robotics: built in the vanilla air factory, run from the dispatch hub
         TechNode hubNode = child(find(Blocks.airFactory), RoboticsContent.robotHub);
         child(child(hubNode, RoboticsContent.logisticsDrone), RoboticsContent.repairDrone);
@@ -302,7 +305,10 @@ public class EclipseTechTree{
         child(find(Blocks.hail), MilitaryBlocks.minelayer);
         child(find(Blocks.lancer), MilitaryBlocks.heatLance);
         child(find(Blocks.arc), MilitaryBlocks.jammer);
+        child(find(MilitaryBlocks.jammer), MilitaryBlocks.sonar);
         child(find(Blocks.ripple), MilitaryBlocks.piledriver);
+        child(find(MilitaryBlocks.piledriver), MilitaryBlocks.bombard);
+        child(child(find(MilitaryBlocks.bombard), MilitaryBlocks.casingFabricator), MilitaryBlocks.payloadCatapult);
         child(find(Blocks.scatter), MilitaryBlocks.kestrel);
         child(find(Blocks.arc), MilitaryBlocks.thunderhead);
         child(find(MilitaryBlocks.minelayer), MilitaryBlocks.cloudbreaker);
@@ -310,6 +316,7 @@ public class EclipseTechTree{
         child(child(find(Blocks.duo), MilitaryBlocks.rivet), MilitaryBlocks.sickle);
         child(find(Blocks.lancer), MilitaryBlocks.tremor);
         child(find(Blocks.cyclone), MilitaryBlocks.apiary);
+        child(child(find(Blocks.cyclone), MilitaryBlocks.primer), MilitaryBlocks.stardustLauncher);
         child(find(Blocks.meltdown), MilitaryBlocks.eventHorizon);
 
         //unit lines: T1 under the vanilla factory, each upgrade also needs its reconstructor researched (as vanilla units do)

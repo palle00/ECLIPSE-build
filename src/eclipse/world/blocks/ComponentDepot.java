@@ -1,10 +1,12 @@
 package eclipse.world.blocks;
 
 import arc.*;
+import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.struct.*;
 import mindustry.content.*;
 import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.world.blocks.storage.*;
 import mindustry.world.blocks.storage.CoreBlock.*;
@@ -26,11 +28,19 @@ public class ComponentDepot extends StorageBlock{
     /** Items of each kind sent to the core per transfer, and ticks between transfers. */
     public int transferAmount = 2;
     public float transferInterval = 10f;
+    /** "-hub": the transfer hub, turning while components are sent to the core. */
+    public TextureRegion hubRegion;
 
     public ComponentDepot(String name){
         super(name);
         coreMerge = false;
         update = true;
+    }
+
+    @Override
+    public void load(){
+        super.load();
+        hubRegion = Core.atlas.find(name + "-hub");
     }
 
     @Override
@@ -40,7 +50,7 @@ public class ComponentDepot extends StorageBlock{
     }
 
     public class DepotBuild extends StorageBuild{
-        float timer;
+        float timer, sinceSent = 999f, warmup, spin;
 
         @Override
         public boolean acceptItem(Building source, Item item){
@@ -49,6 +59,9 @@ public class ComponentDepot extends StorageBlock{
 
         @Override
         public void updateTile(){
+            sinceSent += delta();
+            warmup = Mathf.approachDelta(warmup, sinceSent < 60f ? 1f : 0f, 0.02f);
+            spin += warmup * delta() * 2f;
             timer += delta();
             if(timer < transferInterval) return;
             timer = 0f;
@@ -59,8 +72,15 @@ public class ComponentDepot extends StorageBlock{
                 if(n <= 0) continue;
                 items.remove(item, n);
                 core.items.add(item, n);
+                sinceSent = 0f;
                 if(!headless && Mathf.chance(0.3)) Fx.itemTransfer.at(x, y, 0f, item.color, core);
             }
+        }
+
+        @Override
+        public void draw(){
+            super.draw();
+            if(hubRegion.found()) Drawf.spinSprite(hubRegion, x, y, spin);
         }
     }
 }

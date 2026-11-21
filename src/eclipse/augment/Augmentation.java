@@ -156,6 +156,8 @@ public class Augmentation{
         groupOwner.clear();
         uniqueSeen.clear();
         float penalty = 0f;
+        //a legendary lifts the cap of its own stat to its own value, so it can beat the best ordinary module
+        float legendaryPower = 0f, legendaryYield = 0f;
         boolean analyzer = false;
 
         for(CouplerBuild c : couplers(target)){
@@ -194,12 +196,16 @@ public class Augmentation{
                 add("cooling", m.coolingBonus);
                 penalty += m.speedPenalty;
                 analyzer |= m.analyzer;
+                if(m.legendary){
+                    legendaryPower = Math.max(legendaryPower, m.powerReduction);
+                    legendaryYield = Math.max(legendaryYield, m.yieldBonus);
+                }
             }
         }
 
         e.speed = combine("speed", maxSpeedBonus) - penalty;
-        e.powerReduction = combine("power", maxPowerReduction);
-        e.yield = combine("yield", maxYield);
+        e.powerReduction = combine("power", Math.max(maxPowerReduction, legendaryPower));
+        e.yield = combine("yield", Math.max(maxYield, legendaryYield));
         e.inputSaving = combine("saving", maxSaving);
         e.recycle = combine("recycle", maxRecycle);
         e.thermal = combine("thermal", maxThermal);

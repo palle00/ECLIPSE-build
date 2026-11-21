@@ -7,6 +7,7 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.entities.*;
+import eclipse.world.blocks.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.ui.*;
@@ -22,7 +23,7 @@ import static mindustry.Vars.*;
  * beacons can't stack past the cap, and the granted part is taken back when a unit leaves the field.
  * Recharging needs power and slows while the field is under pressure. Only the server changes unit shields.
  */
-public class UnitShieldBeacon extends Block{
+public class UnitShieldBeacon extends AnimatedBlock{
     public static final Stat poolStat = new Stat("eclipse-shield-pool", StatCat.function);
 
     public float range = 12f * 8f;
@@ -63,7 +64,7 @@ public class UnitShieldBeacon extends Block{
         Drawf.dashCircle(x * tilesize + offset, y * tilesize + offset, range, fieldColor);
     }
 
-    public class BeaconBuild extends Building{
+    public class BeaconBuild extends AnimatedBuild{
         public float pool, timer, pressure;
         public int covered;
         /** unit id -> shield this beacon granted and the unit still has. Saved (unit ids survive saving), so it can still be taken back. */
@@ -72,6 +73,7 @@ public class UnitShieldBeacon extends Block{
 
         @Override
         public void updateTile(){
+            animate(efficiency > 0f);
             pressure = Math.max(0f, pressure - delta());
             float rate = rechargePerSecond * efficiency * (pressure > 0f ? pressureRecharge : 1f);
             pool = Math.min(poolCapacity, pool + rate * delta() / 60f);

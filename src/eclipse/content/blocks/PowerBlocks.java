@@ -4,6 +4,7 @@ import arc.graphics.*;
 import eclipse.exploration.*;
 import eclipse.world.blocks.*;
 import mindustry.content.*;
+import eclipse.content.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.heat.*;
@@ -29,7 +30,8 @@ public class PowerBlocks{
             requirements(Category.crafting, with(aluminiumPlate, 15, Items.copper, 50, Items.graphite, 30, titaniumRod, 10));
             size = 3;
             health = 500;
-            drawer = new DrawMulti(new DrawDefault(), new DrawHeatOutput(), new DrawHeatInput("-heat"));
+            drawer = new DrawMulti(new DrawDefault(), new DrawHeatRegion("-core"){{ color = Color.valueOf("ff8a3d"); pulse = 0.25f; }},
+                new DrawHeatOutput(), new DrawHeatInput("-heat"));
             regionRotated1 = 1;
         }};
 
@@ -44,8 +46,8 @@ public class PowerBlocks{
             consumeLiquid(purifiedWater, 6f / 60f);
             outputLiquid = new LiquidStack(steam, 12f / 60f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 4f),
-                new DrawBubbles(Color.valueOf("ffffff")){{ amount = 16; radius = 5f; spread = 10f; }},
-                new DrawDefault(), new DrawHeatInput());
+                new DrawBubbles(Color.valueOf("ffffff")){{ amount = 20; radius = 1.5f; spread = 6f; timeScl = 20f; }},
+                new DrawDefault(), new Animations.DrawMove("-needle"){{ pivotX = 9f; pivotY = -9.5f; swing = 40f; period = 120f; }}, new DrawHeatInput());
         }};
 
         // Power -> heat through molybdenum disilicide elements. No fuel needed, but costs a lot of power.
@@ -55,7 +57,7 @@ public class PowerBlocks{
             health = 300;
             heatOutput = 4f;
             consumePower(3f);
-            drawer = new DrawMulti(new DrawDefault(), new DrawHeatOutput());
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion("-coils"){{ color = Color.valueOf("ff6a3d"); alpha = 0.9f; glowScale = 5f; glowIntensity = 0.3f; }}, new DrawHeatOutput());
         }};
 
         // Vanadium redox flow battery: the largest energy store.
@@ -65,7 +67,7 @@ public class PowerBlocks{
             health = 700;
             consumePowerBuffered(120000f);
             baseExplosiveness = 2f;
-            drawer = new DrawMulti(new DrawDefault(), new DrawPower(), new DrawRegion("-top"));
+            drawer = new DrawMulti(new DrawDefault(), Animations.spin("-pump", 4f, -7f, -4.5f), Animations.spin("-pump", 4f, 7f, -4.5f), new DrawPower());
         }};
 
         // Steam -> power; condensate is returned as purified water.
@@ -79,7 +81,7 @@ public class PowerBlocks{
             outputLiquid = new LiquidStack(purifiedWater, 5f / 60f);
             generateEffect = Fx.steam;
             effectChance = 0.04f;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("9fd8ff"); }});
+            drawer = new DrawMulti(new DrawDefault(), new DrawRegion("-rotor", 8f, true), new DrawGlowRegion(){{ color = Color.valueOf("9fd8ff"); }});
         }};
 
         // H2 + O2 -> power + purified water. ~80% round trip vs. electrolysis; free power from chlor-alkali hydrogen.
@@ -92,7 +94,7 @@ public class PowerBlocks{
             consumeLiquids(LiquidStack.with(Liquids.hydrogen, 6f / 60f, oxygen, 3f / 60f));
             outputLiquid = new LiquidStack(purifiedWater, 3f / 60f);
             generateEffect = Fx.none;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("7fc8ff"); }});
+            drawer = new DrawMulti(new DrawDefault(), Animations.spin("-fan", 8f, -5.5f, -4.5f), new DrawGlowRegion(){{ color = Color.valueOf("7fc8ff"); }});
         }};
 
         // Methane -> power.
@@ -106,7 +108,7 @@ public class PowerBlocks{
             outputLiquid = new LiquidStack(flueGas, 12f / 60f); //vented when not piped away
             generateEffect = Fx.generatespark;
             effectChance = 0.05f;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff9a4a"); }});
+            drawer = new DrawMulti(new DrawDefault(), Animations.spin("-rotor", 8f, 1.5f, -0.5f), new DrawGlowRegion(){{ color = Color.valueOf("ff9a4a"); }});
         }};
 
         // Combined cycle: a large gas turbine (about 1.7x the Methane Turbine's power per methane) whose hot exhaust
@@ -118,17 +120,19 @@ public class PowerBlocks{
             liquidCapacity = 80f;
             powerProduction = 40f; //2400/s
             heatOutput = 10f; //drives one Industrial Boiler -> one Steam Turbine (+900/s)
-            consumeLiquid(methane, 35f / 60f);
-            outputLiquid = new LiquidStack(flueGas, 40f / 60f); //vented when not piped away
+            consumeLiquid(methane, 20f / 60f); //120 power per methane: twice the Methane Turbine, beating heater + boiler (90)
+            outputLiquid = new LiquidStack(flueGas, 23f / 60f); //vented when not piped away
             generateEffect = Fx.generatespark;
             effectChance = 0.08f;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff9a4a"); }}, new DrawHeatOutput());
+            drawer = new DrawMulti(new DrawDefault(), Animations.spin("-rotor", 8f, 2f, 0f),
+                new DrawGlowRegion("-flame"){{ color = Color.valueOf("ff9a4a"); alpha = 0.9f; glowScale = 2f; glowIntensity = 0.5f; }}, new DrawHeatOutput());
         }};
 
         // Photovoltaic field of high-purity silicon cells: no fuel, follows the map's light like vanilla solar panels.
         solarFarm = new SolarGenerator("solar-farm"){{
             requirements(Category.power, with(highPuritySilicon, 60, reinforcedGlass, 30, aluminiumPlate, 30, copperWire, 40, Items.lead, 60));
             size = 3;
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion("-glint"){{ color = Color.white; alpha = 0.45f; glowScale = 30f; glowIntensity = 0.8f; }});
             health = 500;
             powerProduction = 5f; //300/s in full light
         }};
@@ -140,7 +144,7 @@ public class PowerBlocks{
             health = 400;
             consumePowerBuffered(25000f);
             baseExplosiveness = 3f;
-            drawer = new DrawMulti(new DrawDefault(), new DrawPower(), new DrawRegion("-top"));
+            drawer = new DrawMulti(new DrawDefault(), new DrawPower());
         }};
 
         // Twice the industrial battery's capacity in the same footprint.
@@ -150,7 +154,7 @@ public class PowerBlocks{
             health = 400;
             consumePowerBuffered(50000f);
             baseExplosiveness = 4f;
-            drawer = new DrawMulti(new DrawDefault(), new DrawPower(), new DrawRegion("-top"));
+            drawer = new DrawMulti(new DrawDefault(), new DrawPower());
         }};
 
         // Burns methane to produce heat for heat-driven processes (shares the vanilla heat system).
@@ -160,10 +164,10 @@ public class PowerBlocks{
             health = 300;
             liquidCapacity = 20f;
             heatOutput = 5f;
-            consumeLiquid(methane, 2f / 60f);
-            outputLiquid = new LiquidStack(flueGas, 4f / 60f);
+            consumeLiquid(methane, 5f / 60f); //90 power per methane through a boiler: below the Combined-Cycle Turbine
+            outputLiquid = new LiquidStack(flueGas, 10f / 60f);
             ignoreLiquidFullness = true; //flue gas is vented when not piped away
-            drawer = new DrawMulti(new DrawDefault(), new DrawHeatOutput());
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion("-flame"){{ color = Color.valueOf("ff8a3d"); alpha = 0.9f; glowScale = 2f; glowIntensity = 0.5f; }}, new DrawHeatOutput());
         }};
     
         // ---- heat storage and cooling ----
@@ -175,7 +179,7 @@ public class PowerBlocks{
             health = 400;
             capacity = 600f;
             maxOutput = 20f;
-            drawer = new DrawMulti(new DrawDefault(), new DrawHeatOutput(), new DrawHeatInput("-heat"));
+            drawer = new DrawMulti(new DrawDefault(), new DrawHeatRegion("-core"){{ color = Color.valueOf("ff8a3d"); pulse = 0.2f; }}, new DrawHeatOutput(), new DrawHeatInput("-heat"));
             regionRotated1 = 1;
         }};
 

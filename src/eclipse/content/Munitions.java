@@ -20,6 +20,8 @@ import static eclipse.content.EclipseItems.*;
  */
 public class Munitions{
     public static StatusEffect etched, jammed;
+    /** Tide submarines: Submerged (untargetable and unhittable, see SubmarineUnitType) and Sonar Contact (a Sonar has it). */
+    public static StatusEffect submerged, sonarContact;
 
     static final Color carbideFront = Color.valueOf("c8ccd8"), carbideBack = Color.valueOf("50525e");
     static final Color sulfurFront = Color.valueOf("f2e27a"), sulfurBack = Color.valueOf("b8a032");
@@ -40,6 +42,15 @@ public class Munitions{
                 entry.armorOverride = unit.armor * 0.5f;
             }
         };
+
+        //Tide submarines: under water, out of reach of everything but mines, until a Sonar picks them up
+        submerged = new StatusEffect("submerged"){{
+            color = Color.valueOf("3e6fb0");
+            speedMultiplier = 0.85f;
+        }};
+        sonarContact = new StatusEffect("sonar-contact"){{
+            color = Color.valueOf("7fe0ff");
+        }};
 
         //Jammer: enemy weapons cycle slower while it lasts
         jammed = new StatusEffect("jammed"){{
@@ -62,7 +73,7 @@ public class Munitions{
             ammoMultiplier = 4f;
             lifetime = 55f;
         }});
-        armourPiercing((ItemTurret)Blocks.spectre, new BasicBulletType(7.5f, 60){{
+        armourPiercing((ItemTurret)Blocks.spectre, new BasicBulletType(7.5f, 85){{ //+40%: at 60 it lost to graphite even against armour
             width = 15f;
             height = 22f;
             ammoMultiplier = 3f;
@@ -72,7 +83,7 @@ public class Munitions{
         }});
         ShrapnelBulletType fuseAp = new ShrapnelBulletType(){{
             length = 100f;
-            damage = 80f;
+            damage = 112f; //+40%: at 80 it lost to thorium even against armour
             ammoMultiplier = 4f;
             reloadMultiplier = 1.1f;
             toColor = carbideFront;

@@ -37,11 +37,13 @@ public class EndgameBlocks{
             consumePower(6f);
             outputItem = new ItemStack(superconductor, 2);
             craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(liquidNitrogen, 5f), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(liquidNitrogen, 5f),
+                new DrawBubbles(Color.valueOf("e8f6ff")){{ amount = 14; radius = 1.2f; spread = 9f; timeScl = 30f; }}, new DrawDefault());
         }};
 
         // Stage 9: one long wave delay; shares the Disruption Array's lockout, so the two never add up.
         temporalArray = new WaveDisruptionArray("temporal-interference-array"){{
+            drawer = new DrawMulti(new DrawDefault(), new DrawRegion("-ring-a", 0.8f, true), new DrawRegion("-ring-b", -1.3f, true), new DrawGlowRegion(){{ color = Color.valueOf("b37aff"); }});
             requirements(Category.effect, with(Items.phaseFabric, 100, platinum, 60, surgeSuperalloy, 60, superconductor, 40, experimentalCore, 10, carbonComposite, 60));
             size = 4;
             health = 1800;
@@ -69,7 +71,8 @@ public class EndgameBlocks{
             explosionDamage = 2500 * 5;
             ambientSound = Sounds.loopPulse;
             ambientSoundVolume = 0.08f;
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawPlasma(){{ plasma1 = Color.valueOf("ff9ab6"); plasma2 = Color.valueOf("8fd0ff"); }}, new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawPlasma(){{ plasma1 = Color.valueOf("ff9ab6"); plasma2 = Color.valueOf("8fd0ff"); }}, new DrawDefault(),
+                new DrawGlowRegion(){{ color = Color.valueOf("8ae4ff"); alpha = 0.8f; glowScale = 10f; }});
         }};
 
         // The capstone: six stages, each fed by a different production branch, then a planetary power source with a huge

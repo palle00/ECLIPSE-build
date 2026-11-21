@@ -2,6 +2,7 @@ package eclipse.content.blocks;
 
 import arc.graphics.*;
 import eclipse.world.blocks.*;
+import eclipse.content.*;
 import mindustry.content.*;
 import mindustry.type.*;
 import mindustry.world.*;
@@ -36,7 +37,9 @@ public class PetrochemicalBlocks{
             outputLiquids = LiquidStack.with(naphtha, 6f / 60f, methane, 4f / 60f, diesel, 3f / 60f);
             liquidOutputDirections = new int[]{1, 3, 0};
             outputItems = with(sulfur, 1, petroleumCoke, 1);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.oil, 4f), new DrawDefault(), new DrawLiquidOutputs());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.oil, 4f),
+                new DrawBubbles(Color.valueOf("8a8a8a")){{ amount = 10; radius = 1.6f; spread = 4f; timeScl = 40f; }},
+                new DrawDefault(), new DrawLiquidOutputs());
         }};
 
         // Naphtha + steam (purified water) + heat -> ethylene.
@@ -49,7 +52,10 @@ public class PetrochemicalBlocks{
             maxEfficiency = 2f;
             consumeLiquids(LiquidStack.with(naphtha, 6f / 60f, purifiedWater, 2f / 60f));
             outputLiquid = new LiquidStack(ethylene, 5f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(naphtha, 4f), new DrawDefault(), new DrawHeatInput());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(naphtha, 4f),
+                new DrawBubbles(Color.valueOf("f3e0b8")){{ amount = 14; radius = 1.4f; spread = 5f; timeScl = 25f; }},
+                new DrawDefault(), new DrawGlowRegion("-flame"){{ color = Color.valueOf("ff8a3d"); alpha = 0.9f; glowScale = 2.5f; glowIntensity = 0.6f; }},
+                new DrawHeatInput());
         }};
 
     
@@ -77,7 +83,9 @@ public class PetrochemicalBlocks{
                 .liquidsOut(acrylonitrile, 4f / 60f).catalyst(molybdenum, 30);
             recipe(3, 60f, ItemStack.empty, with(polyethylene, 1)).liquidsIn(ethylene, 5f / 60f).catalyst(polymerCatalyst, 12);
             recipe(3, 60f, with(sulfur, 1), with(syntheticRubber, 2)).liquidsIn(ethylene, 3f / 60f, propylene, 3f / 60f).catalyst(polymerCatalyst, 12);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(),
+                new DrawBubbles(Color.valueOf("ffffff")){{ amount = 5; radius = 0.8f; spread = 1.4f; timeScl = 30f; }}, new DrawDefault(),
+                new Animations.DrawMove("-needle"){{ pivotX = 8f; pivotY = 8f; swing = 40f; period = 120f; }});
         }};
 
         // Acrylonitrile is spun into fiber, then oxidized and carbonized in a very hot furnace. Off-gases leave as flue gas.
@@ -96,7 +104,8 @@ public class PetrochemicalBlocks{
             outputLiquid = new LiquidStack(flueGas, 2f / 60f);
             ignoreLiquidFullness = true; //flue gas is vented when not piped away
             craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff8a3d"); }}, new DrawHeatInput());
+            drawer = new DrawMulti(new DrawDefault(), Animations.spin("-spool-in", 3f, -8f, 0f), Animations.spin("-spool-out", 3f, 8f, 0f),
+                new DrawGlowRegion(){{ color = Color.valueOf("ff8a3d"); }}, new DrawHeatInput());
         }};
 
         // Carbon fiber laid up in epoxy and cured -> carbon composite (CFRP), light and very strong.

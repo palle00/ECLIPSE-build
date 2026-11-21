@@ -3,6 +3,8 @@ package eclipse.content.blocks;
 import eclipse.augment.*;
 import eclipse.world.blocks.*;
 import mindustry.content.*;
+import eclipse.content.*;
+import arc.graphics.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.power.*;
@@ -24,6 +26,8 @@ public class ExplorationBlocks{
             minTier = maxTier = 5;
             itemCapacity = 80;
             consumePower(6f);
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion("-crystal"){{ color = Color.valueOf("7fe0ff"); alpha = 0.85f; glowScale = 5f; }},
+                Animations.spin("-ring", 2f, 0f, 7.5f));
         }};
 
         aetheriteCapacitor = new Battery("aetherite-capacitor"){{
@@ -32,7 +36,7 @@ public class ExplorationBlocks{
             health = 500;
             consumePowerBuffered(120000f);
             baseExplosiveness = 6f;
-            drawer = new DrawMulti(new DrawDefault(), new DrawPower(), new DrawRegion("-top"));
+            drawer = new DrawMulti(new DrawDefault(), new DrawPower());
         }};
 
         // ---- environment: free heat on hot floors ----
@@ -41,7 +45,7 @@ public class ExplorationBlocks{
             size = 2;
             health = 400;
             heatOutput = 3f; //per unit of floor heat: about 6 on full hot rock, 9 on full magma rock
-            drawer = new DrawMulti(new DrawDefault(), new DrawHeatOutput());
+            drawer = new DrawMulti(new DrawDefault(), new DrawHeatRegion("-core"){{ color = Color.valueOf("ff8a3d"); pulse = 0.3f; }}, new DrawHeatOutput());
         }};
     }
 }

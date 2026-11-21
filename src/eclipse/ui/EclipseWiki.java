@@ -45,9 +45,11 @@ public class EclipseWiki extends BaseDialog{
         {"augmentation", "eclipse-augmentation-coupler", "eclipse-basic-module-assembler", "eclipse-production-accelerator-1", "eclipse-module-recycling-facility"},
         {"robotics", "eclipse-robot-dispatch-hub", "eclipse-logistics-drone", "eclipse-repair-drone", "eclipse-shield-drone"},
         {"defense", "eclipse-wave-intelligence-scanner", "eclipse-wave-disruption-array", "eclipse-unit-shield-beacon", "eclipse-emergency-repair-dispatch-bay"},
-        {"military", "eclipse-acid-mortar", "eclipse-heat-lance", "eclipse-minelayer", "eclipse-jammer", "eclipse-piledriver", "eclipse-kestrel", "eclipse-thunderhead", "eclipse-cloudbreaker", "eclipse-rivet", "eclipse-sickle", "eclipse-tremor", "eclipse-apiary", "eclipse-event-horizon", "eclipse-reaper", "eclipse-wraith", "eclipse-orbital-weapons-platform", "eclipse-titan-manufacturing-complex"},
-        {"factions", "eclipse-mite", "eclipse-wasp", "eclipse-spitter", "eclipse-brood", "eclipse-behemoth", "eclipse-colossus", "eclipse-leviathan"},
+        {"military", "eclipse-acid-mortar", "eclipse-heat-lance", "eclipse-minelayer", "eclipse-jammer", "eclipse-sonar", "eclipse-piledriver", "eclipse-bombard", "eclipse-payload-catapult", "eclipse-casing-fabricator", "eclipse-kestrel", "eclipse-thunderhead", "eclipse-cloudbreaker", "eclipse-rivet", "eclipse-sickle", "eclipse-tremor", "eclipse-apiary", "eclipse-primer", "eclipse-stardust-launcher", "eclipse-event-horizon", "eclipse-reaper", "eclipse-wraith", "eclipse-orbital-weapons-platform", "eclipse-titan-manufacturing-complex"},
+        {"factions", "eclipse-mite", "eclipse-wasp", "eclipse-spitter", "eclipse-brood", "eclipse-behemoth", "eclipse-skiff", "eclipse-slicker", "eclipse-frostwake", "eclipse-cinderwake", "eclipse-maelstrom", "eclipse-lurker", "eclipse-barracuda", "eclipse-abyss", "eclipse-colossus", "eclipse-leviathan"},
         {"exploration", "eclipse-aetherite", "eclipse-ore-aetherite", "eclipse-aetherite-module-forge", "eclipse-cooling-tower", "eclipse-biomass-cultivator"},
+        {"logic", "eclipse-assembler", "eclipse-orbital-weapons-platform", "eclipse-wave-intelligence-scanner", "eclipse-world-engine", "eclipse-flow-meter", "eclipse-augmentation-coupler"},
+        {"compare", "eclipse-steam-turbine", "eclipse-fusion-reactor", "eclipse-apiary", "eclipse-colossus"},
     };
 
     /** The icon of each guide in the menu: an ECLIPSE content name whose icon stands for the topic (start uses a vanilla icon). */
@@ -67,11 +69,17 @@ public class EclipseWiki extends BaseDialog{
         {"military", "eclipse-acid-mortar"},
         {"factions", "eclipse-brood"},
         {"exploration", "eclipse-aetherite"},
+        {"logic", "micro-processor"},
+        {"compare", "eclipse-steam-turbine"},
     };
 
     final Seq<Object> history = new Seq<>();
     @Nullable Object current;
     String query = "";
+    /** Catalogue shows only what the player has unlocked (campaign); everything is unlocked elsewhere. */
+    boolean unlockedOnly;
+    /** Target rate of the production calculator on item pages, per second. */
+    float treeRate = 1f;
     final Table list = new Table(), page = new Table();
     ScrollPane pageScroll;
 
@@ -143,6 +151,7 @@ public class EclipseWiki extends BaseDialog{
         super("@eclipse-wiki.title");
         addCloseButton();
         buttons.button("@eclipse-wiki.previous", Icon.left, this::back).disabled(b -> history.isEmpty()).size(210f, 64f);
+        buttons.button("@eclipse-production", Icon.chartBar, ProductionStats::show).disabled(b -> !state.isGame()).size(210f, 64f);
 
         cont.table(left -> {
             left.top();
@@ -153,6 +162,10 @@ public class EclipseWiki extends BaseDialog{
                     buildList();
                 }).growX().get().setMessageText(Core.bundle.get("eclipse-wiki.search"));
             }).growX().padBottom(6f).row();
+            left.check("@eclipse-wiki.unlocked-only", false, v -> {
+                unlockedOnly = v;
+                buildList();
+            }).left().padBottom(6f).row();
             left.pane(Styles.smallPane, list).grow().get().setScrollingDisabledX(true);
         }).width(mobile ? 240f : 320f).growY().padRight(10f);
         pageScroll = cont.pane(page).grow().get();
@@ -197,7 +210,7 @@ public class EclipseWiki extends BaseDialog{
         Seq<UnlockableContent> out = new Seq<>();
         for(ContentType type : new ContentType[]{ContentType.item, ContentType.liquid, ContentType.block, ContentType.unit}){
             for(Content c : content.getBy(type)){
-                if(c instanceof UnlockableContent u && isEclipse(u) && filter.get(u)
+                if(c instanceof UnlockableContent u && isEclipse(u) && filter.get(u) && (!unlockedOnly || u.unlockedNow())
                     && (query.isEmpty() || u.localizedName.toLowerCase().contains(query))) out.add(u);
             }
         }
@@ -247,8 +260,11 @@ public class EclipseWiki extends BaseDialog{
         page.add("[accent]" + Core.bundle.get("eclipse-wiki.guide." + id + ".name")).style(Styles.outlineLabel).padBottom(8f).row();
         String text = Core.bundle.get("eclipse-wiki.guide." + id + ".text");
         //the QOL page names the keys as currently bound, so a rebound key shows correctly
-        if(id.equals("qol")) text = Core.bundle.format("eclipse-wiki.guide.qol.text", keyName(entryKey), keyName(eclipse.input.UpgradePlanner.key));
+        if(id.equals("qol")) text = Core.bundle.format("eclipse-wiki.guide.qol.text", keyName(entryKey), keyName(eclipse.input.UpgradePlanner.key),
+            keyName(ProductionStats.key), keyName(StallOverlay.key));
         page.add(text).wrap().width(textWidth()).padBottom(10f).row();
+        if(id.equals("logic")) logicGuide();
+        if(id.equals("compare")) WikiTables.build(this, page);
         for(String[] g : guides){
             if(!g[0].equals(id) || g.length < 2) continue;
             sub(page, "eclipse-wiki.related");
@@ -287,6 +303,7 @@ public class EclipseWiki extends BaseDialog{
             page.add("[lightgray]" + Core.bundle.get("eclipse-wiki.setup.hint")).wrap().width(textWidth()).left().padBottom(8f).row();
         }
         if(c instanceof Block b) blockFacts(b);
+        if(c instanceof Block b) logicFacts(b);
         if(c instanceof Item item) materialFacts(item);
         if(c instanceof Liquid liquid) materialFacts(liquid);
         if(c instanceof UnitType u) unitFacts(u);
@@ -403,15 +420,34 @@ public class EclipseWiki extends BaseDialog{
         page.add("[lightgray]" + Core.bundle.get("eclipse-wiki.recipes.hint")).wrap().width(textWidth()).left().padBottom(8f).row();
     }
 
-    /** The whole chain for 1 per second: an indented tree, then raw materials and machines in total. */
+    /** The production calculator: the whole chain for a target rate (typed in), then raw materials, machines and power. */
     void recipeTree(Item item){
-        RecipeTree.Step root = RecipeTree.plan(item, 1f);
         sub(page, "eclipse-wiki.tree");
+        Table host = new Table().left();
+        page.table(r -> {
+            r.left();
+            r.add(Core.bundle.get("eclipse-wiki.tree.rate") + " ").padRight(4f);
+            r.field(Strings.autoFixed(treeRate, 2), TextField.TextFieldFilter.floatsOnly, text -> {
+                float v = Strings.parseFloat(text, -1f);
+                if(v <= 0f || v > 10000f) return;
+                treeRate = v;
+                host.clear();
+                treeBody(host, item);
+            }).width(110f);
+            r.add(" /s");
+        }).left().padBottom(4f).row();
+        page.add(host).left().row();
+        treeBody(host, item);
+    }
+
+    void treeBody(Table host, Item item){
+        host.left().defaults().left();
+        RecipeTree.Step root = RecipeTree.plan(item, treeRate);
         Table tree = new Table().left();
         treeRows(tree, root, 0);
-        page.add(tree).left().row();
+        host.add(tree).left().row();
 
-        sub(page, "eclipse-wiki.tree.raw");
+        sub(host, "eclipse-wiki.tree.raw");
         Table raw = new Table().left();
         ObjectFloatMap<UnlockableContent> totals = RecipeTree.totals(root);
         Seq<UnlockableContent> keys = totals.keys().toSeq().sort(Structs.comparingFloat(c -> -totals.get(c, 0f)));
@@ -420,9 +456,9 @@ public class EclipseWiki extends BaseDialog{
             link(raw, c, perSecond(totals.get(c, 0f)));
             if(++n % 3 == 0) raw.row();
         }
-        page.add(raw).left().row();
+        host.add(raw).left().row();
 
-        sub(page, "eclipse-wiki.tree.machines");
+        sub(host, "eclipse-wiki.tree.machines");
         Table machines = new Table().left();
         ObjectFloatMap<Block> counts = RecipeTree.machines(root);
         n = 0;
@@ -430,8 +466,11 @@ public class EclipseWiki extends BaseDialog{
             link(machines, b, "x" + Strings.autoFixed(counts.get(b, 0f), 2));
             if(++n % 3 == 0) machines.row();
         }
-        page.add(machines).left().row();
-        page.add("[lightgray]" + Core.bundle.get("eclipse-wiki.tree.hint")).wrap().width(textWidth()).left().padBottom(8f).row();
+        host.add(machines).left().row();
+        int tier = RecipeTree.maxTier(root);
+        host.add("[lightgray]" + Core.bundle.format("eclipse-wiki.tree.power", Strings.autoFixed(RecipeTree.power(root) * 60f, 0),
+            tier == 0 ? "-" : RecipeCrafter.roman(tier), Strings.autoFixed(RecipeCrafter.tierPower[tier] * 60f, 0))).left().padTop(4f).row();
+        host.add("[lightgray]" + Core.bundle.get("eclipse-wiki.tree.hint")).wrap().width(textWidth()).left().padBottom(8f).row();
     }
 
     void treeRows(Table t, RecipeTree.Step s, int depth){
@@ -447,6 +486,49 @@ public class EclipseWiki extends BaseDialog{
             t.add(lr).left().row();
         }
         for(RecipeTree.Step in : s.inputs) treeRows(t, in, depth + 1);
+    }
+
+    /** What a processor can read from and set on this block (generated from EclipseLogic, so it can't go out of date). */
+    void logicFacts(Block b){
+        Seq<eclipse.logic.EclipseLogic.Field> fields = eclipse.logic.EclipseLogic.fields(b);
+        Seq<eclipse.logic.EclipseLogic.Setting> settings = eclipse.logic.EclipseLogic.settings(b);
+        boolean config = b instanceof RecipeCrafter, shoot = b instanceof eclipse.defense.OrbitalPlatform, flow = b instanceof eclipse.logistics.FlowMeter;
+        if(fields.isEmpty() && settings.isEmpty() && !flow) return;
+        sub(page, "eclipse-wiki.logic");
+        Table t = new Table().left();
+        t.defaults().left().padBottom(2f);
+        for(var f : fields) logicRow(t, "esensor result block " + f.name(), "eclipse-logic.field." + f.name());
+        for(var s : settings) logicRow(t, "econtrol " + s.name() + " block " + (s == eclipse.logic.EclipseLogic.Setting.target ? "x y" : "value"), "eclipse-logic.setting." + s.name());
+        if(config) logicRow(t, "sensor result block @config", "eclipse-logic.config");
+        if(shoot) logicRow(t, "control shoot block x y 1", "eclipse-logic.shoot");
+        if(flow) logicRow(t, "sensor result block @copper", "eclipse-logic.flow");
+        page.add(t).left().row();
+        page.add("[lightgray]" + Core.bundle.get("eclipse-wiki.logic.hint")).wrap().width(textWidth()).left().padBottom(8f).row();
+    }
+
+    void logicRow(Table t, String code, String key){
+        t.add("[#8fd8ff]" + code).left().padRight(12f);
+        t.add("[lightgray]" + Core.bundle.get(key)).wrap().width(Math.max(textWidth() - 360f, 200f)).left().row();
+    }
+
+    /** The logic guide's generated part: what each status code means, and every block a processor can read. */
+    void logicGuide(){
+        sub(page, "eclipse-wiki.logic.codes");
+        Table codes = new Table().left();
+        for(MachineStatus.Kind k : MachineStatus.Kind.values()){
+            codes.add("[#8fd8ff]" + k.ordinal()).left().padRight(12f);
+            codes.add("[lightgray]" + Core.bundle.get("eclipse-logic.status." + k.name())).left().row();
+        }
+        page.add(codes).left().row();
+        sub(page, "eclipse-wiki.logic.blocks");
+        Table blocks = new Table().left();
+        int n = 0;
+        for(Block b : content.blocks()){
+            if(!isEclipse(b) || !b.isVisible() || eclipse.logic.EclipseLogic.fields(b).isEmpty()) continue;
+            link(blocks, b, null);
+            if(++n % 3 == 0) blocks.row();
+        }
+        page.add(blocks).left().padBottom(8f).row();
     }
 
     void materialFacts(UnlockableContent mat){
@@ -601,7 +683,7 @@ public class EclipseWiki extends BaseDialog{
     }
 
     /** A clickable icon + name (+ amount): ECLIPSE content opens its wiki entry, vanilla content the game's database. */
-    void link(Table t, UnlockableContent c, @Nullable String amount){
+    public void link(Table t, UnlockableContent c, @Nullable String amount){
         t.button(b -> {
             b.left();
             b.image(c.uiIcon).size(24f).padRight(4f);

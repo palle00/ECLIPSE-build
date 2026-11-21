@@ -2,34 +2,47 @@ package eclipse.ui;
 
 import arc.*;
 import arc.input.*;
-import arc.scene.*;
-import arc.scene.event.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
-import mindustry.gen.*;
+import mindustry.game.EventType.*;
+import mindustry.type.*;
 import mindustry.ui.*;
+import mindustry.ui.fragments.*;
 import mindustry.world.*;
 
 import static mindustry.Vars.*;
 
 /**
- * A search box right above the build menu. Type part of a block's name: matching blocks from every tab appear as icons;
- * click one (or press Enter for the first) to pick it for placing, as if chosen from its tab. Escape clears the search.
- * Vanilla's build menu can't be filtered from a mod (its block lists are package-private), so this sits next to it.
+ * A search box at the top of the build menu's block grid (the grid moves down to make room). Type part of a block's
+ * name and the grid itself shows the matching blocks from every tab, in build-menu order (tab by tab, each in its menu
+ * position); hovering one shows its info as usual. Click one (or press Enter for the first) to pick it: the menu jumps
+ * to its tab with it selected. Escape clears the search.
+ * The build menu rebuilds its whole frame now and then, so the box re-attaches itself whenever that happens: the grid's
+ * cell gets a small table holding the box and the grid (Cell.setElement, the layout's own way to swap a cell's content).
+ * It reads the menu's package-private fields (blockPane, blockTable, menuHoverBlock, selectedBlocks) by reflection.
  */
 public class BlockSearch{
-    static final int maxResults = 24, columns = 6;
+    static final String marker = "eclipse-search";
+    static final int columns = 4; //as vanilla's grid
+    static final float boxHeight = 34f, gridHeight = 194f; //vanilla gives the grid 194
 
-    /** Placeable blocks whose name contains every word of the query, best matches (name starts with it) first. */
+    static TextField field;
+    /** The build menu's fields, looked up once in install(). */
+    static java.lang.reflect.Field blockPane, blockTable, menuHoverBlock, selectedBlocks;
+    static ScrollPane attachedTo;
+    static String shownQuery = "";
+
+    /** Placeable blocks whose name contains every word of the query, in build-menu order. */
     public static Seq<Block> matches(String query){
         String q = query.trim().toLowerCase();
         if(q.isEmpty()) return new Seq<>();
         String[] words = q.split("\\s+");
         Seq<Block> found = content.blocks().select(b -> b.isPlaceable() && b.environmentBuildable() && b.unlockedNow() && matchesAll(b, words));
-        found.sort(Structs.comps(Structs.comparingBool(b -> !b.localizedName.toLowerCase().startsWith(q)), Structs.comparing(b -> b.localizedName)));
+        //ids follow the menu order (ECLIPSE's MenuOrder renumbers them), so this is the order the tabs show them in
+        found.sort(Structs.comps(Structs.comparingInt(b -> b.category.ordinal()), Structs.comparingInt(b -> b.id)));
         return found;
     }
 
@@ -39,63 +52,114 @@ public class BlockSearch{
         return true;
     }
 
-    /** Throws if a game update removed the build menu's private "toggler" table (the headless test checks it still exists). */
+    /** Throws if a game update renamed the build menu's fields this relies on, so the caller can turn it off. */
     public static void install(){
-        Table toggler = Reflect.get(ui.hudfrag.blockfrag, "toggler");
-        if(toggler == null) return;
+        PlacementFragment frag = ui.hudfrag.blockfrag;
+        blockPane = menuField("blockPane");
+        blockTable = menuField("blockTable");
+        menuHoverBlock = menuField("menuHoverBlock");
+        selectedBlocks = menuField("selectedBlocks");
 
-        Table root = new Table();
-        root.touchable = Touchable.childrenOnly;
-        Table results = new Table(Styles.black6);
-        TextField[] field = {null};
+        field = new TextField("");
+        field.setMessageText(Core.bundle.get("eclipse-search.blocks"));
+        field.keyDown(KeyCode.enter, () -> {
+            Seq<Block> found = matches(field.getText());
+            if(found.any()) pick(found.first());
+        });
+        field.keyDown(KeyCode.escape, BlockSearch::clear);
 
-        Runnable[] rebuild = {null};
-        rebuild[0] = () -> {
-            results.clear();
-            Seq<Block> found = matches(field[0].getText());
-            for(int i = 0; i < Math.min(found.size, maxResults); i++){
-                Block b = found.get(i);
-                results.button(new TextureRegionDrawable(b.uiIcon), Styles.selecti, 32f, () -> pick(b, field[0]))
-                    .size(46f).tooltip(b.localizedName).checked(btn -> control.input.block == b);
-                if((i + 1) % columns == 0) results.row();
+        Events.run(Trigger.update, () -> {
+            if(state.isMenu()) return;
+            ScrollPane pane = get(blockPane, frag);
+            //the menu rebuilt its frame: put the box back on top of the new grid
+            if(pane != attachedTo && pane != null && pane.parent instanceof Table column){
+                Cell<?> cell = column.getCell(pane);
+                if(cell == null) return;
+                Table box = new Table();
+                cell.setElement(box);
+                field.remove();
+                box.add(field).growX().height(boxHeight).padBottom(2f).row();
+                box.add(pane).grow();
+                cell.height(gridHeight + boxHeight + 2f); //the grid keeps its height; the menu grows a little
+                attachedTo = pane;
+                shownQuery = "";
             }
-            if(found.size > maxResults) results.row().add("[lightgray]+" + (found.size - maxResults)).colspan(columns);
-            if(found.isEmpty() && !field[0].getText().isBlank()) results.add("[lightgray]" + Core.bundle.get("eclipse-search.none")).pad(6f);
-        };
-
-        root.add(results).right().row();
-        field[0] = root.field("", text -> rebuild[0].run()).growX().height(40f).get();
-        field[0].setMessageText(Core.bundle.get("eclipse-search.blocks"));
-        field[0].keyDown(KeyCode.enter, () -> {
-            Seq<Block> found = matches(field[0].getText());
-            if(found.any()) pick(found.first(), field[0]);
+            Table grid = get(blockTable, frag);
+            if(grid == null) return;
+            String query = field.getText().trim();
+            boolean ours = grid.find(marker) != null;
+            if(!query.isEmpty() && (!ours || !query.equals(shownQuery))){
+                fill(frag, grid, query);
+            }else if(query.isEmpty() && ours){
+                //search cleared: give the grid back to the current tab
+                shownQuery = "";
+                frag.rebuild();
+            }
         });
-        field[0].keyDown(KeyCode.escape, () -> clear(field[0]));
-        results.visible(() -> !field[0].getText().isBlank());
-
-        //sit on top of the build menu's frame, matching its width
-        root.update(() -> {
-            if(toggler.getChildren().isEmpty()) return;
-            Element frame = toggler.getChildren().first();
-            frame.localToStageCoordinates(Tmp.v1.set(frame.getWidth(), frame.getHeight()));
-            root.getCell(field[0]).width(frame.getWidth());
-            root.pack();
-            root.setPosition(Tmp.v1.x - root.getWidth(), Tmp.v1.y);
-        });
-        root.visible(() -> ui.hudfrag.shown && toggler.visible && !toggler.getChildren().isEmpty() && toggler.getChildren().first().visible && !state.isMenu());
-        ui.hudGroup.addChild(root);
     }
 
-    static void pick(Block b, TextField field){
+    /** Shows the matches in the menu's own grid, with buttons like vanilla's, from the first slot. */
+    static void fill(PlacementFragment frag, Table grid, String query){
+        shownQuery = query;
+        grid.clear();
+        grid.top().left().margin(5f);
+        Seq<Block> found = matches(query);
+        ButtonGroup<ImageButton> group = new ButtonGroup<>();
+        group.setMinCheckCount(0);
+        for(int i = 0; i < found.size; i++){
+            Block b = found.get(i);
+            ImageButton button = grid.button(new TextureRegionDrawable(b.uiIcon), Styles.selecti, () -> pick(b)).size(46f).group(group).name(marker).get();
+            button.resizeImage(iconMed);
+            button.update(() -> button.setChecked(control.input.block == b));
+            button.hovered(() -> set(menuHoverBlock, frag, b));
+            button.exited(() -> {
+                if(get(menuHoverBlock, frag) == b) set(menuHoverBlock, frag, null);
+            });
+            if((i + 1) % columns == 0) grid.row();
+        }
+        if(found.isEmpty()) grid.add("[lightgray]" + Core.bundle.get("eclipse-search.none")).name(marker).pad(6f);
+    }
+
+    /** Picks a block for placing, as if chosen from its tab, and clears the search (the menu then shows that tab). */
+    static void pick(Block b){
+        PlacementFragment frag = ui.hudfrag.blockfrag;
         control.input.block = b;
-        ui.hudfrag.blockfrag.currentCategory = b.category;
-        ui.hudfrag.blockfrag.rebuild();
-        clear(field);
+        frag.currentCategory = b.category;
+        ObjectMap<Category, Block> selected = get(selectedBlocks, frag);
+        if(selected != null) selected.put(b.category, b);
+        clear();
     }
 
-    static void clear(TextField field){
+    /** A field of the build menu, made accessible; throws if a game update renamed it. */
+    static java.lang.reflect.Field menuField(String name){
+        try{
+            java.lang.reflect.Field f = PlacementFragment.class.getDeclaredField(name);
+            f.setAccessible(true);
+            return f;
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T> T get(java.lang.reflect.Field f, Object o){
+        try{
+            return (T)f.get(o);
+        }catch(IllegalAccessException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    static void set(java.lang.reflect.Field f, Object o, Object value){
+        try{
+            f.set(o, value);
+        }catch(IllegalAccessException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    static void clear(){
         field.setText("");
-        field.change();
         Core.scene.setKeyboardFocus(null);
     }
 }

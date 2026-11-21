@@ -7,6 +7,7 @@ import arc.math.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import arc.util.io.*;
+import eclipse.world.blocks.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.ui.*;
@@ -24,7 +25,7 @@ import static mindustry.Vars.*;
  * - only the server changes the countdown; clients receive it through the normal state sync;
  * - wave spacing, waitEnemies and wave contents are never touched; manually sending a wave ignores the delay.
  */
-public class WaveDisruptionArray extends Block{
+public class WaveDisruptionArray extends AnimatedBlock{
     /** Shared with any later wave-delay device (Temporal Interference Array). */
     public static final String lockTag = "eclipse-wave-delay-wave";
     public static final Stat delayStat = new Stat("eclipse-wave-delay", StatCat.function);
@@ -66,7 +67,7 @@ public class WaveDisruptionArray extends Block{
         return v == null ? 0 : Strings.parseInt(v, 0);
     }
 
-    public class DisruptionBuild extends Building{
+    public class DisruptionBuild extends AnimatedBuild{
         public float charge;
 
         /** Why the array can't be activated right now, or null if it can. */
@@ -81,6 +82,7 @@ public class WaveDisruptionArray extends Block{
 
         @Override
         public void updateTile(){
+            animate(efficiency > 0f);
             if(charge < 1f) charge = Math.min(1f, charge + efficiency * delta() / chargeTime);
         }
 

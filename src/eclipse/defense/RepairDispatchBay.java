@@ -9,6 +9,7 @@ import arc.scene.ui.layout.*;
 import arc.util.*;
 import arc.util.io.*;
 import mindustry.content.*;
+import eclipse.world.blocks.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
@@ -25,7 +26,7 @@ import static mindustry.Vars.*;
  * repaired uses one {@link #stock} item. It never builds, never repairs enemy blocks and never repairs an area,
  * so it is a deliberate service, not a better mender.
  */
-public class RepairDispatchBay extends Block{
+public class RepairDispatchBay extends AnimatedBlock{
     public static final Stat serviceStat = new Stat("eclipse-repair-service", StatCat.function);
 
     public Item stock;
@@ -63,7 +64,7 @@ public class RepairDispatchBay extends Block{
         Drawf.dashCircle(x * tilesize + offset, y * tilesize + offset, range, beamColor);
     }
 
-    public class BayBuild extends Building{
+    public class BayBuild extends AnimatedBuild{
         public int target = -1;
         /** Health repaired that has not been paid for with stock yet. */
         public float debt;
@@ -95,6 +96,7 @@ public class RepairDispatchBay extends Block{
 
         @Override
         public void updateTile(){
+            animate(repairing);
             repairing = false;
             Building b = targetBuild();
             if(b == null || b.health >= b.maxHealth || efficiency <= 0f) return;

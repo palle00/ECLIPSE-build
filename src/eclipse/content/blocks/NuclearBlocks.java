@@ -3,6 +3,7 @@ package eclipse.content.blocks;
 import arc.graphics.*;
 import eclipse.world.blocks.*;
 import mindustry.content.*;
+import eclipse.content.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.heat.*;
@@ -29,7 +30,8 @@ public class NuclearBlocks{
             warmupRate = 0.05f;
             consumeItem(thoriumFuelRod, 1);
             outputItem = new ItemStack(spentFuelRod, 1);
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff7ad1"); }}, new DrawHeatOutput());
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion("-core"){{ color = Color.valueOf("ff7ad1"); glowScale = 8f; }},
+                new DrawRegion("-bridge", 0.3f, true), new DrawHeatOutput());
         }};
 
         // Fast breeder: a thorium blanket around the core breeds new fissile fuel, so each fuel rod comes out as two spent
@@ -47,7 +49,8 @@ public class NuclearBlocks{
             consumeItem(thoriumFuelRod, 1);
             consumeLiquid(liquidSodium, 2f / 60f); //coolant lost to the cover gas and to activation
             outputItem = new ItemStack(spentFuelRod, 2);
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ffb46a"); }}, new DrawHeatOutput());
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion("-core"){{ color = Color.valueOf("ff7ad1"); glowScale = 8f; }},
+                Animations.spin("-pump", 9f, -7.5f, -7f), Animations.spin("-pump", 9f, 7.5f, 7.5f), new DrawHeatOutput());
         }};
 
         // Spent fuel + nitric acid -> recovered thorium (PUREX), leaving acidic waste.
@@ -63,7 +66,8 @@ public class NuclearBlocks{
             consumePower(2f);
             outputItem = new ItemStack(Items.thorium, 2);
             outputLiquid = new LiquidStack(acidicWaste, 3f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(nitricAcid, 4f), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(nitricAcid, 4f),
+                new DrawBubbles(Color.valueOf("fff4cc")){{ amount = 10; radius = 1.4f; spread = 3.5f; timeScl = 30f; }}, new DrawDefault());
         }};
     }
 }

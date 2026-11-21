@@ -1,6 +1,7 @@
 package eclipse.logistics;
 
 import arc.*;
+import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
@@ -68,6 +69,18 @@ public class LiquidValve extends Block{
                 return source.liquids.get(liquid) / source.block.liquidCapacity > reservePercent / 100f;
             }
             return true;
+        }
+
+        @Override
+        public void draw(){
+            super.draw();
+            //the sight glass in the middle shows what is flowing and how full the valve is
+            float fill = Mathf.clamp(liquids.currentAmount() / liquidCapacity);
+            if(fill > 0.01f){
+                Draw.color(liquids.current().color, 0.35f + 0.6f * fill);
+                Fill.square(x, y, 1.5f);
+                Draw.color();
+            }
         }
 
         @Override

@@ -8,6 +8,7 @@ import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.production.*;
 import mindustry.world.draw.*;
+import eclipse.content.*;
 
 import static eclipse.content.EclipseItems.*;
 import static eclipse.content.EclipseLiquids.*;
@@ -41,6 +42,7 @@ public class ComponentBlocks{
         extruder = new RecipeCrafter("extruder"){{
             requirements(Category.crafting, with(Items.copper, 60, Items.lead, 40, Items.graphite, 20, copperGear, 10));
             size = 2;
+            drawer = new DrawMulti(new DrawDefault(), new Animations.DrawMove("-ram"){{ slideX = 1.5f; period = 60f; }}, Animations.spin("-spool", 4f, 4f, 0f));
             health = 260;
             itemCapacity = 10;
             recipe(1, 30f, with(Items.copper, 1), with(copperWire, 2));
@@ -73,6 +75,7 @@ public class ComponentBlocks{
         lathe = new RecipeCrafter("lathe"){{
             requirements(Category.crafting, with(Items.titanium, 40, Items.lead, 30, Items.graphite, 20, copperGear, 10));
             size = 2;
+            drawer = new DrawMulti(new DrawDefault(), Animations.spin("-chuck", 10f, -2.5f, 1.25f), new Animations.DrawMove("-carriage"){{ slideX = 2.5f; period = 120f; }});
             health = 260;
             itemCapacity = 10;
             recipe(2, 30f, with(titaniumRod, 1), with(titaniumBolt, 2));
@@ -88,6 +91,10 @@ public class ComponentBlocks{
         assembler = new RecipeCrafter("assembler"){{
             requirements(Category.crafting, with(Items.titanium, 80, Items.lead, 60, Items.silicon, 40, Items.graphite, 40, titaniumGear, 10, titaniumRod, 10));
             size = 3;
+            drawer = new DrawMulti(new DrawDefault(),
+                new Animations.DrawMove("-arm-l"){{ pivotX = -8.25f; pivotY = -5.5f; swing = 12f; period = 80f; }},
+                new Animations.DrawMove("-arm-r"){{ pivotX = 8.25f; pivotY = -5.5f; swing = -12f; period = 80f; }},
+                new DrawParticles(){{ color = Color.valueOf("ffd9a0"); y = -1.5f; particles = 6; particleRad = 2.5f; particleSize = 0.7f; particleLife = 20f; }});
             health = 600;
             itemCapacity = 20;
             liquidCapacity = 20f;
@@ -122,7 +129,8 @@ public class ComponentBlocks{
             consumePower(4f);
             outputItem = new ItemStack(experimentalCore, 1);
             craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("c88fff"); }});
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("c88fff"); }},
+                new DrawPulseShape(false){{ color = Color.valueOf("c88fff"); radiusScl = 0.35f; stroke = 1.2f; }});
         }};
     }
 

@@ -2,6 +2,7 @@ package eclipse.content.blocks;
 
 import arc.graphics.*;
 import eclipse.world.blocks.*;
+import eclipse.content.*;
 import mindustry.content.*;
 import mindustry.type.*;
 import mindustry.world.*;
@@ -32,7 +33,7 @@ public class MetallurgyBlocks{
             results = with(vanadium, 3, chromium, 2); //steel slag really carries vanadium and chromium
             consumeLiquids(LiquidStack.with(Liquids.slag, 4f / 60f, sulfuricAcid, 2f / 60f));
             consumePower(1.1f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.slag, 3f), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.slag, 3f), new DrawDefault(), new DrawRegion("-rotator", 4f, true));
         }};
 
         // Scrap + aqua regia -> platinum (recovered from old electronics), leaving acidic waste.
@@ -49,7 +50,7 @@ public class MetallurgyBlocks{
             outputItem = new ItemStack(platinum, 1);
             outputLiquid = new LiquidStack(acidicWaste, 3f / 60f);
             craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(aquaRegia, 3f), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(aquaRegia, 3f), new DrawBubbles(Color.valueOf("ffe0b0")){{ amount = 10; radius = 1f; spread = 3.5f; timeScl = 30f; }}, new DrawDefault());
         }};
 
         // Brine -> lithium.
@@ -65,7 +66,7 @@ public class MetallurgyBlocks{
             consumePower(1f);
             outputItem = new ItemStack(lithium, 1);
             craftEffect = Fx.pulverizeSmall;
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(brine, 3f), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(brine, 3f), new DrawBubbles(Color.valueOf("ffffff")){{ amount = 8; radius = 0.9f; spread = 2.5f; timeScl = 30f; }}, new DrawDefault());
         }};
 
         // Faster than the laser drill at the same size.
@@ -113,7 +114,8 @@ public class MetallurgyBlocks{
             consumePower(0.5f);
             outputItems = with(alumina, 2, redMud, 1); //Bayer: the residue leaves as red mud
             craftEffect = Fx.pulverizeSmall;
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(sodiumHydroxide, 4f), new DrawDefault(), new DrawHeatInput());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(sodiumHydroxide, 4f), new DrawDefault(),
+                Animations.spin("-rake", 1.2f, -8f, -8f), Animations.spin("-rake", -1.2f, 8f, -8f), new DrawHeatInput());
         }};
 
         // ---- advanced vanilla combinations ----
@@ -133,7 +135,9 @@ public class MetallurgyBlocks{
             //Kroll: mineral sand chlorinated with coke, the titanium chloride reduced with magnesium under argon
             recipe(3, 60f, with(Items.sand, 4, Items.coal, 2, magnesium, 1), with(hotTitanium, 2)).liquidsIn(chlorine, 4f / 60f, argon, 1f / 60f).heat(10f);
             craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ffb46b"); }}, new DrawHeatInput());
+            drawer = new DrawMulti(new DrawDefault(),
+                new DrawParticles(){{ color = Color.valueOf("ffb060"); particles = 10; particleRad = 4f; particleSize = 1f; particleLife = 45f; alpha = 0.8f; }},
+                new DrawGlowRegion(){{ color = Color.valueOf("ffb46b"); }}, new DrawHeatInput());
         }};
 
         // Electric furnace: melting and sintering by electricity alone. AlNiCo magnets (induction), hot tungsten carbide
@@ -151,7 +155,8 @@ public class MetallurgyBlocks{
             recipe(3, 90f, with(Items.scrap, 4), with(hotAluminium, 1)); //secondary aluminium: remelted scrap, aluminium on any map
             recipe(3, 120f, with(redMud, 4), with(hotTitanium, 1)); //titanium smelted out of Bayer red mud
             craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff6a3d"); }});
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff6a3d"); }},
+                new DrawArcSmelt(){{ x = -1f; particles = 14; particleRad = 3.5f; particleLen = 2f; alpha = 0.6f; }});
         }};
 
         // Hot metal + cryofluid -> usable metal. Every midgame and later furnace metal cools here before use.
@@ -173,7 +178,8 @@ public class MetallurgyBlocks{
             recipe(2, 30f, with(hotMetaglass, 3), with(Items.metaglass, 3)).liquidsIn(Liquids.cryofluid, 1f / 60f);
             recipe(2, 30f, with(hotReinforcedGlass, 1), with(reinforcedGlass, 1)).liquidsIn(Liquids.cryofluid, 1f / 60f);
             craftEffect = Fx.freezing;
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.cryofluid, 4f), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.cryofluid, 4f), new DrawDefault(),
+                Animations.spin("-pump", 9f, -9f, -9f), new DrawParticles(){{ color = Color.valueOf("e8f6ff"); x = 0f; particles = 8; particleRad = 4.5f; particleSize = 1.3f; particleLife = 90f; alpha = 0.45f; }});
         }};
 
         surgeSuperalloyWall = new Wall("surge-superalloy-wall"){{
@@ -199,6 +205,7 @@ public class MetallurgyBlocks{
         oreCrusher = new RecipeCrafter("ore-crusher"){{
             requirements(Category.crafting, with(Items.copper, 60, Items.lead, 40, Items.graphite, 30, copperGear, 15, titaniumGear, 10));
             size = 2;
+            drawer = new DrawMulti(new DrawDefault(), Animations.spin("-roller", 5f, -3.25f, 0f), Animations.spin("-roller", -5f, 3.25f, 0f));
             health = 320;
             itemCapacity = 10;
             recipe(1, 60f, with(Items.scrap, 3), with(crushedOre, 2, Items.sand, 1)); //scrap for the ore washer, on any map
@@ -226,7 +233,7 @@ public class MetallurgyBlocks{
             recipe(2, 90f, with(wolframite, 4), with(tungsten, 6, molybdenum, 1)).liquidsIn(Liquids.water, 6f / 60f);
             recipe(2, 90f, with(molybdenite, 4), with(molybdenum, 6, sulfur, 1)).liquidsIn(Liquids.water, 6f / 60f);
             recipe(2, 90f, with(sperrylite, 4), with(platinum, 6, nickel, 1)).liquidsIn(Liquids.water, 6f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.water, 3f), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.water, 3f), new DrawBubbles(Color.valueOf("ffffff")){{ amount = 22; radius = 1.1f; spread = 3f; timeScl = 30f; }}, new DrawDefault());
         }};
 
         // Crushed ore + water -> metals by density (jigs and flotation). Each craft yields one metal; rarely aetherite crystals.
@@ -241,7 +248,9 @@ public class MetallurgyBlocks{
             consumeItem(crushedOre, 1);
             consumeLiquid(Liquids.water, 6f / 60f);
             consumePower(0.6f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.water, 3f), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.water, 3f),
+                new DrawBubbles(Color.valueOf("ffffff")){{ amount = 10; radius = 0.9f; spread = 4f; timeScl = 30f; }}, new DrawDefault(),
+                Animations.spin("-wheel", 3f, 0f, 2f));
         }};
 
 }

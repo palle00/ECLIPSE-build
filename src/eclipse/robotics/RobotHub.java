@@ -8,6 +8,7 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.io.*;
 import eclipse.robotics.RobotType.*;
+import eclipse.world.blocks.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
@@ -25,7 +26,7 @@ import static mindustry.Vars.*;
  * The hub recharges docked robots with power and turns its titanium-rod stock into repair charge. It controls only
  * ECLIPSE robots, never other units, and nothing reaches beyond its radius.
  */
-public class RobotHub extends Block{
+public class RobotHub extends AnimatedBlock{
     /** Every hub in the world, so robots can find one without scanning the map. */
     public static final Seq<HubBuild> all = new Seq<>();
     public static final Stat slotsStat = new Stat("eclipse-robot-slots", StatCat.function);
@@ -86,7 +87,7 @@ public class RobotHub extends Block{
         public RobotAI.State state = RobotAI.State.idle;
     }
 
-    public class HubBuild extends Building{
+    public class HubBuild extends AnimatedBuild{
         public Slot[] slotData = new Slot[slots];
         /** Client-side: which slot field the next building tap sets. */
         int pickOp = -1, pickSlot = -1, itemSlot = -1;
@@ -164,6 +165,11 @@ public class RobotHub extends Block{
                 case opItem -> s.item = value;
                 case opClear -> { s.source = s.dest = s.target = s.item = -1; }
             }
+        }
+
+        @Override
+        public void updateTile(){
+            animate(efficiency > 0f);
         }
 
         /** Docked robots recharge with the hub's power; repair charge is bought with titanium rods. */

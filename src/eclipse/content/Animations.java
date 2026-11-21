@@ -23,12 +23,22 @@ import static mindustry.Vars.*;
  */
 public class Animations{
 
+    /** Rotor speeds (degrees per tick of progress) for blocks that turn slower than the default, by block name. */
+    public static final ObjectFloatMap<String> rotorSpeed = new ObjectFloatMap<>();
+
+    static{
+        rotorSpeed.put("eclipse-wastewater-treatment-plant", 0.6f);
+        rotorSpeed.put("eclipse-biomass-cultivator", 1f);
+    }
+
     public static void load(){
         for(Block b : content.blocks()){
             if(!b.name.startsWith("eclipse-") || !(b instanceof GenericCrafter c)) continue;
             Seq<DrawBlock> parts = c.drawer instanceof DrawMulti m ? Seq.with(m.drawers) : Seq.with(c.drawer);
             int main = parts.indexOf(d -> d instanceof DrawDefault);
-            parts.insert(main + 1, new DrawRotor());
+            DrawRotor rotor = new DrawRotor();
+            rotor.speed = rotorSpeed.get(b.name, rotor.speed);
+            parts.insert(main + 1, rotor);
             parts.insert(main + 1, new DrawPress());
             boolean hasGlow = parts.contains(d -> d instanceof DrawGlowRegion || d instanceof DrawHeatOutput);
             if(!hasGlow){
@@ -71,6 +81,55 @@ public class Animations{
             Draw.color(Tmp.c1.set(Color.white).mul(1f - 0.18f * down));
             Draw.rect(region, build.x, build.y, region.width * region.scl() * scale, region.height * region.scl() * scale);
             Draw.color();
+        }
+
+        @Override
+        public TextureRegion[] icons(Block block){
+            return region == null ? new TextureRegion[0] : new TextureRegion[]{region};
+        }
+    }
+
+    /**
+     * A small "&lt;block&gt;&lt;suffix&gt;" part (fan, spool) spinning at x, y world units from the block centre while the
+     * machine works. Left out of the build-menu icon: the main sprite carries a copy at rest.
+     */
+    public static DrawRegion spin(String suffix, float speed, float x, float y){
+        DrawRegion d = new DrawRegion(suffix, speed, true){
+            @Override
+            public TextureRegion[] icons(Block block){
+                return new TextureRegion[0];
+            }
+        };
+        d.x = x;
+        d.y = y;
+        return d;
+    }
+
+    /**
+     * Draws "&lt;block&gt;&lt;suffix&gt;", a full-size layer, moving back and forth while the machine works: it swings
+     * by {@code swing} degrees about a pivot, and/or slides by {@code slideX, slideY}. Pivot and slide are in world
+     * units from the block centre (y up). One back-and-forth takes {@code period} ticks of production progress.
+     */
+    public static class DrawMove extends DrawBlock{
+        public String suffix;
+        public float pivotX, pivotY, swing, slideX, slideY, period = 90f, phase;
+        public TextureRegion region;
+
+        public DrawMove(String suffix){
+            this.suffix = suffix;
+        }
+
+        @Override
+        public void load(Block block){
+            region = Core.atlas != null && Core.atlas.has(block.name + suffix) ? Core.atlas.find(block.name + suffix) : null;
+        }
+
+        @Override
+        public void draw(Building build){
+            if(region == null) return;
+            float s = Mathf.sin(build.totalProgress() * Mathf.PI2 / period + phase);
+            float w = region.width * region.scl(), h = region.height * region.scl();
+            Draw.rect(region, build.x + slideX * s, build.y + slideY * s, w, h, w / 2f + pivotX, h / 2f + pivotY, swing * s);
         }
 
         @Override

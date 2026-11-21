@@ -3,6 +3,7 @@ package eclipse.content.blocks;
 import arc.graphics.*;
 import eclipse.exploration.*;
 import eclipse.world.blocks.*;
+import eclipse.content.*;
 import mindustry.content.*;
 import mindustry.type.*;
 import mindustry.world.*;
@@ -34,7 +35,9 @@ public class ChemicalBlocks{
             consumePower(0.5f);
             outputLiquids = LiquidStack.with(purifiedWater, 13f / 60f, brine, 5f / 60f);
             liquidOutputDirections = new int[]{1, 3};
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 3f), new DrawDefault(), new DrawLiquidOutputs());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 3f),
+                new DrawBubbles(Color.valueOf("ffffff")){{ amount = 10; radius = 0.9f; spread = 4f; timeScl = 35f; }}, new DrawDefault(),
+                Animations.spin("-pump", 6f, -5.5f, 0f), new DrawLiquidOutputs());
         }};
 
         // Small-batch chemistry: hydrochloric acid (H2 + Cl2), aqua regia (3 HCl : 1 HNO3), neutralizing acidic waste with
@@ -59,7 +62,8 @@ public class ChemicalBlocks{
             recipe(2, 120f, ItemStack.empty, ItemStack.empty).liquidsIn(flueGas, 12f / 60f, sodiumHydroxide, 2f / 60f)
                 .liquidsOut(sulfuricAcid, 1f / 60f, wastewater, 4f / 60f).sides(1, 3); //regenerative scrubbing: SO2 recovered as sulfuric acid
             recipe(2, 60f, ItemStack.empty, with(sodaAsh, 1)).liquidsIn(sodiumHydroxide, 4f / 60f, carbonDioxide, 2f / 60f); //2 NaOH + CO2 -> Na2CO3 + H2O
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(),
+                new DrawBubbles(Color.valueOf("ffffff")){{ amount = 10; radius = 1f; spread = 3f; timeScl = 30f; }}, new DrawDefault());
         }};
 
         // Electrolysis of every kind: water into hydrogen (left) and oxygen (right); brine into chlorine (left), hydrogen
@@ -95,7 +99,8 @@ public class ChemicalBlocks{
             recipe(3, 120f, with(sperrylite, 4), with(platinum, 8, nickel, 2)).liquidsIn(sulfuricAcid, 4f / 60f).liquidsOut(acidicWaste, 2f / 60f); //leached and electrowon: x2
             recipe(2, 60f, with(Items.scrap, 2), with(Items.copper, 2, Items.lead, 1)).liquidsIn(sulfuricAcid, 4f / 60f).liquidsOut(acidicWaste, 1f / 60f);
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(purifiedWater, 4f),
-                new DrawBubbles(Color.valueOf("ffffff")){{ amount = 14; radius = 6f; spread = 10f; }}, new DrawDefault());
+                new DrawBubbles(Color.valueOf("ffffff")){{ amount = 24; radius = 1.4f; spread = 9f; timeScl = 30f; }}, new DrawDefault(),
+                new DrawGlowRegion(){{ color = Color.valueOf("8fd8ff"); }});
         }};
 
         // Scrap + HCl -> titanium + copper + lead, leaving acidic waste.
@@ -113,7 +118,7 @@ public class ChemicalBlocks{
             outputLiquid = new LiquidStack(acidicWaste, 4f / 60f);
             craftEffect = Fx.smeltsmoke;
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(hydrochloricAcid, 4f),
-                new DrawBubbles(Color.valueOf("f4f7c8")){{ amount = 8; radius = 4f; spread = 8f; }},
+                new DrawBubbles(Color.valueOf("f4f7c8")){{ amount = 14; radius = 1.5f; spread = 4.5f; timeScl = 30f; }},
                 new DrawDefault());
         }};
 
@@ -131,7 +136,9 @@ public class ChemicalBlocks{
             consumeLiquids(LiquidStack.with(oxygen, 4f / 60f, purifiedWater, 4f / 60f));
             consumePower(0.5f);
             outputLiquid = new LiquidStack(sulfuricAcid, 8f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(sulfuricAcid, 3f), new DrawDefault(), new DrawHeatOutput());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(sulfuricAcid, 3f),
+                new DrawBubbles(Color.valueOf("fff4b0")){{ amount = 8; radius = 1f; spread = 2.4f; timeScl = 30f; }}, new DrawDefault(),
+                new DrawGlowRegion("-flame"){{ color = Color.valueOf("ff8a3d"); alpha = 0.9f; glowScale = 2f; glowIntensity = 0.5f; }}, new DrawHeatOutput());
         }};
 
         // ---- nitrogen chemistry ----
@@ -148,7 +155,8 @@ public class ChemicalBlocks{
             consumePower(3f);
             outputLiquids = LiquidStack.with(Liquids.nitrogen, 8f / 60f, oxygen, 2f / 60f, argon, 0.5f / 60f);
             liquidOutputDirections = new int[]{1, 3, 0};
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.cryofluid, 4f), new DrawDefault(), new DrawLiquidOutputs());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(Liquids.cryofluid, 4f), new DrawDefault(),
+                Animations.spin("-fan", 8f, -8f, 0f), new DrawParticles(){{ color = Color.valueOf("e8f6ff"); x = 1.25f; particles = 8; particleRad = 4.5f; particleSize = 1.3f; particleLife = 90f; alpha = 0.45f; }}, new DrawLiquidOutputs());
         }};
 
         // Nitrogen gas + cryofluid refrigeration -> liquid nitrogen, a premium turret coolant.
@@ -164,7 +172,9 @@ public class ChemicalBlocks{
             consumeLiquids(LiquidStack.with(Liquids.nitrogen, 6f / 60f, Liquids.cryofluid, 1f / 60f));
             consumePower(2f);
             outputLiquid = new LiquidStack(liquidNitrogen, 4f / 60f);
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(liquidNitrogen, 3f), new DrawDefault());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(liquidNitrogen, 3f), new DrawDefault(),
+                Animations.spin("-fan", 8f, -4.5f, 4.5f),
+                new DrawParticles(){{ color = Color.valueOf("e8f6ff"); x = 0.5f; y = -1f; particles = 6; particleRad = 3f; particleSize = 1f; particleLife = 80f; alpha = 0.45f; }});
         }};
 
     
@@ -182,7 +192,9 @@ public class ChemicalBlocks{
             consumePower(1.5f);
             outputLiquids = LiquidStack.with(Liquids.nitrogen, 8f / 60f, carbonDioxide, 3f / 60f);
             liquidOutputDirections = new int[]{1, 3};
-            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(flueGas, 4f), new DrawDefault(), new DrawLiquidOutputs());
+            drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(flueGas, 4f), new DrawDefault(),
+                Animations.spin("-fan", 8f, -8.5f, 0f), new Animations.DrawMove("-needle"){{ pivotX = -8.5f; pivotY = 8f; swing = 35f; period = 150f; }},
+                new DrawLiquidOutputs());
         }};
 
         // Wastewater -> purified water + industrial sludge (settling and filtration).
@@ -215,7 +227,9 @@ public class ChemicalBlocks{
             outputLiquid = new LiquidStack(flueGas, 2f / 60f);
             ignoreLiquidFullness = true; //flue gas is vented when not piped away
             craftEffect = Fx.smeltsmoke;
-            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("ff8a3d"); }}, new DrawHeatInput());
+            drawer = new DrawMulti(new DrawDefault(),
+                new DrawParticles(){{ color = Color.valueOf("ffb060"); x = -0.5f; particles = 8; particleRad = 2.4f; particleSize = 0.8f; particleLife = 40f; alpha = 0.8f; }},
+                new DrawGlowRegion(){{ color = Color.valueOf("ff8a3d"); }}, new DrawHeatInput());
         }};
     }
 }

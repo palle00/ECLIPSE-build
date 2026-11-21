@@ -7,6 +7,7 @@ import eclipse.augment.*;
 import eclipse.world.blocks.*;
 import eclipse.augment.AugmentModule.*;
 import mindustry.content.*;
+import mindustry.world.draw.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.turrets.*;
@@ -287,11 +288,11 @@ public class AugmentContent{
             m -> { m.speedBonus = 1.5f; m.relativePowerCost = 2f; m.legendary = true; m.compatible = producers; m.compatibleKey = "production"; });
         matterReplicator = module("matter-replicator", ModuleCategory.legendary, 4, 4f, 3600f,
             with(Items.phaseFabric, 60, surgeSuperalloy, 30, microchip, 60, highPuritySilicon, 40),
-            m -> { m.yieldBonus = 0.5f; m.legendary = true; m.exclusiveGroup = "efficiency"; m.compatible = itemProducers; m.compatibleKey = "item-producers"; });
+            m -> { m.yieldBonus = 0.8f; m.legendary = true; m.exclusiveGroup = "efficiency"; m.compatible = itemProducers; m.compatibleKey = "item-producers"; });
         //internal name kept from before the rename so existing saves keep their modules
         zeroPointEfficiencyCore = module("ancient-efficiency-core", ModuleCategory.legendary, 4, 0f, 3600f,
             with(Items.phaseFabric, 50, platinum, 40, vanadium, 40, microchip, 50),
-            m -> { m.powerReduction = 0.5f; m.inputSaving = 0.25f; m.legendary = true; m.compatible = itemConsumers; m.compatibleKey = "item-consumers"; });
+            m -> { m.powerReduction = 0.7f; m.inputSaving = 0.25f; m.legendary = true; m.exclusiveGroup = "efficiency"; m.compatible = itemConsumers; m.compatibleKey = "item-consumers"; });
         temporalProcessingCore = module("temporal-processing-core", ModuleCategory.legendary, 4, 5f, 3600f,
             with(Items.phaseFabric, 60, surgeSuperalloy, 40, lithium, 60, microchip, 50),
             m -> { m.overchargeBonus = 3f; m.legendary = true; m.compatible = producers; m.compatibleKey = "production"; });
@@ -304,6 +305,7 @@ public class AugmentContent{
         }};
 
         experimentalFacility = new ModuleAssembler("experimental-augmentation-facility"){{
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("c88fff"); }}, new Animations.DrawMove("-arm-l"){{ pivotX = -9.5f; pivotY = 9.5f; swing = 12f; period = 90f; }}, new Animations.DrawMove("-arm-r"){{ pivotX = 9.5f; pivotY = 9.5f; swing = -12f; period = 90f; }});
             requirements(Category.crafting, with(Items.titanium, 120, Items.phaseFabric, 40, microchip, 60, surgeSuperalloy, 30, superalloyFrame, 20, precisionComponent, 20));
             size = 4;
             health = 1200;
@@ -315,6 +317,7 @@ public class AugmentContent{
         moduleRecycler = new ModuleRecycler("module-recycling-facility"){{
             requirements(Category.crafting, with(Items.copper, 60, Items.lead, 60, Items.silicon, 40, Items.graphite, 30, copperGear, 20, titaniumGear, 10));
             size = 2;
+            drawer = new DrawMulti(new DrawDefault(), Animations.spin("-saw", 12f, -2.5f, 2.5f), new DrawGlowRegion(){{ color = Color.valueOf("8ae4ff"); }});
             health = 320;
             consumePower(1f);
         }};
@@ -351,6 +354,8 @@ public class AugmentContent{
             health = 320;
             minTier = maxTier = 1;
             consumePower(1f);
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("fdb380"); }},
+                new Animations.DrawMove("-head"){{ slideX = 4f; period = 90f; }});
         }};
 
         advancedModuleAssembler = new ModuleAssembler("advanced-module-assembler"){{
@@ -360,6 +365,8 @@ public class AugmentContent{
             minTier = 2;
             maxTier = 3;
             consumePower(3f);
+            drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion(){{ color = Color.valueOf("8ae4ff"); }},
+                new Animations.DrawMove("-head-a"){{ slideX = 5f; period = 100f; }}, new Animations.DrawMove("-head-b"){{ slideX = -5f; period = 100f; }});
         }};
 
         //mechanical components by tier: gears (I), titanium gears (II), precision components (III), experimental cores (IV)

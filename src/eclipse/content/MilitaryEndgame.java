@@ -26,7 +26,7 @@ public class MilitaryEndgame{
     public static Block titanComplex, orbitalPlatform;
 
     public static void load(){
-        dreadnought = MilitaryUnits.tank("dreadnought", 160, 30, 136, t -> {
+        dreadnought = MilitaryUnits.tank("dreadnought", 256, 18, 216, t -> {
             t.health = 60000f;
             t.armor = 24f;
             t.speed = 0.3f;
@@ -41,13 +41,13 @@ public class MilitaryEndgame{
                 width = 8f;
             }}, new JamPulseAbility());
             t.weapons.add(new Weapon("eclipse-dreadnought-cannon"){{
-                x = 13f;
-                y = 4f;
+                x = 15f;
+                y = 6f;
                 rotate = true;
                 rotateSpeed = 1f;
                 alternate = true;
                 reload = 120f;
-                shootY = 22f;
+                shootY = 17f; //the muzzle of the cannon sprite
                 recoil = 5f;
                 shake = 6f;
                 shootSound = Sounds.shootSpectre;
@@ -68,11 +68,12 @@ public class MilitaryEndgame{
                 }};
             }}, new Weapon("eclipse-dreadnought-lance"){{
                 mirror = false;
+                x = 0f;
                 y = -10f;
                 rotate = true;
                 rotateSpeed = 1.5f;
                 reload = 100f;
-                shootY = 14f;
+                shootY = 9.25f; //the lens of the heat lance sprite
                 shootSound = Sounds.shootLancer;
                 bullet = new LaserBulletType(220f){{
                     length = 260f;
@@ -84,6 +85,7 @@ public class MilitaryEndgame{
             }}, new Weapon("eclipse-colossus-mortar"){{
                 x = 15f;
                 y = -18f;
+                shootY = 6f; //the mouth of the mortar sprite
                 rotate = true;
                 rotateSpeed = 2f;
                 reload = 70f;

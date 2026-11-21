@@ -183,6 +183,8 @@ public class RecipeCrafter extends GenericCrafter{
     public RecipeCrafter(String name){
         super(name);
         configurable = true;
+        //a new machine starts with no recipe (user, 2026-11-18); copying and schematics still carry it. saveConfig stays on
+        //so a pick (middle-click) applies to placed copies; configuring a machine clears lastConfig (RecipeBuild.configure)
         saveConfig = true;
         clearOnDoubleTap = true;
         logicConfigurable = true;
@@ -229,7 +231,7 @@ public class RecipeCrafter extends GenericCrafter{
         return (overclock << 8) | (r == null ? 0 : block.recipes.indexOf(r) + 1);
     }
 
-    @Nullable Recipe unpackRecipe(int v){
+    public @Nullable Recipe unpackRecipe(int v){
         int i = (v & 0xff) - 1;
         return i >= 0 && i < recipes.size ? recipes.get(i) : null;
     }
@@ -537,31 +539,62 @@ public class RecipeCrafter extends GenericCrafter{
 
         @Override
         public void buildConfiguration(Table table){
-            //one button per recipe, showing its product; hover for the whole recipe. Tapping the chosen one again clears it.
-            Table grid = new Table();
-            int n = 0;
-            for(Recipe r : recipes.select(Recipe::available)){
-                ImageButton button = grid.button(Tex.whiteui, Styles.clearNoneTogglei, 32f,
-                    () -> configure(pack(fixed == r ? null : r, level, RecipeCrafter.this))).size(46f).get();
-                button.getStyle().imageUp = new TextureRegionDrawable(r.output().uiIcon);
-                button.update(() -> button.setChecked(fixed == r));
-                button.addListener(new Tooltip(t -> t.background(Styles.black8).margin(8f).add(recipeLine(r))));
-                if(++n % 4 == 0) grid.row();
-            }
-            table.table(Styles.black6, t -> t.pane(Styles.smallPane, grid).maxHeight(46f * 5f)).left();
-            table.row();
-            //the chosen recipe in full (touch screens have no hover)
-            Table chosen = new Table();
-            Recipe[] shown = {null};
-            boolean[] first = {true};
-            chosen.update(() -> {
-                if(!first[0] && shown[0] == fixed) return;
-                first[0] = false;
-                shown[0] = fixed;
-                chosen.clear();
-                if(fixed != null) chosen.add(recipeLine(fixed)).left();
-            });
-            table.table(Styles.black6, t -> t.add(chosen).left().pad(4f)).growX();
+            //No recipe yet: the grid of recipes (one button per product; hover for the whole recipe).
+            //A recipe chosen: that recipe in full, with "Pick another recipe" (back to the grid) and "Clear recipe" buttons.
+            Table body = new Table();
+            boolean[] picking = {fixed == null};
+            Runnable[] rebuild = {null};
+            rebuild[0] = () -> {
+                body.clear();
+                if(picking[0]){
+                    Table grid = new Table();
+                    int n = 0;
+                    for(Recipe r : recipes.select(Recipe::available)){
+                        ImageButton button = grid.button(Tex.whiteui, Styles.clearNoneTogglei, 32f, () -> {
+                            configure(pack(r, level, RecipeCrafter.this));
+                            picking[0] = false;
+                            rebuild[0].run();
+                        }).size(46f).get();
+                        button.getStyle().imageUp = new TextureRegionDrawable(r.output().uiIcon);
+                        button.update(() -> button.setChecked(fixed == r));
+                        button.addListener(new Tooltip(t -> t.background(Styles.black8).margin(8f).add(recipeLine(r))));
+                        if(++n % 4 == 0) grid.row();
+                    }
+                    body.table(Styles.black6, t -> t.pane(Styles.smallPane, grid).maxHeight(46f * 5f)).left().row();
+                    if(fixed != null){
+                        body.button(Core.bundle.get("eclipse-recipe.cancel"), Icon.cancel, Styles.flatt, () -> {
+                            picking[0] = false;
+                            rebuild[0].run();
+                        }).growX().height(40f).row();
+                    }
+                }else{
+                    //the chosen recipe in full (touch screens have no hover); a recipe changed from elsewhere shows too
+                    Table chosen = new Table();
+                    Recipe[] shown = {null};
+                    boolean[] first = {true};
+                    chosen.update(() -> {
+                        if(!first[0] && shown[0] == fixed) return;
+                        first[0] = false;
+                        shown[0] = fixed;
+                        chosen.clear();
+                        if(fixed != null) chosen.add(recipeLine(fixed)).left();
+                    });
+                    body.table(Styles.black6, t -> t.add(chosen).left().pad(4f)).growX().row();
+                    body.table(t -> {
+                        t.button(Core.bundle.get("eclipse-recipe.change"), Icon.refresh, Styles.flatt, () -> {
+                            picking[0] = true;
+                            rebuild[0].run();
+                        }).growX().height(40f);
+                        t.button(Core.bundle.get("eclipse-recipe.clear"), Icon.cancel, Styles.flatt, () -> {
+                            configure(pack(null, level, RecipeCrafter.this));
+                            picking[0] = true;
+                            rebuild[0].run();
+                        }).growX().height(40f);
+                    }).growX().row();
+                }
+            };
+            rebuild[0].run();
+            table.add(body).growX();
             table.row();
             table.table(Styles.black6, t -> {
                 if(autoSelect){
@@ -582,6 +615,25 @@ public class RecipeCrafter extends GenericCrafter{
         @Override
         public Object config(){
             return fixed == null && level == 0 ? null : pack(fixed, level, RecipeCrafter.this);
+        }
+
+        //logic: @config reads the chosen recipe's product (not the packed number), @heat the heat arriving
+        @Override
+        public Object senseObject(mindustry.logic.LAccess sensor){
+            if(sensor == mindustry.logic.LAccess.config) return fixed == null ? null : fixed.output();
+            return super.senseObject(sensor);
+        }
+
+        @Override
+        public double sense(mindustry.logic.LAccess sensor){
+            if(sensor == mindustry.logic.LAccess.heat) return heat;
+            return super.sense(sensor);
+        }
+
+        @Override
+        public void configure(Object value){
+            super.configure(value);
+            lastConfig = null; //only a pick sets what new machines get; picking a recipe here doesn't
         }
 
         @Override
@@ -619,6 +671,11 @@ public class RecipeCrafter extends GenericCrafter{
                     pressure = read.f();
                     catalystUses = read.i();
                 }
+            }else{
+                //saved as a GenericCrafter (gear press, ore crusher before 1.0): keep making the old product
+                float saved = progress;
+                select(recipes.first(), 0);
+                progress = saved;
             }
         }
     }
