@@ -631,14 +631,19 @@ public class Factions{
         Seq<SpawnGroup> s = new Seq<>();
         for(mindustry.world.Tile spawn : spawner.getSpawns()){
             if(!spawn.floor().isLiquid) continue;
-            SpawnGroup lurkers = group(lurker, 9, -1, 5, 1, 2f, 0f, 6), barracudas = group(barracuda, 19, -1, 10, 1, 3f, 5f, 4), boss = group(abyss, 49, -1, 25, 1, 0f, 40f, 1);
-            boss.effect = StatusEffects.boss;
-            for(SpawnGroup g : new SpawnGroup[]{lurkers, barracudas, boss}){
+            for(SpawnGroup g : subGroups()){
                 g.spawn = spawn.pos();
                 s.add(g);
             }
         }
         return s;
+    }
+
+    /** The submarine groups one water spawn point gets (not yet pinned to it); also what the wiki's unit pages read. */
+    public static Seq<SpawnGroup> subGroups(){
+        SpawnGroup lurkers = group(lurker, 9, -1, 5, 1, 2f, 0f, 6), barracudas = group(barracuda, 19, -1, 10, 1, 3f, 5f, 4), boss = group(abyss, 49, -1, 25, 1, 0f, 40f, 1);
+        boss.effect = StatusEffects.boss;
+        return Seq.with(lurkers, barracudas, boss);
     }
 
     static SpawnGroup group(UnitType type, int begin, int end, int spacing, int amount, float scaling, float shieldScaling, int max){

@@ -116,9 +116,10 @@ Custom games and campaign sectors with waves get three factions on top of the ma
 
 ## Made to be learned
 
-- **ECLIPSE Wiki** in the pause menu: a step-by-step Getting Started guide, guides for every system and an entry for every block, material and unit. Press **I** over any ECLIPSE block to open its page.
-- **Animated setup pictures:** every machine's wiki page shows a small working setup built from its real recipe.
-- Every item page has a **production calculator**: type a target rate and get the whole chain down to raw materials, how many machines it takes, total power and the power tier the grid needs.
+- **ECLIPSE Wiki** in the pause menu, or press **I** over any ECLIPSE block or unit. Every page has a header with the key facts and tabs instead of one long scroll; recipes are cards with the rate of every input and output. Search knows recipes: type a material to see its ore, what makes it and what uses it. Pin the pages you use, go back and forward like a browser.
+- **Build examples:** every machine shows animated, ratio-correct builds with the real items riding the belts, liquids in their pipes, heaters on the right sides and a rate on every belt. Hover anything to see what it carries, step through the build, and press **Build this** to put it on your cursor as a schematic. Furnaces whose metal comes out hot also show the full line, as many furnaces as one Vacuum Freezer keeps up with.
+- **Chain tab** on every item: the whole production chain drawn as a flow down to raw materials, with how many machines it takes and the power the grid needs.
+- **Getting Started** in chapters, with checklists that tick themselves from your base. Over a stopped machine, **I** opens its page with why it stopped and how to fix it.
 - **Comparison tables** in the wiki: generators, turrets and units side by side, read from the game data.
 - Machines tell you **why they stopped** ("Brine has nowhere to go", "No heat", "Underpowered: needs 480/s"). Press **K** to mark every stopped machine on the map.
 - **Production panel** (**O**, or from the wiki): how much of every item and liquid your base makes and uses per second, and where a chain is short.

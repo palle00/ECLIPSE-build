@@ -81,6 +81,7 @@ public class PhotoShoot{
             //"menu": only the menu shot (photos.ps1 -MenuOnly)
             if(path.equals("menu")) Core.app.exit();
             else if(path.startsWith("art:")) art(path.substring(4));
+            else if(path.startsWith("wiki:")) wiki(path.substring(5).split(","), 0);
             else open(path);
         });
         return true;
@@ -103,6 +104,38 @@ public class PhotoShoot{
         }
         shots = showcaseShots;
         start(0);
+    }
+
+    /**
+     * Wiki review (photos.ps1 -Wiki): one shot per page, from the main menu. Each entry is "page|tab|example": a block,
+     * item or unit name without "eclipse-", "guide:id" or "search:text"; the tab id (overview, recipes, build, chain,
+     * uses, logic, or c0, c1... for guide chapters); for the build tab, which example and which step. Shots are named wiki-1, wiki-2...
+     */
+    static void wiki(String[] entries, int i){
+        EclipseWiki wiki = EclipseWiki.instance;
+        if(wiki == null || i >= entries.length){
+            Log.info("[ECLIPSE] photo mode (wiki) done");
+            Core.app.exit();
+            return;
+        }
+        String[] parts = entries[i].trim().split("\\|");
+        String target = parts[0], tab = parts.length > 1 ? parts[1] : null;
+        if(!wiki.isShown()) wiki.show();
+        wiki.searchFor("");
+        if(parts.length > 2) wiki.pendingBuild = arc.util.Strings.parseInt(parts[2], 0);
+        if(parts.length > 3) wiki.pendingStep = arc.util.Strings.parseInt(parts[3], 0);
+        if(target.startsWith("search:")){
+            wiki.open("start", null, true);
+            wiki.searchFor(target.substring(7));
+        }else if(target.startsWith("guide:")) wiki.open(target.substring(6), tab, true);
+        else{
+            UnlockableContent c = EclipseWiki.byName("eclipse-" + target);
+            if(c != null) wiki.open(c, tab, true);
+        }
+        Time.runTask(100f, () -> {
+            save("wiki-" + (i + 1));
+            wiki(entries, i + 1);
+        });
     }
 
     /**

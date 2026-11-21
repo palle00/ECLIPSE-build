@@ -35,6 +35,15 @@ public class MachineStatus{
         /** Power per second needed (underpowered). */
         public float need;
 
+        /** A copy of another status (the wiki keeps why a machine stopped after the machine moves on). */
+        public Status copy(Status o){
+            kind = o.kind;
+            content = o.content;
+            value = o.value;
+            need = o.need;
+            return this;
+        }
+
         Status set(Kind kind, @Nullable UnlockableContent content, float value){
             this.kind = kind;
             this.content = content;

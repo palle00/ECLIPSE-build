@@ -610,6 +610,10 @@ public class RecipeCrafter extends GenericCrafter{
                 t.label(() -> recipe == null ? "" : Core.bundle.format("eclipse-recipe.overclock-info", Strings.autoFixed(overclockSpeed[overclock], 1),
                     Strings.autoFixed(powerNeeded() * 60f, 1))).colspan(overclockSpeed.length + 1).left();
             }).growX();
+            table.row();
+            //the wiki: this machine's recipes, or the chosen recipe's build example
+            table.button(Core.bundle.get("eclipse-recipe.wiki"), Icon.book, Styles.flatt,
+                () -> eclipse.ui.EclipseWiki.openAt(RecipeCrafter.this, fixed != null ? "build" : "recipes", fixed)).growX().height(40f);
         }
 
         @Override
