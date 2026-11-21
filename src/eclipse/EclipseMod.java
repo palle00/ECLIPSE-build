@@ -28,7 +28,7 @@ public class EclipseMod extends Mod{
         TurretStats.init(); //after Augmentation, so its extra laser damage is counted
         eclipse.ui.MachineStatus.install();
         Milestones.init();
-        EclipseEvent.init(); //after the first boss, every 5th wave may bring an ECLIPSE: stronger enemies, a darkened sky
+        EclipseEvent.init(); //every 5th wave may bring an ECLIPSE: stronger enemies, a darkened sky
         eclipse.robotics.RobotAI.registerEvents();
         //Upgrade Section key and hooks (desktop): registered early so the Controls menu lists the key
         eclipse.input.UpgradePlanner.init();
@@ -49,6 +49,7 @@ public class EclipseMod extends Mod{
             CrashLog.optional("deployment intro", DeploymentIntro::install); //the ECLIPSE landing sequence for new games
             CrashLog.optional("live map", LiveMap::install); //the map screen (M) turns into the live game when zoomed in
             CrashLog.optional("block search", BlockSearch::install); //search box above the build menu
+            CrashLog.optional("welcome hint", WelcomeHint::install); //one-time pointer to the wiki and the keys in the first game
         });
 
         //developer convenience: showcase.ps1 -Open drops this one-shot flag to jump straight into the showcase map

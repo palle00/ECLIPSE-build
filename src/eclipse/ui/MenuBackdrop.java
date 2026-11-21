@@ -150,59 +150,65 @@ public class MenuBackdrop extends Element{
     /** The eclipse: corona, two dashed rings turning opposite ways, the black disk and its gold rim. */
     void drawEclipse(float w, float h, float t){
         boolean narrow = w < Scl.scl(768f);
-        float cx = x + w * (narrow ? 0.5f : 0.68f), cy = y + h * (1f - (narrow ? 0.35f : 0.48f)), r = Math.min(w, h) * (narrow ? 0.16f : 0.19f);
+        drawEclipse(x + w * (narrow ? 0.5f : 0.68f), y + h * (1f - (narrow ? 0.35f : 0.48f)), Math.min(w, h) * (narrow ? 0.16f : 0.19f), t, 1f, Scl.scl(1f));
+    }
 
+    /**
+     * The ECLIPSE's eclipse, shared by the main menu and the in-game wave event ({@link eclipse.systems.EclipseEvent}):
+     * centre and radius, time, opacity (for fading in and out) and the size of one screen pixel in the units drawn in.
+     */
+    public static void drawEclipse(float cx, float cy, float r, float t, float alpha, float px){
         //corona: gold at the rim, through amber to a faint cyan, fading out at 2.6 radii (as rings of the gradient)
         float inner = r * 0.92f, outer = r * 2.6f;
         int steps = 64;
         float step = (outer - inner) / steps;
-        Lines.stroke(step + 1f);
+        Lines.stroke(step + px);
         for(int i = 0; i < steps; i++){
             float f = (i + 0.5f) / steps;
             if(f < 0.18f) Tmp.c1.set(gold).a(0.55f).lerp(Tmp.c2.set(amber).a(0.22f), f / 0.18f);
             else if(f < 0.5f) Tmp.c1.set(amber).a(0.22f).lerp(Tmp.c2.set(cyan).a(0.06f), (f - 0.18f) / 0.32f);
             else Tmp.c1.set(cyan).a(0.06f).lerp(Tmp.c2.set(background).a(0f), (f - 0.5f) / 0.5f);
-            Draw.color(Tmp.c1);
+            Draw.color(Tmp.c1.a(Tmp.c1.a * alpha));
             Lines.circle(cx, cy, inner + step * (i + 0.5f));
         }
 
         //rings: gold (dash 12, gap 18, dash 4, gap 18) turning one way, cyan (dash 6, gap 24) the other way, a little slower
         float angle = t * 0.0022f * Mathf.radDeg;
-        Lines.stroke(Scl.scl(1.2f));
-        Draw.color(gold, 0.24f);
-        dashed(cx, cy, r * 1.38f, angle, new float[]{12f, 18f, 4f, 18f});
-        Draw.color(cyan, 0.2f);
-        dashed(cx, cy, r * 1.65f, -angle * 0.8f, new float[]{6f, 24f});
+        Lines.stroke(1.2f * px);
+        Draw.color(gold, 0.24f * alpha);
+        dashed(cx, cy, r * 1.38f, angle, new float[]{12f, 18f, 4f, 18f}, px);
+        Draw.color(cyan, 0.2f * alpha);
+        dashed(cx, cy, r * 1.65f, -angle * 0.8f, new float[]{6f, 24f}, px);
 
-        Draw.color(core);
+        Draw.color(core, alpha);
         Fill.circle(cx, cy, r);
         //the inner rim catching light on the upper left: gold rings, offset that way, fading inward
         for(int i = 0; i < 10; i++){
             float f = i / 10f;
-            Draw.color(gold, 0.05f * (1f - f));
+            Draw.color(gold, 0.05f * (1f - f) * alpha);
             Lines.stroke(r * 0.03f);
             Lines.circle(cx - r * 0.02f * (1f - f), cy + r * 0.02f * (1f - f), r * (0.985f - f * 0.09f));
         }
-        Draw.color(core);
+        Draw.color(core, alpha);
         Fill.circle(cx + r * 0.05f, cy - r * 0.05f, r * 0.86f);
         //lunar surface: a few barely-there maria and craters
         Rand rand = new Rand(31);
         for(int i = 0; i < 14; i++){
             float a = rand.random(360f), d = r * (float)Math.sqrt(rand.random(0.72f)), cr = r * rand.random(0.05f, i < 4 ? 0.3f : 0.12f);
-            Draw.color(i < 4 ? crater : craterLight, i < 4 ? 0.55f : 0.35f);
+            Draw.color(i < 4 ? crater : craterLight, (i < 4 ? 0.55f : 0.35f) * alpha);
             Fill.circle(cx + Angles.trnsx(a, d), cy + Angles.trnsy(a, d), cr);
         }
-        Draw.color(gold, 0.85f);
-        Lines.stroke(Scl.scl(2f));
+        Draw.color(gold, 0.85f * alpha);
+        Lines.stroke(2f * px);
         Lines.circle(cx, cy, r);
     }
 
-    /** A dashed circle: the pattern (dash, gap, dash, gap... in screen pixels) repeated around it, rotated by an angle. */
-    void dashed(float cx, float cy, float radius, float rotation, float[] pattern){
+    /** A dashed circle: the pattern (dash, gap, dash, gap... in screen pixels of size px) repeated around it, rotated by an angle. */
+    static void dashed(float cx, float cy, float radius, float rotation, float[] pattern, float px){
         float circumference = Mathf.PI2 * radius, at = 0f;
         int k = 0;
         while(at < circumference){
-            float len = Scl.scl(pattern[k % pattern.length]);
+            float len = pattern[k % pattern.length] * px;
             if(k % 2 == 0){
                 float a1 = rotation + at / circumference * 360f, a2 = rotation + Math.min(at + len, circumference) / circumference * 360f;
                 Lines.line(cx + Angles.trnsx(a1, radius), cy + Angles.trnsy(a1, radius), cx + Angles.trnsx(a2, radius), cy + Angles.trnsy(a2, radius));

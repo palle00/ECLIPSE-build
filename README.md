@@ -6,11 +6,11 @@
   <b>A Mindustry mod that turns Serpulo into a deep industrial game.</b><br>
   Universal machines on power tiers, machine parts built from bolts and motors, real chemistry, new metals,
   upgrade modules you manufacture yourself,
-  robots, smarter logistics, 14 new turrets and two enemy factions that join your waves.
+  robots, smarter logistics, 19 new turrets, three enemy factions that join your waves and three new planets to fight them on.
 </p>
 
 <p align="center">
-  <b>127 buildings · 14 turrets · 94 new materials · 26 liquids and gases · 70 upgrade modules · 20 units · 8 ores</b>
+  <b>139 buildings · 19 turrets · 94 new materials · 29 liquids and gases · 70 upgrade modules · 30 units · 8 ores</b>
 </p>
 
 <p align="center">
@@ -27,7 +27,7 @@ Requires **Mindustry v8 (build 160 or newer)**. Works on PC (Steam and non-Steam
 - **Manual:** download `Eclipse.jar` from [Releases](https://github.com/palle00/ECLIPSE-build/releases/latest), then Mods → Import Mod → Import File.
 - **Steam:** subscribe to ECLIPSE on the Steam Workshop.
 
-Everything works in **free play and custom games on any Serpulo map**. No new planet needed: new ores appear on generated sectors and on the premade custom-game maps.
+Everything works in **the Serpulo campaign, free play and custom games on any Serpulo map**: new ores appear on generated sectors and on the premade custom-game maps. Three new ECLIPSE planets share Serpulo's research (see [Enemy factions](#enemy-factions)).
 
 ## Made to look like Mindustry
 
@@ -45,7 +45,7 @@ Every ECLIPSE sprite is drawn in vanilla's own pixel style, and every machine is
 - **Corrosion.** Acids and chlorine eat through ordinary conduits. Pipe them in polymer or metal conduits, and deal with your waste, or it stalls production.
 - **Heat.** Furnaces and reactors need heat from heaters, geothermal taps or a fission reactor. Route it with heat exchangers and buffer it in thermal storage.
 - **New metals.** The veins hold real ore minerals (pentlandite, chromite, cobaltite, wolframite, molybdenite, sperrylite, bauxite). Crush them for 1 metal per ore, float them for 1.5 with byproducts, or leach them for 2, with cobalt and platinum out of nickel ore. Or wash metals out of scrap on any map. Smelt superalloy, tungsten carbide and surge superalloy.
-- **Power.** Fuel cells, methane turbines, biofuel engines, steam turbines on a fission reactor, four kinds of batteries, and the World Engine, a five-stage megaproject.
+- **Power.** Fuel cells, methane turbines, biofuel engines, solar farms, combined-cycle turbines, steam turbines on a fission or breeder reactor, a fusion reactor fuelled by deuterium and lithium, four kinds of batteries, and the World Engine, a six-stage megaproject.
 - **Lattice Drill.** An endgame drill that outlines its whole ore patch and mines all of it through one building. Pipe in coolant to speed it up, up to 2.65x with liquid nitrogen.
 
 | Chemistry | Fission power |
@@ -65,7 +65,7 @@ Upgrade any machine, vanilla or ECLIPSE, without replacing it. Manufacture modul
 - **Flow Meter:** a cheap belt block with an LCD showing items per second, readable by logic processors, per material.
 - **Robot Dispatch Hub:** logistics, repair and shield drones you assign to jobs.
 
-## 14 new turrets, one for every stage of the game
+## 19 new turrets, one for every stage of the game
 
 ![ECLIPSE turrets and walls](docs/images/gallery-turrets-and-walls.png)
 
@@ -94,6 +94,7 @@ Upgrade any machine, vanilla or ECLIPSE, without replacing it. Manufacture modul
 
 - **New ammunition** for vanilla turrets: armour-piercing carbide, armour-etching sulfur and EMP shells.
 - **Two new unit lines** built in the vanilla factories: tanks from Reaper to Colossus, strike aircraft from Wraith to Leviathan, plus a one-per-team Dreadnought titan and an Electronic Warfare Drone that slows enemy turrets.
+- **Two new cores** after the Nucleus: Core: Bastion and Core: Citadel, with more storage, a higher unit cap, a built-in power node and their own builders, Delta and Epsilon.
 - **Wave intelligence:** see exactly what the next wave holds, show it on logic displays, delay it, shield your units, repair key buildings.
 - **Every turret shows its DPS, kills and damage done**, vanilla ones too.
 
@@ -103,7 +104,15 @@ Upgrade any machine, vanilla or ECLIPSE, without replacing it. Manufacture modul
 
 ## Enemy factions
 
-Custom games with waves get two factions on top of the map's own waves: **the Swarm** on every 2nd wave (self-repairing biological machines that split and breed) and **the Dominion** on every 3rd (few, heavily armoured units with shields). Every 6th wave they attack together.
+Custom games and campaign sectors with waves get three factions on top of the map's own waves:
+
+- **The Swarm** on every 2nd wave: self-repairing biological machines that split and breed.
+- **The Dominion** on every 3rd: few, heavily armoured units with shields.
+- **The Tide** on every 5th: amphibious boats that cross water and land, each spraying a liquid that sets up a reaction for the others. On maps with a spawn point at sea it also sends submarines that can't be hit under water until a Sonar finds them.
+
+**The ECLIPSE:** every 5th wave may bring an eclipse, more likely the longer the game goes on. The sky darkens, and until the next wave every enemy is tougher and hits harder.
+
+**Three new planets**, one per faction, share Serpulo's research and are reached by launching from Serpulo: **Tide**, an ocean world of islands; **Hive**, a spore jungle; **Ironhold**, an industrial wasteland. Each is attacked only by its own faction.
 
 ## Made to be learned
 
@@ -127,7 +136,7 @@ Custom games with waves get two factions on top of the map's own waves: **the Sw
 ## Everything in the mod
 
 <details>
-<summary>Show all 345 items, liquids, blocks and units</summary>
+<summary>Show all 370 items, liquids, blocks and units</summary>
 
 ![All ECLIPSE content](docs/images/content.png)
 
@@ -136,7 +145,7 @@ Custom games with waves get two factions on top of the map's own waves: **the Sw
 ## Good to know
 
 - Requires Mindustry v8 (build 160 or newer). Java mod.
-- Serpulo only. Erekir is not supported.
+- Serpulo and the three ECLIPSE planets. Erekir is not supported yet.
 - Balance is still being tuned. Feedback and bug reports are very welcome in [Issues](https://github.com/palle00/ECLIPSE-build/issues).
 
 ## License

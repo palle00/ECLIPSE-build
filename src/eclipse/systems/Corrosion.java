@@ -35,15 +35,17 @@ public class Corrosion{
     }
 
     static void update(){
-        if(!state.isPlaying() || net.client()) return;
+        if(!state.isPlaying()) return;
         timer += Time.delta;
         if(timer < interval) return;
         timer = 0f;
 
         Groups.build.each(b -> {
             if(b.liquids == null || b.liquids.currentAmount() < 0.01f || !(b.liquids.current() instanceof CorrosiveLiquid) || resistant(b.block)) return;
-            b.damage(b.maxHealth * damagePerSecond * interval / 60f);
-            if(Mathf.chance(0.35)) eclipse.content.Polish.corrode.at(b.x + Mathf.range(b.block.size * 3f), b.y + Mathf.range(b.block.size * 3f), 0f, b.liquids.current().color);
+            //damage on the server only (clients get it through the game's health sync); effects are never sent over the
+            //network, so every client shows its own
+            if(!net.client()) b.damage(b.maxHealth * damagePerSecond * interval / 60f);
+            if(!headless && Mathf.chance(0.35)) eclipse.content.Polish.corrode.at(b.x + Mathf.range(b.block.size * 3f), b.y + Mathf.range(b.block.size * 3f), 0f, b.liquids.current().color);
         });
     }
 }

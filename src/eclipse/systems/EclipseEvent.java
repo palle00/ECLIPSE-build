@@ -6,7 +6,6 @@ import arc.graphics.Camera;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.util.*;
-import mindustry.content.*;
 import mindustry.game.EventType.*;
 import mindustry.game.Rules.*;
 import mindustry.gen.*;
@@ -15,15 +14,16 @@ import mindustry.graphics.*;
 import static mindustry.Vars.*;
 
 /**
- * The ECLIPSE: once the first boss of a game has spawned, every 5th wave has a chance to bring an eclipse. While it
+ * The ECLIPSE: every 5th wave, from the start of a game, has a chance to bring an eclipse. While it
  * lasts (until the next wave arrives) the wave team's units are tougher and hit harder, by a factor that grows with
- * the wave: x1.3 at wave 30, x2 at wave 200 (see {@link #multiplier}). The chance grows the same way: 30% at wave 30, certain
- * from wave 200 ({@link #chance}). The sky darkens and an eclipsed sun hangs over
+ * the wave: x1.3 at wave 30, x2 at wave 200 (see {@link #multiplier}). The chance grows the same way: 5% at wave 5, 30% at wave 30, certain
+ * from wave 200 ({@link #chance}). The sky darkens and the main menu's eclipse hangs over
  * the map.
  * The server decides and applies it (team rules, so it saves with the map); clients see it through the synced rules.
+ * In PvP only when the wave team owns no core ({@link eclipse.content.Factions#neutralWaves}).
  */
 public class EclipseEvent{
-    public static final String bossTag = "eclipse-boss-seen", activeTag = "eclipse-eclipse";
+    public static final String activeTag = "eclipse-eclipse";
     public static final int every = 5;
 
     /** Client side: how dark the sky is now (0-1), fading in and out; and whether the last frame had an eclipse. */
@@ -49,7 +49,7 @@ public class EclipseEvent{
         return wave <= 30 ? 1f + wave * 0.01f : 1.3f + (wave - 30) * (0.7f / 170f);
     }
 
-    /** The chance of an eclipse on an eligible wave: the same curve as its strength, so 10% at wave 10, 30% at wave 30, 100% from wave 200. */
+    /** The chance of an eclipse on an eligible wave: the same curve as its strength, so 5% at wave 5, 10% at wave 10, 30% at wave 30, 100% from wave 200. */
     public static float chance(int wave){
         return Math.min(multiplier(wave) - 1f, 1f);
     }
@@ -64,13 +64,10 @@ public class EclipseEvent{
     }
 
     static void onWave(){
-        if(net.client() || state.rules.pvp || state.rules.editor) return;
+        if(net.client() || state.rules.editor || !eclipse.content.Factions.neutralWaves()) return;
         int wave = state.wave - 1; //the wave that just arrived (as the HUD counted it); its spawn index is wave - 1
         end(); //an eclipse lasts until the next wave
-        if(!state.rules.tags.containsKey(bossTag) && state.rules.spawns.contains(g -> g.effect == StatusEffects.boss && g.getSpawned(wave - 1) > 0)){
-            state.rules.tags.put(bossTag, "true");
-        }
-        if(state.rules.tags.containsKey(bossTag) && wave % every == 0 && Mathf.chance(chance(wave))) start(wave);
+        if(wave > 0 && wave % every == 0 && Mathf.chance(chance(wave))) start(wave);
     }
 
     /** Starts an eclipse for this wave: the wave team's units get tougher and hit harder until the next wave. */
@@ -99,32 +96,19 @@ public class EclipseEvent{
         if(net.server()) Call.setRules(state.rules);
     }
 
-    static final Color sky = new Color(0.05f, 0.01f, 0.09f, 1f), corona = Color.valueOf("ffd9a0"), rim = Color.valueOf("fff1d6");
+    static final Color sky = new Color(0.05f, 0.01f, 0.09f, 1f);
 
-    /** A darkened sky and an eclipsed sun high over the view, with a slowly turning corona. */
+    /** A darkened sky and the main menu's eclipse high over the view. */
     static void draw(){
         if(shade < 0.01f) return;
         Camera cam = Core.camera;
         Draw.z(Layer.weather + 1f);
         Draw.color(sky, 0.5f * shade);
         Fill.rect(cam.position.x, cam.position.y, cam.width, cam.height);
-
-        float r = Math.min(cam.width, cam.height) * 0.07f;
-        float cx = cam.position.x + cam.width * 0.32f, cy = cam.position.y + cam.height * 0.3f;
-        Draw.color(corona, 0.12f * shade);
-        Fill.circle(cx, cy, r * 2.2f);
-        Draw.color(corona, 0.22f * shade);
-        Fill.circle(cx, cy, r * 1.5f);
-        Draw.color(rim, 0.6f * shade);
-        for(int i = 0; i < 18; i++){
-            float ang = i * 20f + Time.time * 0.15f, len = r * (0.35f + 0.35f * Mathf.absin(Time.time + i * 13f, 9f, 1f));
-            Lines.stroke(r * 0.05f);
-            Lines.lineAngle(cx + Angles.trnsx(ang, r * 1.02f), cy + Angles.trnsy(ang, r * 1.02f), ang, len);
-        }
-        Lines.stroke(r * 0.1f);
-        Lines.circle(cx, cy, r * 1.02f);
-        Draw.color(Color.black, 0.95f * shade);
-        Fill.circle(cx, cy, r);
+        //one screen pixel in world units, so the rings and rim keep the menu's line widths at any zoom
+        float px = cam.width / Core.graphics.getWidth();
+        eclipse.ui.MenuBackdrop.drawEclipse(cam.position.x + cam.width * 0.32f, cam.position.y + cam.height * 0.3f,
+            Math.min(cam.width, cam.height) * 0.07f, Time.time, shade, px);
         Draw.reset();
     }
 }

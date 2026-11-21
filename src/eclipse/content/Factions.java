@@ -431,9 +431,17 @@ public class Factions{
         return true;
     }
 
-    /** New custom game or campaign sector: the map's waves stay, and the factions join them in their own rhythms. */
+    /**
+     * Whether shared waves are fair to change: always outside PvP; in PvP only when the wave team is nobody's side
+     * (owns no core), since the waves then attack every team alike. Also used by the ECLIPSE wave event.
+     */
+    public static boolean neutralWaves(){
+        return !state.rules.pvp || state.rules.waveTeam.cores().isEmpty();
+    }
+
+    /** New custom game, PvP map with waves or campaign sector: the map's waves stay, and the factions join them in their own rhythms. */
     public static void apply(){
-        if(net.client() || state.rules.editor || state.rules.pvp || !state.rules.waves) return;
+        if(net.client() || state.rules.editor || !state.rules.waves || !neutralWaves()) return;
         //the factions' own worlds: only that faction
         if(applyFactionWorld()) return;
         String done = state.rules.tags.get(tag);

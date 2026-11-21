@@ -14,8 +14,8 @@ import static mindustry.Vars.*;
 
 /**
  * One-time messages for key firsts in a game ("First superalloy cast!"): reached the first time any building of the
- * player's team holds the material. Reached milestones are stored in the rules (tag {@link #tag}), so each save shows
- * each message once. A save that predates milestones records what it already has without messages. Sandbox and the
+ * player's team holds the material. Reached milestones are stored in the rules, one tag per team ({@link #tag(Team)}), so
+ * each save shows each message once, and in PvP one team's milestones never hide another's. A save that predates milestones records what it already has without messages. Sandbox and the
  * editor show none.
  */
 public class Milestones{
@@ -53,6 +53,7 @@ public class Milestones{
      */
     public static Seq<String> check(Team team){
         Seq<String> fresh = new Seq<>();
+        String tag = tag(team);
         boolean firstLook = !state.rules.tags.containsKey(tag);
         ObjectSet<String> done = ObjectSet.with(state.rules.tags.get(tag, "").split(","));
         ObjectSet<UnlockableContent> held = held(team);
@@ -65,6 +66,11 @@ public class Milestones{
         }
         if(firstLook || fresh.any()) state.rules.tags.put(tag, String.join(",", done.toSeq().select(s -> !s.isEmpty())));
         return fresh;
+    }
+
+    /** The rules tag holding a team's milestones: the plain tag for the default team (as saves before PvP support), suffixed for others. */
+    public static String tag(Team team){
+        return team == state.rules.defaultTeam ? tag : tag + "-" + team.id;
     }
 
     /** Every item and liquid held by the team's buildings. */
