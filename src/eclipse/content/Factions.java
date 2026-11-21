@@ -19,9 +19,11 @@ import static mindustry.Vars.*;
  * Military phase M4: enemy factions that join the waves of every new custom game. The map's own (vanilla) waves keep
  * running every wave; the factions come on top of them in their own rhythms, so they take turns instead of stacking:
  * - The Swarm, every 2nd wave: many cheap self-repairing biological machines, acid and spores, units that split or breed;
+ *   at full health their regeneration grows an exoskeleton (ExoskeletonAbility); Scrabba, a melee scorpion, is its late boss;
  * - The Dominion, every 3rd wave: few heavy, armoured units from the ECLIPSE tank and strike lines, shields on later waves;
  * - The Tide, every 5th wave: amphibious boats that cross water and land (slow on land), spraying water, oil, cryofluid
- *   or slag to set up status reactions for each other's guns and lightning, and laying mines (1.0 addition; enemy-only).
+ *   or slag to set up status reactions for each other's guns and lightning, and laying mines (1.0 addition; enemy-only);
+ *   the Lamprey leaps from water onto turrets and clamps on, freezing them (LatchAbility).
  * - every 6th wave the Swarm and the Dominion arrive together (a joint assault); every 10th the Tide joins the Swarm.
  * Applied once per game, on a new game or the first load of an older save (tag "eclipse-faction" in the rules, so the save
  * keeps it; an older save with only the first two factions gets the Tide added). PvP and the editor are never touched.
@@ -32,9 +34,9 @@ public class Factions{
     /** Wave rhythm of each faction: the Swarm on waves 2, 4, 6...; the Dominion on waves 3, 6, 9... (0-based wave indices). */
     public static final int swarmSpacing = 2, swarmPhase = 1, dominionSpacing = 3, dominionPhase = 2, tideSpacing = 5, tidePhase = 4;
 
-    public static UnitType mite, wasp, spitter, brood, behemoth;
+    public static UnitType mite, wasp, spitter, brood, behemoth, scrabba;
     /** The Tide's amphibious boats (enemy-only). */
-    public static UnitType skiff, slicker, frostwake, cinderwake, maelstrom;
+    public static UnitType skiff, slicker, frostwake, cinderwake, maelstrom, lamprey;
     /** The Tide's submarines (enemy-only); they only come from spawn points on water. */
     public static UnitType lurker, barracuda, abyss;
 
@@ -45,7 +47,7 @@ public class Factions{
             t.health = 70f;
             t.speed = 0.9f;
             t.hitSize = 8f;
-            t.abilities.add(regen(0.1f));
+            t.abilities.add(regen(0.1f), new ExoskeletonAbility(30f, 0.1f));
             t.weapons.add(new Weapon(){{
                 mirror = false;
                 x = 0f;
@@ -67,7 +69,7 @@ public class Factions{
             t.hitSize = 9f;
             t.accel = 0.12f;
             t.drag = 0.05f;
-            t.abilities.add(regen(0.15f));
+            t.abilities.add(regen(0.15f), new ExoskeletonAbility(50f, 0.15f));
             t.weapons.add(new Weapon(){{
                 mirror = false;
                 x = 0f;
@@ -89,7 +91,7 @@ public class Factions{
             t.speed = 0.55f;
             t.armor = 2f;
             t.hitSize = 12f;
-            t.abilities.add(regen(0.25f));
+            t.abilities.add(regen(0.25f), new ExoskeletonAbility(120f, 0.25f));
             t.weapons.add(new Weapon(){{
                 mirror = false;
                 x = 0f;
@@ -116,7 +118,7 @@ public class Factions{
             t.speed = 0.45f;
             t.armor = 5f;
             t.hitSize = 18f;
-            t.abilities.add(regen(0.5f), new SpawnDeathAbility(mite, 4, 12f));
+            t.abilities.add(regen(0.5f), new ExoskeletonAbility(350f, 0.5f), new SpawnDeathAbility(mite, 4, 12f));
             t.weapons.add(new Weapon(){{
                 mirror = false;
                 x = 0f;
@@ -139,7 +141,8 @@ public class Factions{
             t.speed = 0.35f;
             t.armor = 10f;
             t.hitSize = 30f;
-            t.abilities.add(regen(2f), new UnitSpawnAbility(mite, 60f * 6f, 0f, -8f));
+            //its Mites are laid as eggs that hatch after 3 s: splash can wipe a clutch before it hatches
+            t.abilities.add(regen(2f), new ExoskeletonAbility(2500f, 2f), new EggSpawnAbility(mite, 60f * 6f, 0f, -8f));
             t.weapons.add(new Weapon(){{
                 mirror = false;
                 x = 0f;
@@ -158,6 +161,53 @@ public class Factions{
                     puddles = 8;
                     puddleRange = 18f;
                     puddleAmount = 30f;
+                }};
+            }});
+        });
+
+        //Scrabba: the Swarm's late boss, a giant scorpion and the first melee unit. Its claws crush everything in a 3x3 area
+        //in front of it (walls included); its stinger saps (heals it by part of the damage) and leaves the target Sapped
+        scrabba = swarmMech("scrabba", t -> {
+            t.health = 16000f;
+            t.speed = 0.42f;
+            t.armor = 14f;
+            t.hitSize = 34f;
+            t.rotateSpeed = 2.2f;
+            t.abilities.add(regen(2.5f), new ExoskeletonAbility(3000f, 2.5f));
+            t.weapons.add(new Weapon(){{
+                x = 11f;
+                y = 14f;
+                alternate = true;
+                reload = 50f;
+                shootCone = 45f;
+                shootY = 11f; //the crush lands on the block in front of the claw (pressed against a wall: its centre)
+                shootSound = Sounds.shootSmite;
+                bullet = new ExplosionBulletType(160f, 13f){{ //radius 13 around a block: it and its 8 neighbours
+                    killShooter = false;
+                    splashDamagePierce = true; //every block in the area, not only the first one facing it
+                    rangeOverride = 30f;
+                    buildingDamageMultiplier = 2f;
+                    hitEffect = Fx.dynamicExplosion;
+                    hitColor = Color.valueOf("c9d36a");
+                    shootEffect = Fx.none;
+                    smokeEffect = Fx.none;
+                }};
+            }}, new Weapon(){{
+                mirror = false;
+                x = 0f;
+                y = -4f;
+                rotate = true;
+                rotateSpeed = 4f;
+                reload = 45f;
+                shootSound = Sounds.shootSap;
+                bullet = new SapBulletType(){{
+                    sapStrength = 0.6f;
+                    length = 72f;
+                    damage = 70f;
+                    status = StatusEffects.sapped;
+                    statusDuration = 60f * 4f;
+                    color = Color.valueOf("c9d36a");
+                    width = 0.6f;
                 }};
             }});
         });
@@ -223,6 +273,16 @@ public class Factions{
             t.abilities.add(regen(1f));
             t.weapons.add(spray(Liquids.water, 18f, 44f, -12.4f), spray(Liquids.cryofluid, 18f, 44f, 12.4f), mineDropper(90f, 120f, 34f), shock(24f, 16, 60f));
             t.weapons.get(2).y = -16.3f; //the mine racks at the stern of its 236 px hull
+        });
+
+        //the Lamprey: a robotic eel that leaps from the water onto a turret and clamps on, freezing and draining it until killed
+        lamprey = tideBoat("lamprey", t -> {
+            t.health = 520f;
+            t.speed = 1.7f;
+            t.armor = 3f;
+            t.hitSize = 10f;
+            t.abilities.add(new LatchAbility());
+            t.weapons.add(shock(8f, 6, 45f));
         });
 
         // ---- the Tide's submarines: they dive when not attacking (only mines and sonar reach them then) ----
@@ -296,6 +356,7 @@ public class Factions{
             constructor = MechUnit::create;
             mechStepParticles = true;
             mechLegColor = Color.valueOf("4a5a3a");
+            shieldColor = ExoskeletonAbility.chitin; //the exoskeleton's hit flash
         }};
         setup.get(t);
         return t;
@@ -306,6 +367,7 @@ public class Factions{
             constructor = UnitEntity::create;
             flying = true;
             circleTarget = true;
+            shieldColor = ExoskeletonAbility.chitin;
         }};
         setup.get(t);
         return t;
@@ -419,12 +481,16 @@ public class Factions{
     static boolean applyFactionWorld(){
         Planet planet = state.rules.planet;
         if(planet != EclipsePlanets.tide && planet != EclipsePlanets.hive && planet != EclipsePlanets.ironhold) return false;
-        Seq<SpawnGroup> own = planet == EclipsePlanets.tide ? tideWorldWaves().addAll(subWaves()) : planet == EclipsePlanets.hive ? swarmWorldWaves() : dominionWorldWaves();
-        ObjectSet<UnitType> ownTypes = new ObjectSet<>();
+        Seq<SpawnGroup> base = planet == EclipsePlanets.tide ? tideWorldWaves() : planet == EclipsePlanets.hive ? swarmWorldWaves() : dominionWorldWaves();
+        Seq<SpawnGroup> own = planet == EclipsePlanets.tide ? new Seq<>(base).addAll(subWaves()) : base;
+        ObjectSet<UnitType> ownTypes = new ObjectSet<>(), baseTypes = new ObjectSet<>();
+        base.each(g -> baseTypes.add(g.type));
         own.each(g -> ownTypes.add(g.type));
         String worldTag = planet == EclipsePlanets.tide ? "tide-world" : planet == EclipsePlanets.hive ? "swarm-world" : "dominion-world";
         //already only this faction (and tagged): leave it, so a saved wave list keeps its exact groups
-        if(worldTag.equals(state.rules.tags.get(tag)) && !state.rules.spawns.contains(g -> !ownTypes.contains(g.type))) return true;
+        //(an older save missing a unit type added since, like Scrabba or the Lamprey, gets the current list)
+        if(worldTag.equals(state.rules.tags.get(tag)) && !state.rules.spawns.contains(g -> !ownTypes.contains(g.type))
+            && !baseTypes.toSeq().contains(t -> !state.rules.spawns.contains(g -> g.type == t))) return true;
         state.rules.spawns = own;
         state.rules.tags.put(tag, worldTag);
         if(!headless) ui.showInfoToast(Core.bundle.get("eclipse-factions-" + worldTag), 6f);
@@ -448,13 +514,24 @@ public class Factions{
         if(done == null){
             //a new list, so the map's own wave list is never changed
             state.rules.spawns = new Seq<>(state.rules.spawns).addAll(waves(swarm)).addAll(waves(dominion)).addAll(waves(tide)).addAll(subWaves());
-            state.rules.tags.put(tag, "swarm+dominion+tide");
+            state.rules.tags.put(tag, "swarm+dominion+tide+scrabba+lamprey");
             if(!headless) ui.showInfoToast(Core.bundle.get("eclipse-factions-start"), 6f);
-        }else if(!done.contains("tide")){
-            //an older save that has the Swarm and the Dominion: the Tide joins
+            return;
+        }
+        if(!done.contains("tide")){
+            //an older save that has the Swarm and the Dominion: the Tide joins (with its Lampreys)
             state.rules.spawns = new Seq<>(state.rules.spawns).addAll(waves(tide)).addAll(subWaves());
-            state.rules.tags.put(tag, done + "+tide");
+            done += "+tide+lamprey";
+            state.rules.tags.put(tag, done);
             if(!headless) ui.showInfoToast(Core.bundle.get("eclipse-factions-tide"), 6f);
+        }
+        if(!done.contains("scrabba")){
+            //an older save from before Scrabba and the Lamprey: they join their factions' rhythms
+            Seq<SpawnGroup> newcomers = waves(swarm).select(g -> g.type == scrabba);
+            if(!done.contains("lamprey")) newcomers.addAll(waves(tide).select(g -> g.type == lamprey));
+            state.rules.spawns = new Seq<>(state.rules.spawns).addAll(newcomers);
+            state.rules.tags.put(tag, done + "+scrabba" + (done.contains("lamprey") ? "" : "+lamprey"));
+            if(!headless) ui.showInfoToast(Core.bundle.get("eclipse-factions-newcomers"), 6f);
         }
     }
 
@@ -469,16 +546,18 @@ public class Factions{
             //the Swarm (waves 2, 4, 6...): mites from the start, flyers and spitters soon, breeders mid-game, a Behemoth every 12 waves
             s.add(group(mite, 1, -1, 2, 2, 1f, 0f, 16));
             s.add(group(wasp, 5, -1, 2, 1, 2f, 0f, 10));
-            s.add(group(spitter, 9, -1, 4, 1, 2f, 3f, 6));
-            s.add(group(brood, 15, -1, 4, 1, 3f, 8f, 4));
-            SpawnGroup boss = group(behemoth, 23, -1, 12, 1, 0f, 20f, 2);
-            boss.effect = StatusEffects.boss;
-            s.add(boss);
+            //no wave shields: the Swarm grows its own exoskeleton
+            s.add(group(spitter, 9, -1, 4, 1, 2f, 0f, 6));
+            s.add(group(brood, 15, -1, 4, 1, 3f, 0f, 4));
+            SpawnGroup boss = group(behemoth, 23, -1, 12, 1, 0f, 0f, 2), scrabbaBoss = group(scrabba, 39, -1, 20, 1, 0f, 0f, 1);
+            boss.effect = scrabbaBoss.effect = StatusEffects.boss;
+            s.add(boss, scrabbaBoss);
         }else if(faction == tide){
             //the Tide (waves 5, 10, 15...): skiffs first, then oil and cryofluid boats, slag boats late, a Maelstrom every 20 waves from wave 35
             s.add(group(skiff, 4, -1, 5, 2, 1.5f, 0f, 12));
             s.add(group(slicker, 9, -1, 5, 1, 2f, 0f, 8));
             s.add(group(frostwake, 14, -1, 5, 1, 2.5f, 5f, 6));
+            s.add(group(lamprey, 14, -1, 5, 1, 2.5f, 0f, 6));
             s.add(group(cinderwake, 24, -1, 10, 1, 3f, 10f, 4));
             SpawnGroup boss = group(maelstrom, 34, -1, 20, 1, 0f, 30f, 2);
             boss.effect = StatusEffects.boss;
@@ -505,11 +584,11 @@ public class Factions{
         Seq<SpawnGroup> s = new Seq<>();
         s.add(group(mite, 0, -1, 1, 3, 1f, 0f, 20));
         s.add(group(wasp, 2, -1, 2, 1, 2f, 0f, 12));
-        s.add(group(spitter, 4, -1, 3, 1, 2f, 3f, 8));
-        s.add(group(brood, 10, -1, 4, 1, 3f, 8f, 5));
-        SpawnGroup boss = group(behemoth, 20, -1, 15, 1, 0f, 20f, 2);
-        boss.effect = StatusEffects.boss;
-        s.add(boss);
+        s.add(group(spitter, 4, -1, 3, 1, 2f, 0f, 8));
+        s.add(group(brood, 10, -1, 4, 1, 3f, 0f, 5));
+        SpawnGroup boss = group(behemoth, 20, -1, 15, 1, 0f, 0f, 2), scrabbaBoss = group(scrabba, 29, -1, 20, 1, 0f, 0f, 1);
+        boss.effect = scrabbaBoss.effect = StatusEffects.boss;
+        s.add(boss, scrabbaBoss);
         return s;
     }
 
@@ -536,6 +615,7 @@ public class Factions{
         s.add(group(skiff, 0, -1, 1, 2, 2f, 0f, 14));
         s.add(group(slicker, 2, -1, 2, 1, 2f, 0f, 8));
         s.add(group(frostwake, 6, -1, 3, 1, 2.5f, 5f, 6));
+        s.add(group(lamprey, 4, -1, 2, 1, 2.5f, 0f, 8));
         s.add(group(cinderwake, 14, -1, 5, 1, 3f, 10f, 4));
         SpawnGroup boss = group(maelstrom, 24, -1, 15, 1, 0f, 30f, 2);
         boss.effect = StatusEffects.boss;

@@ -18,7 +18,7 @@ public class UnitPolish{
     static final ObjectSet<String> glowing = ObjectSet.with(
         "dreadnought", "colossus", "leviathan", "annihilator", "tempest", "abyss", "behemoth", "maelstrom", "rampart", "delta",
         "epsilon", "valkyrie", "cinderwake", "repair-drone", "shield-drone", "bulwark", "brood", "barracuda", "interceptor",
-        "frostwake", "spitter", "reaper", "slicker", "ew-drone", "wraith", "wasp", "lurker", "mite", "skiff");
+        "frostwake", "spitter", "reaper", "slicker", "ew-drone", "wraith", "wasp", "lurker", "mite", "skiff", "scrabba", "lamprey");
 
     public static void load(){
         for(UnitType u : content.units()){

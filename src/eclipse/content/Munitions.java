@@ -1,10 +1,14 @@
 package eclipse.content;
 
 import arc.graphics.*;
+import arc.graphics.g2d.*;
+import arc.math.*;
+import arc.util.*;
 import mindustry.content.*;
 import mindustry.entities.bullet.*;
 import mindustry.entities.units.*;
 import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.turrets.*;
@@ -22,6 +26,12 @@ public class Munitions{
     public static StatusEffect etched, jammed;
     /** Tide submarines: Submerged (untargetable and unhittable, see SubmarineUnitType) and Sonar Contact (a Sonar has it). */
     public static StatusEffect submerged, sonarContact;
+    /** The Swarm's exoskeleton (see ExoskeletonAbility): while it holds, the unit takes 20% less damage. */
+    public static StatusEffect exoskeleton;
+    /** A freshly laid Swarm egg (the Behemoth's Mites): it can't move or attack and takes double damage until it hatches. */
+    public static StatusEffect incubating;
+    /** A Tide Lamprey clamped onto a building: it stays put and drains the building (see LatchAbility). */
+    public static StatusEffect latched;
 
     static final Color carbideFront = Color.valueOf("c8ccd8"), carbideBack = Color.valueOf("50525e");
     static final Color sulfurFront = Color.valueOf("f2e27a"), sulfurBack = Color.valueOf("b8a032");
@@ -50,6 +60,43 @@ public class Munitions{
         }};
         sonarContact = new StatusEffect("sonar-contact"){{
             color = Color.valueOf("7fe0ff");
+        }};
+
+        //the Swarm: exoskeleton (tougher while it holds), eggs that must hatch first
+        exoskeleton = new StatusEffect("exoskeleton"){{
+            color = Color.valueOf("d8c48a");
+            healthMultiplier = 1.25f; //damage taken / 1.25: 20% less
+        }};
+        incubating = new StatusEffect("incubating"){{
+            color = Color.valueOf("e8d8a0");
+            speedMultiplier = 0f;
+            disarm = true;
+            healthMultiplier = 0.5f; //takes double damage: a soft target until it hatches
+        }
+
+            @Override
+            public void draw(Unit unit){
+                //the egg: a pale shell over the unit, its spots darkening as it is about to hatch
+                float z = Draw.z();
+                Draw.z(Layer.groundUnit + 1f);
+                float r = unit.hitSize * 0.85f;
+                Draw.color(Color.valueOf("8a7a4a"));
+                Fill.circle(unit.x, unit.y, r + 1f);
+                Draw.color(Color.valueOf("e8d8a0"));
+                Fill.circle(unit.x, unit.y, r);
+                Draw.color(Color.valueOf("fff2c4"));
+                Fill.circle(unit.x - r * 0.3f, unit.y + r * 0.3f, r * 0.35f);
+                Draw.color(Color.valueOf("a6b464"), 0.5f + Mathf.absin(Time.time, 6f, 0.4f));
+                Fill.circle(unit.x + r * 0.35f, unit.y - r * 0.2f, r * 0.18f);
+                Fill.circle(unit.x - r * 0.2f, unit.y - r * 0.4f, r * 0.13f);
+                Draw.reset();
+                Draw.z(z);
+            }
+        };
+        latched = new StatusEffect("latched"){{
+            color = Color.valueOf("8fd8ff");
+            speedMultiplier = 0f;
+            disarm = true; //all its damage goes into the building it holds
         }};
 
         //Jammer: enemy weapons cycle slower while it lasts
