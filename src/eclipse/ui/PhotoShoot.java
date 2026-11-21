@@ -79,6 +79,10 @@ public class PhotoShoot{
             menuReview();
             return true;
         }
+        if(path.startsWith("trailer:")){
+            Trailer.start(path.substring(8));
+            return true;
+        }
         //the menu shot shows the finished menu, not the intro
         MenuBackdrop.skipIntro();
         //first a shot of the main menu with the ECLIPSE backdrop, then the map
