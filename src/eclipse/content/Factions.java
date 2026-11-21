@@ -187,8 +187,8 @@ public class Factions{
                     splashDamagePierce = true; //every block in the area, not only the first one facing it
                     rangeOverride = 30f;
                     buildingDamageMultiplier = 2f;
-                    hitEffect = Fx.dynamicExplosion;
-                    hitColor = Color.valueOf("c9d36a");
+                    //a fixed-size blast: Fx.dynamicExplosion takes its size from the rotation, which for a bullet's hit is its angle (0-360)
+                    hitEffect = Fx.blastExplosion;
                     shootEffect = Fx.none;
                     smokeEffect = Fx.none;
                 }};
