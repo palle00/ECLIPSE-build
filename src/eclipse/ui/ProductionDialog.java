@@ -4,6 +4,7 @@ import arc.*;
 import arc.func.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
+import arc.math.*;
 import arc.scene.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
@@ -12,7 +13,6 @@ import arc.struct.*;
 import arc.util.*;
 import eclipse.world.blocks.*;
 import eclipse.world.blocks.RecipeCrafter.*;
-import mindustry.content.*;
 import mindustry.core.*;
 import mindustry.ctype.*;
 import mindustry.gen.*;
@@ -22,34 +22,35 @@ import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 import mindustry.world.*;
 import mindustry.world.blocks.production.*;
+import mindustry.world.blocks.storage.CoreBlock.*;
 
 import static mindustry.Vars.*;
 
 /**
- * The production panel (O, or the wiki's Production button), in three tabs:
+ * The production panel (O, or the wiki's Production button), in the wiki's look, in four tabs:
  * <ul>
- * <li>Resources: every material the base makes or uses, sortable and filterable, with a trend line; the selected one in
- * detail (rates, a one-minute graph, its production chain, totals and a hint).</li>
- * <li>Production Chains: the selected material's whole chain for a target rate, with machines needed against machines built.</li>
- * <li>Power: made, used, stored and satisfaction, a one-minute graph, and power by generator and consumer block.</li>
+ * <li>Overview: the base at a glance (power, shortages, stopped machines, the core filling up), what needs attention
+ * (stopped machines grouped by block and reason, each a jump to why and how to fix it) and what runs short.</li>
+ * <li>Resources: every material the base makes or uses, sortable and filterable; the selected one in detail: rates,
+ * a one-minute graph, which of your machines make and use it, totals and advice.</li>
+ * <li>Chains: a material's whole production chain for a target rate, drawn as a flow with built against needed on
+ * every step, and the machines still missing.</li>
+ * <li>Power: made, used, stored and satisfaction, a one-minute graph, and every generator and consumer as a share.</li>
  * </ul>
  * All numbers come from {@link ProductionStats}; the panel refreshes once a second.
  */
 public class ProductionDialog extends BaseDialog{
     public static @Nullable ProductionDialog instance;
 
-    //the wiki's look: the game's translucent dialog, see-through dark panels and its yellow accent; blue/orange only for the graph lines
     static final Color accent = Pal.accent, madeColor = Color.valueOf("4aa8ff"), usedColor = Color.valueOf("ff9a3d"),
-        good = Pal.heal, bad = Pal.remove, muted = Color.lightGray, grid = Color.valueOf("ffffff22"),
-        //cards: dark, a little see-through, 1px frame; zebra rows; dimmed zeroes
-        cardFill = Color.valueOf("121212d9"), cardBorder = Color.valueOf("2a2a2a"), rowA = Color.valueOf("0d0d0dcc"), rowB = Color.valueOf("151515cc"),
-        rowSelected = Color.valueOf("ffd37f2e"), dim = Color.valueOf("555555"), tabFill = Color.valueOf("1a1a1ae6"), tabOver = Color.valueOf("2a2a2ae6");
+        good = WikiUI.good, bad = WikiUI.bad, muted = Color.lightGray, grid = Color.valueOf("ffffff22"),
+        rowA = Color.valueOf("0f0f13d9"), rowB = Color.valueOf("15151bd9"), rowSelected = Color.valueOf("ffd37f26"), dim = Color.valueOf("5a5a66");
 
-    enum Tab{resources, chains, power}
+    enum Tab{overview, resources, chains, power}
     enum Sort{name, made, used, net, core}
     enum Filter{all, raw, intermediate, advanced, liquids}
 
-    Tab tab = Tab.resources;
+    Tab tab = Tab.overview;
     Sort sort = Sort.used;
     boolean descending = true;
     Filter filter = Filter.all;
@@ -58,16 +59,23 @@ public class ProductionDialog extends BaseDialog{
     float chainRate = -1f;
     float refresh;
 
-    final Table body = new Table(), list = new Table(), right = new Table();
+    final Table tabsBar = new Table(), body = new Table(), list = new Table(), right = new Table();
     final ObjectMap<UnlockableContent, Filter> categories = new ObjectMap<>();
+    Button.ButtonStyle rowEven, rowOdd;
 
     public ProductionDialog(){
         super("@eclipse-production");
-        styles();
+        rowEven = rowStyle(rowA);
+        rowOdd = rowStyle(rowB);
         addCloseButton();
+        buttons.button("@eclipse-wiki", Icon.book, () -> {
+            if(EclipseWiki.instance != null) EclipseWiki.instance.show();
+        }).size(210f, 64f);
         cont.margin(6f);
-        header();
+        cont.add(tabsBar).growX().row();
+        cont.image().color(WikiUI.edge).height(3f).growX().padBottom(8f).row();
         cont.add(body).grow();
+        buildTabs();
         shown(() -> {
             categories.clear(); //raw or not depends on the map, which may have changed
             rebuild();
@@ -81,99 +89,44 @@ public class ProductionDialog extends BaseDialog{
         });
     }
 
-    /** Tabs and filter pills share one look: dark fill, gold underline when active. Rows: zebra, gold bar when selected. */
-    TextButton.TextButtonStyle tabStyle;
-    Button.ButtonStyle rowEven, rowOdd;
-
-    void styles(){
-        tabStyle = new TextButton.TextButtonStyle(){{
-            font = Fonts.def;
-            fontColor = Color.white;
-            up = filled(tabFill, null, false);
-            over = filled(tabOver, null, false);
-            down = filled(tabOver, accent, false);
-            checked = filled(tabFill, accent, false);
-        }};
-        rowEven = rowStyle(rowA);
-        rowOdd = rowStyle(rowB);
-    }
-
     static Button.ButtonStyle rowStyle(Color fill){
         return new Button.ButtonStyle(){{
-            up = filled(fill, null, true);
-            over = filled(Color.valueOf("222222cc"), null, true);
-            checked = filled(rowSelected, accent, true);
+            up = WikiUI.box(fill, Color.clear, 0f, 0f);
+            over = WikiUI.box(Color.valueOf("1f1f27e6"), Color.clear, 0f, 0f);
+            checked = WikiUI.box(rowSelected, accent, 2f, 0f);
         }};
     }
 
-    /** A fill with an optional accent line: along the bottom (tabs) or the left edge (rows). Keeps the caller's alpha. */
-    static Drawable filled(Color fill, @Nullable Color line, boolean leftBar){
-        return new BaseDrawable(){
-            @Override
-            public void draw(float x, float y, float w, float h){
-                float a = Draw.getColor().a;
-                Draw.color(fill, fill.a * a);
-                Fill.crect(x, y, w, h);
-                if(line != null){
-                    Draw.color(line, a);
-                    if(leftBar) Fill.crect(x, y, Scl.scl(3f), h);
-                    else Fill.crect(x, y, w, Scl.scl(3f));
-                }
-                Draw.color(1f, 1f, 1f, a);
-            }
-        };
+    // ---------------- frame ----------------
+
+    void buildTabs(){
+        tabsBar.clear();
+        tabsBar.left();
+        tabButton(Tab.overview, Icon.home);
+        tabButton(Tab.resources, Icon.box);
+        tabButton(Tab.chains, Icon.tree);
+        tabButton(Tab.power, Icon.power);
     }
 
-    /** A card: dark fill with a 1px frame. */
-    static Drawable framed(Color fill, Color border){
-        return new BaseDrawable(){
-            @Override
-            public void draw(float x, float y, float w, float h){
-                float a = Draw.getColor().a, t = Scl.scl(1f);
-                Draw.color(fill, fill.a * a);
-                Fill.crect(x, y, w, h);
-                Draw.color(border, a);
-                Fill.crect(x, y, w, t);
-                Fill.crect(x, y + h - t, w, t);
-                Fill.crect(x, y, t, h);
-                Fill.crect(x + w - t, y, t, h);
-                Draw.color(1f, 1f, 1f, a);
-            }
-        };
-    }
-
-    static Drawable panel(){
-        return framed(cardFill, cardBorder);
-    }
-
-    static Drawable box(){
-        return Styles.black6;
-    }
-
-    /** A section heading as in the wiki: accent text with a line under it. */
-    static void heading(Table t, String key){
-        t.add("[accent]" + Core.bundle.get(key)).left().padTop(6f).padBottom(2f).row();
-        t.image().color(accent).height(2f).growX().padBottom(6f).row();
-    }
-
-    // ---- frame ----
-
-    void header(){
-        cont.table(h -> {
-            h.left();
-            tabButton(h, Tab.resources, Icon.box);
-            tabButton(h, Tab.chains, Icon.tree);
-            tabButton(h, Tab.power, Icon.power);
-        }).growX().padBottom(8f).row();
-    }
-
-    void tabButton(Table h, Tab t, Drawable icon){
-        TextButton b = h.button(Core.bundle.get("eclipse-production.tab." + t.name()), icon, tabStyle, () -> {
+    void tabButton(Tab t, Drawable icon){
+        TextButton b = tabsBar.button(Core.bundle.get("eclipse-production.tab." + t.name()), icon, Styles.flatTogglet, () -> {
             tab = t;
             rebuild();
-        }).height(46f).minWidth(190f).padRight(8f).get();
+        }).height(46f).padRight(4f).get();
         b.update(() -> b.setChecked(tab == t));
-        b.getLabelCell().padLeft(8f);
+        b.getLabelCell().pad(0f, 10f, 0f, 14f);
+        b.getCells().first().padLeft(10f);
+    }
+
+    /** Opens a tab with a material selected (photo mode). */
+    void photo(String tabName, @Nullable String material){
+        tab = Tab.valueOf(tabName);
+        if(material != null){
+            UnlockableContent c = content.item(material);
+            selected = c != null ? c : content.liquid(material);
+        }
+        if(!isShown()) show();
+        rebuild();
     }
 
     void rebuild(){
@@ -182,17 +135,24 @@ public class ProductionDialog extends BaseDialog{
             Seq<UnlockableContent> rows = rows();
             if(rows.any()) selected = rows.first();
         }
-        if(tab == Tab.power){
+        if(tab == Tab.overview || tab == Tab.power){
             body.add(right).grow();
         }else{
-            body.table(panel(), this::leftPanel).width(Math.min(Core.graphics.getWidth() / Scl.scl(1f) * 0.47f, 760f)).growY().padRight(10f);
+            body.table(WikiUI.card(), this::leftPanel).width(Math.min(Core.graphics.getWidth() / Scl.scl(1f) * 0.42f, 700f)).growY().padRight(10f);
             body.add(right).grow();
         }
         refreshData();
     }
 
+    void select(UnlockableContent c, Tab to){
+        selected = c;
+        chainRate = -1f;
+        tab = to;
+        rebuild();
+    }
+
     void refreshData(){
-        fillList();
+        if(tab == Tab.resources || tab == Tab.chains) fillList();
         //the rebuild makes new scroll panes: remember where each was scrolled to and put it back (same layout, same order)
         Seq<ScrollPane> before = new Seq<>();
         panes(right, before);
@@ -205,9 +165,9 @@ public class ProductionDialog extends BaseDialog{
         UnlockableContent shownSelected = lastSelected;
         right.clear();
         right.top().left();
-        right.background(panel());
-        right.margin(14f);
+        right.background(WikiUI.box(Color.valueOf("101015d9"), WikiUI.edge, 2f, 14f));
         switch(tab){
+            case overview -> overviewView();
             case resources -> resourceDetail();
             case chains -> chainView();
             case power -> powerView();
@@ -217,7 +177,6 @@ public class ProductionDialog extends BaseDialog{
         if(shownTab != tab || shownSelected != selected) return; //another tab or material starts at the top
         Seq<ScrollPane> after = new Seq<>();
         panes(right, after);
-        //set before the first layout: the pane clamps to its new size instead of resetting
         Runnable restore = () -> {
             for(int i = 0; i < after.size && i < scrollY.size; i++){
                 after.get(i).setScrollXForce(scrollX.get(i));
@@ -225,7 +184,6 @@ public class ProductionDialog extends BaseDialog{
             }
         };
         restore.run();
-        //and once more after the first layout, in case it clamped the panes while their content was still unmeasured
         Core.app.post(restore);
     }
 
@@ -237,13 +195,165 @@ public class ProductionDialog extends BaseDialog{
         if(e instanceof Group g) for(Element child : g.getChildren()) panes(child, out);
     }
 
-    // ---- left: the material list ----
+    // ---------------- shared pieces ----------------
 
-    static final float colName = 190f, colNum = 92f, colCore = 74f, rowHeight = 42f;
+    /** A key number: icon, title, the value large in its colour, a line under it, and an optional bar (0-1). */
+    void tile(Table t, Drawable icon, String title, String value, Color color, String sub, float bar, Color barColor){
+        t.table(WikiUI.card(), b -> {
+            b.top().left();
+            b.table(h -> {
+                h.left();
+                h.image(icon).size(22f).color(color).padRight(8f);
+                h.add(title).color(muted).left();
+            }).left().row();
+            b.add(value).color(color).fontScale(1.6f).left().padTop(4f).row();
+            b.add(sub).color(muted).fontScale(0.8f).left().wrap().growX().row();
+            if(bar >= 0f) b.add(new Bar(Mathf.clamp(bar), barColor)).growX().height(6f).padTop(6f);
+        }).growX().uniformX().minWidth(150f).pad(0f, 0f, 0f, 10f).top();
+    }
+
+    /** A thin horizontal bar, filled to a fraction. */
+    static class Bar extends Element{
+        final float value;
+        final Color color;
+
+        Bar(float value, Color color){
+            this.value = value;
+            this.color = color;
+        }
+
+        @Override
+        public void draw(){
+            Draw.color(Color.valueOf("26262f"), parentAlpha);
+            Fill.crect(x, y, width, height);
+            Draw.color(color, parentAlpha);
+            Fill.crect(x, y, width * value, height);
+            Draw.reset();
+        }
+    }
+
+    // ---------------- overview ----------------
+
+    void overviewView(){
+        float pm = ProductionStats.powerMade, pu = ProductionStats.powerUsed;
+        Seq<UnlockableContent> shortages = ProductionStats.tracked().select(c -> net(c) < -0.02f * Math.max(made(c), used(c)) && used(c) > 0.001f)
+            .sort(Structs.comparingFloat(this::net));
+        CoreBuild core = player == null ? null : player.core();
+        Seq<Item> filling = new Seq<>();
+        if(core != null) for(Item i : content.items()) if(core.items.get(i) >= core.storageCapacity * 0.9f && net(i) > 0.001f) filling.add(i);
+        int stopped = ProductionStats.crafters - ProductionStats.running;
+
+        right.table(tiles -> {
+            tiles.left().top();
+            float sat = ProductionStats.satisfaction;
+            tile(tiles, Icon.power, Core.bundle.get("eclipse-production.tile.power"), (pm - pu >= 0 ? "+" : "") + power(pm - pu),
+                sat < 0.999f ? bad : pm > 0f ? good : muted, Core.bundle.format("eclipse-production.tile.power.sub", power(pm), power(pu), (int)(sat * 100)), sat, sat < 0.999f ? bad : good);
+            tile(tiles, Icon.warning, Core.bundle.get("eclipse-production.tile.short"), String.valueOf(shortages.size), shortages.any() ? bad : good,
+                Core.bundle.get(shortages.any() ? "eclipse-production.tile.short.sub" : "eclipse-production.tile.short.none"), -1f, bad);
+            tile(tiles, Icon.cancel, Core.bundle.get("eclipse-production.tile.stopped"), stopped + " / " + ProductionStats.crafters, stopped > 0 ? Color.orange : good,
+                Core.bundle.format("eclipse-production.tile.stopped.sub", ProductionStats.running), ProductionStats.crafters == 0 ? -1f : ProductionStats.running / (float)ProductionStats.crafters, good);
+            tile(tiles, Icon.box, Core.bundle.get("eclipse-production.tile.full"), String.valueOf(filling.size), filling.any() ? Color.orange : good,
+                Core.bundle.get(filling.any() ? "eclipse-production.tile.full.sub" : "eclipse-production.tile.full.none"), -1f, good);
+        }).growX().padBottom(14f).row();
+
+        right.table(cols -> {
+            cols.top().left();
+            cols.table(this::attention).grow().top().padRight(16f);
+            cols.table(r -> {
+                r.top().left();
+                shortages(r, shortages);
+                fillingUp(r, filling, core);
+            }).width(Math.min(Core.graphics.getWidth() / Scl.scl(1f) * 0.32f, 520f)).top();
+        }).grow();
+    }
+
+    /** Stopped machines, grouped by block and reason: why (the wiki's fix) and where (the K overlay). */
+    void attention(Table t){
+        t.top().left();
+        WikiUI.header(t, Core.bundle.get("eclipse-production.attention"));
+        Seq<ProductionStats.Stall> stalls = ProductionStats.stalls;
+        if(stalls.isEmpty()){
+            t.add(WikiUI.callout(1, Core.bundle.get("eclipse-production.attention.none"), Core.bundle.get("eclipse-production.attention.none.text"), 560f)).growX().left().row();
+            return;
+        }
+        Table rows = new Table().top().left();
+        int shown = 0;
+        for(ProductionStats.Stall s : stalls){
+            if(++shown > 14) break;
+            rows.table(WikiUI.card(), r -> {
+                r.left();
+                r.image(s.block.uiIcon).size(36f).padRight(10f);
+                r.table(txt -> {
+                    txt.left().defaults().left();
+                    txt.add("×" + s.count + "  " + s.block.localizedName).row();
+                    txt.add(s.status.text()).color(StallOverlay.color(s.status.kind)).fontScale(0.85f);
+                }).growX();
+                if(s.status.content != null) r.image(s.status.content.uiIcon).size(26f).padRight(10f);
+                if(EclipseWiki.isEclipse(s.block)) r.button("@eclipse-production.why", Icon.book, Styles.flatt, () -> EclipseWiki.openStopped(s.block, s.status)).height(38f).padRight(4f);
+                r.button("@eclipse-production.show", Icon.eye, Styles.flatt, () -> {
+                    StallOverlay.shown = true;
+                    hide();
+                    ui.showInfoToast(Core.bundle.get("eclipse-production.show.toast"), 4f);
+                }).height(38f);
+            }).growX().padBottom(4f).row();
+        }
+        if(stalls.size > 14) rows.add(Core.bundle.format("eclipse-production.attention.more", stalls.size - 14)).color(muted).left().row();
+        t.pane(Styles.smallPane, rows).grow().top().get().setScrollingDisabledX(true);
+    }
+
+    void shortages(Table t, Seq<UnlockableContent> shortages){
+        WikiUI.header(t, Core.bundle.get("eclipse-production.short"));
+        if(shortages.isEmpty()){
+            t.add(Core.bundle.get("eclipse-production.short.none")).color(muted).left().padBottom(6f).row();
+            return;
+        }
+        int n = 0;
+        for(UnlockableContent c : shortages){
+            if(++n > 6) break;
+            float m = made(c), u = used(c);
+            t.button(b -> {
+                b.left();
+                b.image(c.uiIcon).size(28f).padRight(8f);
+                b.table(txt -> {
+                    txt.left().defaults().left();
+                    txt.add(c.localizedName).row();
+                    txt.add(Core.bundle.format("eclipse-production.made-used", rate(m), rate(u))).color(muted).fontScale(0.8f);
+                }).growX();
+                b.add(net(m - u, Math.max(m, u))).right().padLeft(8f);
+            }, rowEven, () -> select(c, Tab.resources)).growX().height(48f).padBottom(2f).row();
+        }
+    }
+
+    void fillingUp(Table t, Seq<Item> filling, @Nullable CoreBuild core){
+        if(core == null) return;
+        WikiUI.header(t, Core.bundle.get("eclipse-production.filling"));
+        if(filling.isEmpty()){
+            t.add(Core.bundle.get("eclipse-production.filling.none")).color(muted).left().row();
+            return;
+        }
+        int n = 0;
+        for(Item i : filling){
+            if(++n > 4) break;
+            float frac = core.items.get(i) / (float)core.storageCapacity;
+            t.button(b -> {
+                b.left();
+                b.image(i.uiIcon).size(28f).padRight(8f);
+                b.table(txt -> {
+                    txt.left().defaults().left();
+                    txt.add(i.localizedName + "  [lightgray]" + (int)(frac * 100) + "%").row();
+                    txt.add(new Bar(frac, frac >= 0.999f ? bad : Color.orange)).width(180f).height(5f).padTop(3f);
+                }).growX();
+                b.add("+" + rate(net(i))).color(good).right().padLeft(8f);
+            }, rowEven, () -> select(i, Tab.resources)).growX().height(48f).padBottom(2f).row();
+        }
+    }
+
+    // ---------------- left: the material list ----------------
+
+    static final float colName = 190f, colNum = 86f, colCore = 74f, rowHeight = 42f;
 
     void leftPanel(Table t){
-        t.margin(10f).top();
-        //top-down: search, category pills, column headers, rows
+        t.top();
         t.table(top -> {
             top.left();
             top.image(Icon.zoom).padRight(8f);
@@ -256,14 +366,12 @@ public class ProductionDialog extends BaseDialog{
         t.table(pills -> {
             pills.left();
             for(Filter f : Filter.values()){
-                TextButton b = pills.button(Core.bundle.get("eclipse-production.filter." + f.name()), tabStyle, () -> {
+                pills.button(Core.bundle.get("eclipse-production.filter." + f.name()), WikiUI.chipStyle(), () -> {
                     filter = f;
                     fillList();
-                }).height(38f).padRight(6f).get();
-                b.getLabelCell().pad(0f, 12f, 0f, 12f);
-                b.update(() -> b.setChecked(filter == f));
+                }).checked(b -> filter == f).height(34f).padRight(6f);
             }
-        }).growX().padBottom(10f).row();
+        }).growX().padBottom(8f).row();
         if(tab == Tab.resources){
             t.table(head -> {
                 head.left().defaults().left();
@@ -272,12 +380,12 @@ public class ProductionDialog extends BaseDialog{
                 sortHeader(head, Sort.used, "eclipse-production.col.used", colNum);
                 sortHeader(head, Sort.net, "eclipse-production.col.net", colNum);
                 sortHeader(head, Sort.core, "eclipse-production.col.core", colCore);
-            }).growX().padBottom(4f).row();
+            }).growX().padBottom(2f).row();
         }else{
             //chains: every material in the game, whether the base makes it or not
-            t.add("[accent]" + Core.bundle.get("eclipse-production.chains.all")).left().height(32f).padBottom(4f).row();
+            t.add(Core.bundle.get("eclipse-production.chains.all")).color(accent).left().height(32f).row();
         }
-        t.image().color(accent).height(2f).growX().padBottom(4f).row();
+        t.image().color(WikiUI.edge).height(2f).growX().padBottom(4f).row();
         t.pane(Styles.smallPane, list).grow().get().setScrollingDisabledX(true);
     }
 
@@ -309,9 +417,9 @@ public class ProductionDialog extends BaseDialog{
             && (search.isEmpty() || c.localizedName.toLowerCase().contains(search)));
         if(tab == Tab.chains) return rows.sort(Structs.comparing(c -> c.localizedName));
         Floatf<UnlockableContent> key = switch(sort){
-            case made -> c -> ProductionStats.made.get(c, 0f);
-            case used -> c -> ProductionStats.used.get(c, 0f);
-            case net -> c -> ProductionStats.made.get(c, 0f) - ProductionStats.used.get(c, 0f);
+            case made -> this::made;
+            case used -> this::used;
+            case net -> this::net;
             case core -> c -> c instanceof Item i && player != null && player.core() != null ? player.core().items.get(i) : -1f;
             case name -> c -> 0f;
         };
@@ -332,20 +440,15 @@ public class ProductionDialog extends BaseDialog{
         Building core = player == null ? null : player.core();
         int index = 0;
         for(UnlockableContent c : rows){
-            float m = ProductionStats.made.get(c, 0f), u = ProductionStats.used.get(c, 0f);
+            float m = made(c), u = used(c);
             Button row = new Button(index++ % 2 == 0 ? rowEven : rowOdd);
             row.left();
             if(tab == Tab.chains){
-                //chains: just the material and its category
                 row.image(c.uiIcon).size(26f).padLeft(8f).padRight(8f);
                 row.add(c.localizedName).left().ellipsis(true).growX();
-                row.add("[#" + dim + "]" + Core.bundle.get("eclipse-production.badge." + category(c).name())).fontScale(0.75f).right().padRight(12f);
+                row.add(Core.bundle.get("eclipse-production.badge." + category(c).name())).color(dim).fontScale(0.75f).right().padRight(12f);
                 row.setChecked(selected == c);
-                row.clicked(() -> {
-                    selected = c;
-                    chainRate = -1f;
-                    refreshData();
-                });
+                row.clicked(() -> select(c, Tab.chains));
                 list.add(row).growX().height(rowHeight).row();
                 continue;
             }
@@ -363,16 +466,31 @@ public class ProductionDialog extends BaseDialog{
             int stock = c instanceof Item i && core != null ? core.items.get(i) : -1;
             row.add(stock < 0 ? "[#" + dim + "]-" : dimmed(String.valueOf(stock), stock)).minWidth(colCore).growX().left();
             row.setChecked(selected == c);
-            row.clicked(() -> {
-                selected = c;
-                chainRate = -1f;
-                refreshData();
-            });
+            row.clicked(() -> select(c, Tab.resources));
             list.add(row).growX().height(rowHeight).row();
         }
     }
 
-    // ---- right: resource detail ----
+    // ---------------- resources: the selected material ----------------
+
+    /** Icon, name, tags (category, hot), and buttons to its wiki page and its chain. */
+    void materialHeader(UnlockableContent c, boolean chainButton){
+        right.table(top -> {
+            top.left();
+            top.table(WikiUI.box(WikiUI.well, WikiUI.edge, 2f, 6f), i -> i.image(c.uiIcon).size(64f)).padRight(14f);
+            top.table(n -> {
+                n.left().top().defaults().left();
+                n.add(c.localizedName).style(Styles.outlineLabel).color(accent).fontScale(1.3f).row();
+                n.table(tags -> {
+                    tags.left();
+                    WikiUI.tag(tags, Core.bundle.get("eclipse-production.badge." + category(c).name()), muted);
+                    if(c.name.startsWith("eclipse-hot-")) WikiUI.tag(tags, Core.bundle.get("eclipse-wiki.tag.hot"), WikiUI.heat);
+                }).padTop(4f);
+            }).growX().left();
+            if(EclipseWiki.isEclipse(c)) top.button("@eclipse-production.wiki", Icon.book, Styles.flatt, () -> EclipseWiki.openAt(c, "overview", null)).height(44f).padLeft(8f);
+            if(chainButton && c instanceof Item i && !RecipeTree.raw(i) && RecipeTree.sourceOf(i) != null) top.button("@eclipse-production.chain", Icon.tree, Styles.flatt, () -> select(c, Tab.chains)).height(44f).padLeft(4f);
+        }).growX().padBottom(10f).row();
+    }
 
     void resourceDetail(){
         UnlockableContent c = selected;
@@ -380,25 +498,20 @@ public class ProductionDialog extends BaseDialog{
             right.add("[lightgray]" + Core.bundle.get("eclipse-production.empty"));
             return;
         }
-        float m = ProductionStats.made.get(c, 0f), u = ProductionStats.used.get(c, 0f);
-        right.table(top -> {
-            top.left();
-            top.image(c.uiIcon).size(80f).padRight(16f);
-            top.table(n -> {
-                n.left().top();
-                n.add("[accent]" + c.localizedName).style(Styles.outlineLabel).fontScale(1.3f).left().row();
-                badge(n, c);
-                n.row();
-                if(c.description != null) n.add("[lightgray]" + c.description).wrap().width(300f).left().padTop(4f);
-            }).growX().left();
-            statBox(top, "eclipse-production.col.made", rate(m), Color.white);
-            statBox(top, "eclipse-production.col.used", rate(u), Color.white);
-            float n = m - u;
-            statBox(top, "eclipse-production.col.net", (n > 0 ? "+" : "") + rate(n), netColor(n, Math.max(m, u)));
-        }).growX().padBottom(12f).row();
+        float m = made(c), u = used(c), n = m - u;
+        materialHeader(c, true);
+        CoreBuild core = player == null ? null : player.core();
+        right.table(tiles -> {
+            tiles.left();
+            tile(tiles, Icon.upload, Core.bundle.get("eclipse-production.col.made"), rate(m), madeColor, Core.bundle.format("eclipse-production.total", amount(ProductionStats.totalMade.get(c, 0f))), -1f, madeColor);
+            tile(tiles, Icon.download, Core.bundle.get("eclipse-production.col.used"), rate(u), usedColor, Core.bundle.format("eclipse-production.total", amount(ProductionStats.totalUsed.get(c, 0f))), -1f, usedColor);
+            tile(tiles, Icon.chartBar, Core.bundle.get("eclipse-production.col.net"), (n > 0 ? "+" : "") + rate(n), netColor(n, Math.max(m, u)),
+                Core.bundle.format("eclipse-production.minute", rate(ProductionStats.averageNet(c))), -1f, good);
+            if(c instanceof Item i && core != null) tile(tiles, Icon.box, Core.bundle.get("eclipse-production.col.core"), String.valueOf(core.items.get(i)), Color.white,
+                Core.bundle.format("eclipse-production.of-capacity", (int)(core.items.get(i) * 100f / core.storageCapacity)), core.items.get(i) / (float)core.storageCapacity, Color.orange);
+        }).growX().padBottom(10f).row();
 
-        right.table(box(), g -> {
-            g.margin(10f);
+        right.table(WikiUI.card(), g -> {
             g.table(legend -> {
                 legend.right();
                 legend.image().color(madeColor).size(10f).padRight(4f);
@@ -406,50 +519,70 @@ public class ProductionDialog extends BaseDialog{
                 legend.image().color(usedColor).size(10f).padRight(4f);
                 legend.add(Core.bundle.get("eclipse-production.col.used"));
             }).growX().row();
-            g.add(new LineGraph(() -> ProductionStats.history(c, true), () -> ProductionStats.history(c, false))).grow().minHeight(170f);
-        }).growX().height(220f).padBottom(12f).row();
+            g.add(new LineGraph(() -> ProductionStats.history(c, true), () -> ProductionStats.history(c, false))).grow().minHeight(150f);
+        }).growX().height(200f).padBottom(10f).row();
 
+        //which of your machines make and use it
+        right.table(cols -> {
+            cols.top().left();
+            cols.table(l -> shares(l, Core.bundle.get("eclipse-production.made-by"), ProductionStats.madeBy.get(c), ProductionStats.madeByCount.get(c), madeColor)).growX().top().padRight(14f);
+            cols.table(l -> shares(l, Core.bundle.get("eclipse-production.used-by"), ProductionStats.usedBy.get(c), ProductionStats.usedByCount.get(c), usedColor)).growX().top();
+        }).growX().padBottom(8f).row();
 
-        heading(right, "eclipse-production.details");
-        right.table(d -> {
-            d.left().top();
-            d.table(rows -> {
-                rows.left().defaults().left().padBottom(4f);
-                mindustry.world.blocks.storage.CoreBlock.CoreBuild core = player == null ? null : player.core();
-                detailRow(rows, "eclipse-production.col.core", c instanceof Item i && core != null ? String.valueOf(core.items.get(i)) : "-");
-                float avg = ProductionStats.averageNet(c);
-                detailRow(rows, "eclipse-production.last-minute", net(avg, Math.max(m, u)));
-                detailRow(rows, "eclipse-production.total-made", amount(ProductionStats.totalMade.get(c, 0f)));
-                detailRow(rows, "eclipse-production.total-used", amount(ProductionStats.totalUsed.get(c, 0f)));
-            }).width(300f).top().padRight(20f);
-            d.table(box(), hint -> {
-                hint.margin(12f).left();
-                hint.image(Icon.infoCircle).size(28f).color(accent).top().padRight(10f);
-                hint.add(advice(c, m, u)).wrap().growX().left();
-            }).growX().top().minHeight(100f);
-        }).growX().row();
+        int kind = advice(c, m, u);
+        right.add(WikiUI.callout(kind == 0 ? 3 : kind, "", adviceText(c, m, u), 640f)).growX().left().padTop(6f).row();
     }
 
-    void statBox(Table t, String key, String value, Color color){
-        t.table(box(), b -> {
-            b.margin(8f, 14f, 8f, 14f).left();
-            b.add("[lightgray]" + Core.bundle.get(key)).left().row();
-            b.add(value).fontScale(1.4f).color(color).left();
-        }).minWidth(120f).padLeft(8f).top();
+    /** Blocks and their share of a rate, as bars: who makes (or uses) a material in your base. */
+    void shares(Table t, String title, @Nullable ObjectFloatMap<Block> rates, @Nullable ObjectIntMap<Block> counts, Color color){
+        t.top().left();
+        WikiUI.header(t, title);
+        if(rates == null || rates.size == 0){
+            t.add(Core.bundle.get("eclipse-production.nobody")).color(muted).left().row();
+            return;
+        }
+        float total = 0f, max = 0f;
+        for(var e : rates){
+            total += e.value;
+            max = Math.max(max, e.value);
+        }
+        float fmax = max;
+        Seq<Block> blocks = rates.keys().toSeq().sort(Structs.comparingFloat(b -> -rates.get(b, 0f)));
+        int n = 0;
+        for(Block b : blocks){
+            if(++n > 5) break;
+            float v = rates.get(b, 0f);
+            t.table(r -> {
+                r.left();
+                r.image(b.uiIcon).size(26f).padRight(8f);
+                r.table(txt -> {
+                    txt.left().defaults().left();
+                    txt.add(b.localizedName + "  [lightgray]×" + (counts == null ? 0 : counts.get(b, 0))).fontScale(0.9f).row();
+                    txt.add(new Bar(fmax <= 0f ? 0f : v / fmax, color)).growX().height(5f).padTop(3f);
+                }).growX();
+                r.add(rate(v)).color(color).right().padLeft(8f);
+            }).growX().padBottom(4f).row();
+        }
+        if(blocks.size > 5) t.add(Core.bundle.format("eclipse-production.attention.more", blocks.size - 5)).color(muted).left().row();
+        t.add(Core.bundle.format("eclipse-production.share-total", rate(total))).color(muted).fontScale(0.8f).left().padTop(2f).row();
     }
 
-    void detailRow(Table t, String key, String value){
-        t.add(Core.bundle.get(key)).padRight(20f);
-        t.add(value).right().row();
+    /** 0 balanced or idle, 1 surplus (tip), 2 short or none made (warning). */
+    int advice(UnlockableContent c, float m, float u){
+        float big = Math.max(m, u), n = ProductionStats.averageNet(c);
+        if(u > 0.001f && m <= 0.001f) return 2;
+        if(n < -0.02f * big) return 2;
+        if(n > 0.02f * big) return 1;
+        return 0;
     }
 
-    String advice(UnlockableContent c, float m, float u){
+    String adviceText(UnlockableContent c, float m, float u){
         float big = Math.max(m, u), n = ProductionStats.averageNet(c);
         String name = c.localizedName;
         if(u > 0.001f && m <= 0.001f) return Core.bundle.format("eclipse-production.advice.none", name);
         if(n < -0.02f * big) return Core.bundle.format("eclipse-production.advice.short", name);
         if(n > 0.02f * big){
-            mindustry.world.blocks.storage.CoreBlock.CoreBuild core = player == null ? null : player.core();
+            CoreBuild core = player == null ? null : player.core();
             if(c instanceof Item i && core != null && core.items.get(i) >= core.storageCapacity * 0.95f) return Core.bundle.format("eclipse-production.advice.full", name);
             return Core.bundle.format("eclipse-production.advice.surplus", name);
         }
@@ -457,35 +590,7 @@ public class ProductionDialog extends BaseDialog{
         return Core.bundle.format("eclipse-production.advice.balanced", name);
     }
 
-    // ---- chains tab ----
-
-    /** Icon, name, category badge, and core stock and net rate: the top of every chain page, raw materials too. */
-    void headerCard(UnlockableContent c){
-        float m = ProductionStats.made.get(c, 0f), u = ProductionStats.used.get(c, 0f);
-        Building core = player == null ? null : player.core();
-        right.table(framed(Color.valueOf("0d0d0dcc"), cardBorder), h -> {
-            h.margin(10f).left();
-            h.image(c.uiIcon).size(48f).padRight(14f);
-            h.table(n -> {
-                n.left();
-                n.add("[accent]" + c.localizedName).style(Styles.outlineLabel).fontScale(1.3f).left().row();
-                badge(n, c);
-            }).left();
-            h.add().growX();
-            h.table(st -> {
-                st.right().defaults().right();
-                st.add("[lightgray]" + Core.bundle.get("eclipse-production.col.core") + "  [white]"
-                    + (c instanceof Item i && core != null ? core.items.get(i) : "-")).row();
-                st.add("[lightgray]" + Core.bundle.get("eclipse-production.col.net") + "  " + net(m - u, Math.max(m, u)));
-            });
-        }).growX().padBottom(12f).row();
-    }
-
-    /** A small framed category label: RAW MATERIAL, INTERMEDIATE, ADVANCED, LIQUID. */
-    void badge(Table t, UnlockableContent c){
-        t.table(framed(Color.valueOf("00000066"), accent), b -> b.add(Core.bundle.get("eclipse-production.badge." + category(c).name()))
-            .fontScale(0.75f).color(accent).pad(2f, 8f, 2f, 8f)).left().padTop(4f);
-    }
+    // ---------------- chains ----------------
 
     void chainView(){
         UnlockableContent c = selected;
@@ -493,12 +598,12 @@ public class ProductionDialog extends BaseDialog{
             right.add("[lightgray]" + Core.bundle.get("eclipse-production.empty"));
             return;
         }
-        headerCard(c);
+        materialHeader(c, false);
         if(!(c instanceof Item item) || RecipeTree.raw(item) || RecipeTree.sourceOf(item) == null){
             rawChain(c);
             return;
         }
-        if(chainRate <= 0f) chainRate = Math.max(Math.max(ProductionStats.used.get(c, 0f), ProductionStats.made.get(c, 0f)), 1f);
+        if(chainRate <= 0f) chainRate = Math.max(Math.max(used(c), made(c)), 1f);
         right.table(top -> {
             top.left();
             top.add(Core.bundle.get("eclipse-wiki.tree.rate") + " ").color(muted);
@@ -508,22 +613,55 @@ public class ProductionDialog extends BaseDialog{
             }).width(100f);
             top.add(" /s").padRight(10f);
             top.button(Icon.refresh, Styles.cleari, this::refreshData).size(40f);
-        }).growX().padBottom(10f).row();
+            top.add(Core.bundle.get("eclipse-production.chains.rate-hint")).color(muted).fontScale(0.8f).padLeft(10f);
+        }).growX().padBottom(8f).row();
 
         ObjectIntMap<String> have = builtCounts();
         RecipeTree.Step root = RecipeTree.plan(item, chainRate);
-        Table tree = new Table().top().left();
-        tree.defaults().left().padBottom(3f);
-        tree.add("[accent]" + Core.bundle.get("eclipse-production.col.material")).padRight(20f);
-        tree.add("[accent]" + Core.bundle.get("eclipse-production.chains.machine")).padRight(20f);
-        tree.add("[accent]" + Core.bundle.get("eclipse-production.chains.need")).padRight(20f);
-        tree.add("[accent]" + Core.bundle.get("eclipse-production.chains.have")).row();
-        chainRows(tree, root, 0, have);
-        right.pane(Styles.smallPane, tree).grow().row();
+        ChainGraph graph = new ChainGraph(root, x -> {
+            if(x != c) select(x, Tab.chains);
+        });
+        graph.built = s -> s.source == null ? 0 : have.get(key(s.source.block, s.item), 0);
+        right.pane(Styles.smallPane, graph).growX().maxHeight(Core.graphics.getHeight() / Scl.scl(1f) * 0.45f).left().row();
+
+        //what's missing to reach the rate: one line per step that has fewer machines than it needs
+        WikiUI.header(right, Core.bundle.get("eclipse-production.chains.todo"));
+        Table todo = new Table().top().left();
+        boolean[] any = {false};
+        collectMissing(root, have, todo, any);
+        if(!any[0]) todo.add(WikiUI.callout(1, Core.bundle.get("eclipse-production.chains.complete"), Core.bundle.get("eclipse-production.chains.complete.text"), 600f)).growX().left().row();
+        right.pane(Styles.smallPane, todo).grow().left().row();
         int tier = RecipeTree.maxTier(root);
-        right.add("[lightgray]" + Core.bundle.format("eclipse-wiki.tree.power", Strings.autoFixed(RecipeTree.power(root) * 60f, 0),
-            tier == 0 ? "-" : RecipeCrafter.roman(tier), Strings.autoFixed(RecipeCrafter.tierPower[tier] * 60f, 0))).wrap().growX().left().padTop(8f).row();
-        right.add("[lightgray]" + Core.bundle.get("eclipse-production.chains.hint")).wrap().growX().left().padTop(4f);
+        right.table(t -> {
+            t.left();
+            WikiUI.tag(t, Core.bundle.format("eclipse-wiki.chain.power", Strings.autoFixed(RecipeTree.power(root) * 60f, 0)), accent);
+            if(tier > 0) WikiUI.tag(t, Core.bundle.format("eclipse-wiki.tag.tier-power", RecipeCrafter.roman(tier), Strings.autoFixed(RecipeCrafter.tierPower[tier] * 60f, 0)), WikiUI.tierColor(tier));
+        }).left().padTop(8f).row();
+        right.add(Core.bundle.get("eclipse-production.chains.hint")).color(muted).fontScale(0.85f).wrap().growX().left().padTop(4f);
+    }
+
+    void collectMissing(RecipeTree.Step s, ObjectIntMap<String> have, Table t, boolean[] any){
+        if(s.source != null){
+            int built = have.get(key(s.source.block, s.item), 0), need = Mathf.ceil(s.machines - 0.001f);
+            if(built < need){
+                any[0] = true;
+                Block b = s.source.block;
+                t.table(WikiUI.card(), r -> {
+                    r.left();
+                    r.image(b.uiIcon).size(32f).padRight(10f);
+                    r.add(Core.bundle.format("eclipse-production.chains.todo.row", need - built, b.localizedName, s.item.localizedName)).growX().left().wrap();
+                    r.add(Core.bundle.format("eclipse-production.chains.have-need", built, need)).color(bad).right().padLeft(10f);
+                    if(EclipseWiki.isEclipse(b)) r.button(Icon.book, Styles.clearNonei, () -> EclipseWiki.openAt(b, "build", recipeOf(b, s.item))).size(40f).padLeft(6f);
+                }).growX().padBottom(4f).row();
+            }
+        }
+        for(RecipeTree.Step in : s.inputs) collectMissing(in, have, t, any);
+    }
+
+    /** The recipe of a universal machine that makes this item (to open its build example), or null. */
+    static @Nullable Object recipeOf(Block b, Item item){
+        if(!(b instanceof RecipeCrafter rc)) return null;
+        return rc.recipes.find(r -> r.outputs.length > 0 && r.outputs[0].item == item);
     }
 
     /** A raw material has no chain of its own: show what it goes into instead, each a jump to that chain. */
@@ -549,7 +687,7 @@ public class ProductionDialog extends BaseDialog{
             right.add("[lightgray]" + Core.bundle.format("eclipse-production.chains.unused", c.localizedName)).wrap().growX().left();
             return;
         }
-        heading(right, "eclipse-production.chains.used-in");
+        WikiUI.header(right, Core.bundle.get("eclipse-production.chains.used-in"));
         Table grid = new Table().top().left();
         int n = 0;
         for(UnlockableContent p : products){
@@ -557,38 +695,10 @@ public class ProductionDialog extends BaseDialog{
                 b.left();
                 b.image(p.uiIcon).size(28f).padLeft(8f).padRight(8f);
                 b.add(p.localizedName).left().ellipsis(true).width(150f);
-            }, tabStyle, () -> {
-                selected = p;
-                chainRate = -1f;
-                refreshData();
-            }).size(210f, 44f).pad(3f);
+            }, rowEven, () -> select(p, Tab.chains)).size(210f, 44f).pad(3f);
             if(++n % 3 == 0) grid.row();
         }
         right.pane(Styles.smallPane, grid).grow().top();
-    }
-
-    void chainRows(Table t, RecipeTree.Step s, int depth, ObjectIntMap<String> have){
-        t.table(n -> {
-            n.left();
-            n.add().width(depth * 20f);
-            n.image(s.item.uiIcon).size(24f).padRight(6f);
-            n.add(s.item.localizedName + " [lightgray]" + rate(s.perSecond));
-        }).left().padRight(20f);
-        if(s.source != null){
-            Block b = s.source.block;
-            int built = have.get(key(b, s.item), 0);
-            float need = s.machines;
-            t.table(n -> {
-                n.left();
-                n.image(b.uiIcon).size(24f).padRight(6f);
-                n.add(b.localizedName);
-            }).left().padRight(20f);
-            t.add(Strings.autoFixed(need, 2)).padRight(20f);
-            t.add((built >= Math.ceil(need - 0.001f) ? "[#" + good + "]" : "[#" + bad + "]") + built).row();
-        }else{
-            t.add("[lightgray]" + Core.bundle.get("eclipse-production.chains.raw-step")).colspan(3).row();
-        }
-        for(RecipeTree.Step in : s.inputs) chainRows(t, in, depth + 1, have);
     }
 
     /** Built machines per block (universal machines per block and recipe product). */
@@ -608,48 +718,84 @@ public class ProductionDialog extends BaseDialog{
         return b instanceof RecipeCrafter && product != null ? b.name + "/" + product.name : b.name + "/";
     }
 
-    // ---- power tab ----
+    // ---------------- power ----------------
 
     void powerView(){
-        float m = ProductionStats.powerMade, u = ProductionStats.powerUsed;
-        right.table(top -> {
-            top.left();
-            top.image(Icon.power).size(64f).color(accent).padRight(16f);
-            top.add("[accent]" + Core.bundle.get("eclipse-production.tab.power")).style(Styles.outlineLabel).fontScale(1.3f).growX().left();
-            statBox(top, "eclipse-production.col.made", power(m), Color.white);
-            statBox(top, "eclipse-production.col.used", power(u), Color.white);
-            statBox(top, "eclipse-production.col.net", (m - u > 0 ? "+" : "") + power(m - u), netColor(m - u, Math.max(m, u)));
-            statBox(top, "eclipse-production.stored", power(ProductionStats.powerStored).replace("/s", "") + " / " + power(ProductionStats.powerCapacity).replace("/s", ""), Color.white);
-            statBox(top, "eclipse-production.satisfaction", (int)(ProductionStats.satisfaction * 100) + "%", ProductionStats.satisfaction < 0.999f ? bad : good);
-        }).growX().padBottom(12f).row();
-        right.table(box(), g -> {
-            g.margin(10f);
-            g.add(new LineGraph(() -> ProductionStats.powerHistory(true), () -> ProductionStats.powerHistory(false))).grow().minHeight(170f);
-        }).growX().height(220f).padBottom(12f).row();
+        float m = ProductionStats.powerMade, u = ProductionStats.powerUsed, sat = ProductionStats.satisfaction;
+        right.table(tiles -> {
+            tiles.left();
+            tile(tiles, Icon.upload, Core.bundle.get("eclipse-production.col.made"), power(m), madeColor, Core.bundle.format("eclipse-production.generators-n", count(ProductionStats.generatorCount)), -1f, madeColor);
+            tile(tiles, Icon.download, Core.bundle.get("eclipse-production.col.used"), power(u), usedColor, Core.bundle.format("eclipse-production.consumers-n", count(ProductionStats.consumerCount)), -1f, usedColor);
+            tile(tiles, Icon.chartBar, Core.bundle.get("eclipse-production.col.net"), (m - u > 0 ? "+" : "") + power(m - u), netColor(m - u, Math.max(m, u)), "", -1f, good);
+            float cap = ProductionStats.powerCapacity;
+            tile(tiles, Icon.box, Core.bundle.get("eclipse-production.stored"), shortNumber(ProductionStats.powerStored), Color.white,
+                Core.bundle.format("eclipse-production.of-capacity-power", shortNumber(cap)), cap <= 0f ? 0f : ProductionStats.powerStored / cap, accent);
+            tile(tiles, Icon.power, Core.bundle.get("eclipse-production.satisfaction"), (int)(sat * 100) + "%", sat < 0.999f ? bad : good,
+                Core.bundle.get(sat < 0.999f ? "eclipse-production.satisfaction.low" : "eclipse-production.satisfaction.ok"), sat, sat < 0.999f ? bad : good);
+        }).growX().padBottom(10f).row();
+        right.table(WikiUI.card(), g -> {
+            g.table(legend -> {
+                legend.right();
+                legend.image().color(madeColor).size(10f).padRight(4f);
+                legend.add(Core.bundle.get("eclipse-production.col.made")).padRight(14f);
+                legend.image().color(usedColor).size(10f).padRight(4f);
+                legend.add(Core.bundle.get("eclipse-production.col.used"));
+            }).growX().row();
+            g.add(new LineGraph(() -> ProductionStats.powerHistory(true), () -> ProductionStats.powerHistory(false))).grow().minHeight(150f);
+        }).growX().height(200f).padBottom(10f).row();
         right.table(lists -> {
             lists.top().left();
-            lists.table(l -> blockList(l, "eclipse-production.generators", ProductionStats.powerByGenerator, ProductionStats.generatorCount, madeColor)).grow().top().padRight(16f);
-            lists.table(l -> blockList(l, "eclipse-production.consumers", ProductionStats.powerByConsumer, ProductionStats.consumerCount, usedColor)).grow().top();
+            lists.table(l -> powerShares(l, "eclipse-production.generators", ProductionStats.powerByGenerator, ProductionStats.generatorCount, madeColor)).grow().top().padRight(16f);
+            lists.table(l -> powerShares(l, "eclipse-production.consumers", ProductionStats.powerByConsumer, ProductionStats.consumerCount, usedColor)).grow().top();
         }).grow();
     }
 
-    void blockList(Table t, String key, ObjectFloatMap<Block> power, ObjectIntMap<Block> counts, Color color){
-        t.top().left().defaults().left().padBottom(3f);
-        t.add("[accent]" + Core.bundle.get(key)).left().padBottom(2f).row();
-        t.image().color(accent).height(2f).growX().padBottom(6f).row();
-        Seq<Block> blocks = power.keys().toSeq().sort(Structs.comparingFloat(b -> -power.get(b, 0f)));
-        if(blocks.isEmpty()) t.add("[lightgray]-").row();
-        Table rows = new Table().top().left();
-        rows.defaults().left().padBottom(3f);
-        for(Block b : blocks){
-            rows.image(b.uiIcon).size(26f).padRight(8f);
-            rows.add(b.localizedName + " [lightgray]x" + counts.get(b, 0)).growX().padRight(16f);
-            rows.add(power(power.get(b, 0f))).color(color).right().row();
-        }
-        t.pane(Styles.smallPane, rows).grow().top();
+    static int count(ObjectIntMap<Block> counts){
+        int n = 0;
+        for(var e : counts) n += e.value;
+        return n;
     }
 
-    // ---- formatting ----
+    void powerShares(Table t, String key, ObjectFloatMap<Block> power, ObjectIntMap<Block> counts, Color color){
+        t.top().left();
+        WikiUI.header(t, Core.bundle.get(key));
+        Seq<Block> blocks = power.keys().toSeq().sort(Structs.comparingFloat(b -> -power.get(b, 0f)));
+        if(blocks.isEmpty()){
+            t.add("[lightgray]-").left().row();
+            return;
+        }
+        float total = 0f;
+        for(var e : power) total += e.value;
+        Table rows = new Table().top().left();
+        for(Block b : blocks){
+            float v = power.get(b, 0f), share = total <= 0f ? 0f : v / total;
+            rows.table(r -> {
+                r.left();
+                r.image(b.uiIcon).size(26f).padRight(8f);
+                r.table(txt -> {
+                    txt.left().defaults().left();
+                    txt.add(b.localizedName + "  [lightgray]×" + counts.get(b, 0) + "  " + (int)(share * 100) + "%").fontScale(0.9f).row();
+                    txt.add(new Bar(share, color)).growX().height(5f).padTop(3f);
+                }).growX();
+                r.add(power(v)).color(color).right().padLeft(8f);
+            }).growX().padBottom(4f).row();
+        }
+        t.pane(Styles.smallPane, rows).grow().top().get().setScrollingDisabledX(true);
+    }
+
+    // ---------------- numbers ----------------
+
+    float made(UnlockableContent c){
+        return ProductionStats.made.get(c, 0f);
+    }
+
+    float used(UnlockableContent c){
+        return ProductionStats.used.get(c, 0f);
+    }
+
+    float net(UnlockableContent c){
+        return made(c) - used(c);
+    }
 
     Filter category(UnlockableContent c){
         return categories.get(c, () -> {
@@ -686,7 +832,7 @@ public class ProductionDialog extends BaseDialog{
         return shortNumber(v) + "/s";
     }
 
-    /** 950, 12.5k, 3.4mil, 1.2bil: short enough for graph scales and stat boxes at any power level. */
+    /** 950, 12.5k, 3.4mil, 1.2bil: short enough for graph scales and tiles at any power level. */
     static String shortNumber(float v){
         float a = Math.abs(v);
         String sign = v < 0f ? "-" : "";
@@ -696,7 +842,7 @@ public class ProductionDialog extends BaseDialog{
         return sign + Strings.autoFixed(a, a >= 10f ? 0 : 2);
     }
 
-    // ---- graphs ----
+    // ---------------- graphs ----------------
 
     /** A thin bar along the bottom edge of the Net cell (under the number): the deficit share in red, or the surplus share in green. */
     static class NetBar extends Element{
@@ -719,13 +865,12 @@ public class ProductionDialog extends BaseDialog{
                 frac = made <= 0f ? 0f : (made - used) / made;
                 Draw.color(good, parentAlpha);
             }
-            //fill from the left, where the numbers start
             Fill.crect(x, y0, w * frac, h);
             Draw.reset();
         }
     }
 
-    /** Made and used over the last minute, with a 0..max scale on the left. */
+    /** Made and used over the last minute, with a 0..max scale on the left and a soft fill under each line. */
     static class LineGraph extends Element{
         final Prov<float[]> a, b;
 
@@ -757,10 +902,16 @@ public class ProductionDialog extends BaseDialog{
 
         void series(float[] d, Color c, float px, float py, float pw, float ph, float max){
             if(d.length < 2) return;
-            Draw.color(c, parentAlpha);
-            Lines.stroke(Scl.scl(2f));
             float step = pw / (ProductionStats.historySize - 1);
             float x0 = px + pw - step * (d.length - 1);
+            //a faint fill under the line, then the line
+            Draw.color(c, 0.12f * parentAlpha);
+            for(int i = 1; i < d.length; i++){
+                float xa = x0 + step * (i - 1), xb = x0 + step * i, ya = py + ph * d[i - 1] / max, yb = py + ph * d[i] / max;
+                Fill.quad(xa, py, xa, ya, xb, yb, xb, py);
+            }
+            Draw.color(c, parentAlpha);
+            Lines.stroke(Scl.scl(2f));
             for(int i = 1; i < d.length; i++){
                 Lines.line(x0 + step * (i - 1), py + ph * d[i - 1] / max, x0 + step * i, py + ph * d[i] / max);
             }

@@ -39,6 +39,22 @@ public class ProductionStats{
     public static final ObjectIntMap<Block> generatorCount = new ObjectIntMap<>(), consumerCount = new ObjectIntMap<>();
 
     static final ObjectFloatMap<UnlockableContent> sampleIn = new ObjectFloatMap<>(), sampleOut = new ObjectFloatMap<>();
+    static final ObjectFloatMap<UnlockableContent> oneIn = new ObjectFloatMap<>(), oneOut = new ObjectFloatMap<>();
+
+    /** Per material, per block: what each kind of building makes or uses per second right now, and how many of them do. */
+    public static final ObjectMap<UnlockableContent, ObjectFloatMap<Block>> madeBy = new ObjectMap<>(), usedBy = new ObjectMap<>();
+    public static final ObjectMap<UnlockableContent, ObjectIntMap<Block>> madeByCount = new ObjectMap<>(), usedByCount = new ObjectMap<>();
+
+    /** Machines that make things (crafters), how many of them are running, and the stopped ones grouped by block and reason. */
+    public static int crafters, running;
+    public static final Seq<Stall> stalls = new Seq<>();
+
+    /** Stopped machines of one block for one reason (and the same missing or blocked material). */
+    public static class Stall{
+        public Block block;
+        public MachineStatus.Status status;
+        public int count;
+    }
     static final float smoothing = 0.35f;
     static float timer;
     public static @Nullable KeyBind key;
@@ -78,6 +94,12 @@ public class ProductionStats{
         java.util.Arrays.fill(histPowerUsed, 0f);
         powerMade = powerUsed = powerStored = powerCapacity = 0f;
         satisfaction = 1f;
+        madeBy.clear();
+        usedBy.clear();
+        madeByCount.clear();
+        usedByCount.clear();
+        stalls.clear();
+        crafters = running = 0;
     }
 
     /** One sample of a team's rates: blended into the averages, added to the history and the totals. */
@@ -88,12 +110,46 @@ public class ProductionStats{
         powerByConsumer.clear();
         generatorCount.clear();
         consumerCount.clear();
+        madeBy.clear();
+        usedBy.clear();
+        madeByCount.clear();
+        usedByCount.clear();
+        crafters = running = 0;
+        ObjectMap<String, Stall> groups = new ObjectMap<>();
         //power made: every generator's output; used: what consumers ask for, times how much of it their grid can give
         ObjectSet<PowerGraph> graphs = new ObjectSet<>();
         float pm = 0f, pu = 0f, wanted = 0f;
         for(Building b : team.data().buildings){
             if(!b.isValid()) continue;
-            Rates.of(b, sampleIn, sampleOut);
+            //what this building makes and uses, added to the totals and to its block's share
+            oneIn.clear();
+            oneOut.clear();
+            Rates.of(b, oneIn, oneOut);
+            for(var e : oneOut){
+                sampleOut.increment(e.key, 0f, e.value);
+                madeBy.get(e.key, ObjectFloatMap::new).increment(b.block, 0f, e.value);
+                madeByCount.get(e.key, ObjectIntMap::new).increment(b.block);
+            }
+            for(var e : oneIn){
+                sampleIn.increment(e.key, 0f, e.value);
+                usedBy.get(e.key, ObjectFloatMap::new).increment(b.block, 0f, e.value);
+                usedByCount.get(e.key, ObjectIntMap::new).increment(b.block);
+            }
+            //crafters: running, or stopped and why (grouped)
+            if(b.block instanceof mindustry.world.blocks.production.GenericCrafter && !(b.block instanceof mindustry.world.blocks.heat.HeatProducer)){
+                crafters++;
+                MachineStatus.Status s = MachineStatus.of(b);
+                if(!s.problem()) running++;
+                else{
+                    Stall st = groups.get(b.block.name + "/" + s.kind + "/" + (s.content == null ? "" : s.content.name), () -> {
+                        Stall n = new Stall();
+                        n.block = b.block;
+                        n.status = new MachineStatus.Status().copy(s);
+                        return n;
+                    });
+                    st.count++;
+                }
+            }
             if(b.power == null) continue;
             graphs.add(b.power.graph);
             if(b instanceof PowerGenerator.GeneratorBuild g && g.getPowerProduction() > 0f){
@@ -111,6 +167,9 @@ public class ProductionStats{
                 }
             }
         }
+        stalls.clear();
+        for(Stall st : groups.values()) stalls.add(st);
+        stalls.sort(st -> -st.count);
         blend(made, sampleOut);
         blend(used, sampleIn);
         float seconds = interval / 60f;

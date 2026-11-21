@@ -122,7 +122,7 @@ Custom games and campaign sectors with waves get three factions on top of the ma
 - **Getting Started** in chapters, with checklists that tick themselves from your base. Over a stopped machine, **I** opens its page with why it stopped and how to fix it.
 - **Comparison tables** in the wiki: generators, turrets and units side by side, read from the game data.
 - Machines tell you **why they stopped** ("Brine has nowhere to go", "No heat", "Underpowered: needs 480/s"). Press **K** to mark every stopped machine on the map.
-- **Production panel** (**O**, or from the wiki): how much of every item and liquid your base makes and uses per second, and where a chain is short.
+- **Production panel** (**O**, or from the wiki): what needs attention (stopped machines and why, shortages, power), how much of every item and liquid your base makes and uses and which machines do it, and what a chain still needs built.
 - A **search box** above the build menu finds any block by name.
 - Placement hints show liquid output sides, how much heat a heater delivers, and how many machines it takes to feed the one you are placing.
 - **Logic:** processors can read ECLIPSE machines (status, recipe, overclock, heat, pressure, the next wave...) with `esensor`, set overclock, recipe or the Orbital Platform's target with `econtrol`, and look up recipes with `recipe`. Every block's wiki page lists what it answers, and a Logic guide has ready-to-paste programs.

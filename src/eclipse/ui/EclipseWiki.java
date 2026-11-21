@@ -179,6 +179,15 @@ public class EclipseWiki extends BaseDialog{
         instance.open(c, tab, true);
     }
 
+    /** Opens a machine's page with why such machines are stopped and how to fix it (the production panel's "Why?"). */
+    public static void openStopped(Block block, MachineStatus.Status status){
+        if(instance == null) return;
+        instance.show();
+        instance.stopped = new MachineStatus.Status().copy(status);
+        instance.stoppedBlock = block;
+        instance.open(block, "overview", true);
+    }
+
     /** The ECLIPSE block or unit under the cursor, else the ECLIPSE block selected in the build menu. */
     static @Nullable UnlockableContent hoveredContent(){
         if(!state.isGame()) return null;

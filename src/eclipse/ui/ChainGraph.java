@@ -34,6 +34,8 @@ public class ChainGraph extends Element{
 
     final Seq<Node> nodes = new Seq<>();
     final Cons<UnlockableContent> open;
+    /** Optional: how many machines of a step the player has built (the production panel); drawn as "built N" beside "need". */
+    public @Nullable Intf<RecipeTree.Step> built;
     int cols, rows;
     @Nullable Node hovered;
 
@@ -148,6 +150,13 @@ public class ChainGraph extends Element{
             font.getData().setScale(0.75f);
             font.setColor(WikiUI.cyan);
             font.draw(Strings.autoFixed(n.step.perSecond, 2) + "/s" + (raw ? "  " + Core.bundle.get("eclipse-wiki.chain.raw") : ""), ax + Scl.scl(42f), ay + h - Scl.scl(30f));
+            if(n.step.source != null && built != null){
+                int have = built.get(n.step), need = Mathf.ceil(n.step.machines - 0.001f);
+                String text = Core.bundle.format("eclipse-production.chains.built", have);
+                font.setColor(have >= need ? WikiUI.good : WikiUI.bad);
+                layout.setText(font, text);
+                font.draw(text, ax + w - layout.width - Scl.scl(6f), ay + h - Scl.scl(30f));
+            }
             if(n.step.source != null){
                 Draw.color(1f, 1f, 1f, parentAlpha);
                 Draw.rect(n.step.source.block.uiIcon, ax + Scl.scl(14f), ay + Scl.scl(13f), Scl.scl(18f), Scl.scl(18f));

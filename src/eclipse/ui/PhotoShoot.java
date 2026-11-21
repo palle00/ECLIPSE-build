@@ -82,6 +82,7 @@ public class PhotoShoot{
             if(path.equals("menu")) Core.app.exit();
             else if(path.startsWith("art:")) art(path.substring(4));
             else if(path.startsWith("wiki:")) wiki(path.substring(5).split(","), 0);
+            else if(path.startsWith("production:")) production(path.substring(11).split(","), 0);
             else open(path);
         });
         return true;
@@ -135,6 +136,36 @@ public class PhotoShoot{
         Time.runTask(100f, () -> {
             save("wiki-" + (i + 1));
             wiki(entries, i + 1);
+        });
+    }
+
+    /**
+     * Production panel review (photos.ps1 -Production): the showcase map runs for 30 s so the panel has data, then one
+     * shot per entry "tab|material" (tab: resources, chains or power; material by name). Shots are named production-1...
+     */
+    static void production(String[] entries, int attempt){
+        Map map = maps.all().find(m -> m.name().equals(eclipse.EclipseMod.showcaseName));
+        if(map == null){
+            if(attempt < 20) Time.runTask(30f, () -> production(entries, attempt + 1));
+            return;
+        }
+        running = true; //(keeps the welcome hint away)
+        control.playMap(map, map.applyRules(Gamemode.sandbox));
+        Time.runTask(60f * 30f, () -> productionShot(entries, 0));
+    }
+
+    static void productionShot(String[] entries, int i){
+        ProductionDialog d = ProductionDialog.instance;
+        if(d == null || i >= entries.length){
+            Log.info("[ECLIPSE] photo mode (production) done");
+            Core.app.exit();
+            return;
+        }
+        String[] parts = entries[i].trim().split("\\|");
+        d.photo(parts[0], parts.length > 1 ? parts[1] : null);
+        Time.runTask(90f, () -> {
+            save("production-" + (i + 1));
+            productionShot(entries, i + 1);
         });
     }
 
