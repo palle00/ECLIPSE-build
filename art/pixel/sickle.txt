@@ -1,0 +1,81 @@
+size 64 64
+mirror
+color a 4d4e58 b
+color b 7b7b7b a
+color z 2c2d38
+color m 4d4e58 n
+color n 7b7b7b m
+base 2
+
+color d d96b68 e
+color e fdb380 d
+
+color k 8c939e l
+color l b4bcc4 k
+heat m n d e
+ref lancer salvo wave
+grid
+................................
+................................
+................................
+................................
+................................
+................................
+..................deeeenn.......
+..................deeeenn.......
+..................deeeenn.......
+..................mnnnnnn.......
+..................mnnnnn.....zzz
+..................mnnnnn...zzzzz
+..................mnnnnn.zzzzkzz
+..................mnnnnnzzzzkkkk
+..................mnnnnnzzzzkkkk
+..................mnnnnzzkkkkkkk
+..................mnnnnzzkkkkkkk
+..................mnnnzzkkkkkkkk
+..................mnnnzzzzkkkkzz
+..................mnnnzzzzkkkkzz
+..................mnnnzzkkkkkkzz
+..................mnnnzzkkkkkkzz
+..................mnnnzzkkkkkkkk
+..................mnnnnzzkkkkkkk
+..................mnnnnzzkkkkkkk
+..................mnnnnnzzkkkkkk
+..................mnnnnnzzzkkkkk
+..................mnnnnnazzzzkkk
+..................mnnnnnaaazzzzz
+..................mnnnnnaaaaazzz
+..................aaaaaaa..aaaaa
+..............aaaaaaaaaaa..aaaaa
+.............aaaaaaaaaaaa..aaaaa
+............aaaaaaaaaaaaa..aaaaa
+............aaaaaaaaaaaaa..aaaaa
+............aaaaaaaaaaaaa..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+............aaaaaaaabbbbb..aaaaa
+.............aaaaaaabbbbb..aaaaa
+..............aaaaaaaaaaa..adddd
+...............aaaaaaaaaa..adddd
+................aaaaaaaaaaaadddd
+...........................aaaaa
+...........................aaaaa
+................................
+................................
+................................

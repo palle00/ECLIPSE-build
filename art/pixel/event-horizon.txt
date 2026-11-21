@@ -1,0 +1,143 @@
+size 128 128
+mirror
+color a 4d4e58 b
+color b 7b7b7b a
+color z 2c2d38
+color m 4d4e58 n
+color n 7b7b7b m
+color k 3b3e4c l
+color l 5d6273 k
+color d 8a5ad1 e
+color e c88fff d
+heat d e
+base 4
+ref foreshadow meltdown
+grid
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+................................................................
+...........................................................aeeee
+..........................................................aaeeee
+.........................................................aaaeeee
+........................................................aaaaeeee
+........................................................aaaaeeee
+........................................................aaaaaaaa
+........................................................aaaaaaaa
+........................................................aaaaaaaa
+........................................................aaaaaaaa
+........................................................aaaaaaaa
+......................................................bbaaaaaaaa
+...................................................bbbbbaaaaaaaa
+.................................................bbbbbbbbbbbbaaa
+...............................................bbbbbbbbbbbbbbbaa
+..............................................bbbbbbbbbbbbbbbbaa
+............................................bbbbbbbbbbbbbbbbbbaa
+...........................................bbbbbbbbbbbbbbbbbbbaa
+..........................................bbbbbbbbbbbbbbbbbbbbaa
+.........................................bbbbbbbbbbbbbbbb.......
+........................................bbbbbbbbbbbbbb.....eeeee
+.......................................bbbbbbbbbbbbb....eeeeeeee
+......................................bbbbbbbbbbbbb...eeeeeeeeee
+.............................a.......bbbbbbbbbbbb...eeeeeeeeeeee
+..........................aaaa.......bbbbbbbbbbb..eeeeeeeedddddd
+........................aaaaaa......bbbbbbbbbbb..eeeeeeddddddddd
+......................aaaaaaaa.....bbbbbbbbbbb..eeeeeeddddddzzzz
+...................aaaaaaaaaaa.....bbbbbbbbbb..eeeeedddddzzzzzzz
+.................aaaaaaaaaaaaa....bbbbbbbbbb..eeeeeddddzzzzzzzzz
+................aaaaaaaaaaaaaa....bbbbbbbbbb.eeeeeddddzzzzzzzzzz
+...............aaaaaaaaaaaaaaa...bbbbbbbbbb..eeeedddzzzzzzzzzzzz
+...............aaaaaaaaaaaaaaa...bbbbbbbbb..eeeedddzzzzzzzzzzzzz
+..............aaaaaaaaaaabaaaa...bbbbbbbbb..eeeedddzzzzzzzzkkkkk
+..............aaaaaaaabbbbaakkkkkkkkkkkbb..eeeedddzzzzzzzzkkkzzz
+.............aaaaaabbbbbbbaakkkkkkkkkkkbb..eeedddzzzzzzzkkkzzzzz
+.............aaaaabbbbbbbbaakkaaaabbbbkbb.eeeedddzzzzzzkkzzzzzzz
+............aaaaabbbbbbbbbaakkaaaabbbbkb..eeeeddzzzzzzzkzzzzzzzz
+............aaaaabbbbbbbbbaakkaaaabbbbkb..eeedddzzzzzzkkzzzzzzzz
+...........aaaaabbbbbbbbbbaakkaaaabbbbkb.eeeedddzzzzzkkzzzzzzzzz
+...........aaaaabbbbbbbbbbaakkaaaabbbbkb.eeeeddzzzzzzkkzzzzzzzkk
+..........aaaaabbbbbbbbbbbaakkaaaabbbbkb.eeeeddzzzzzzkzzzzzzzkkk
+..........aaaaabbbbbbbbbbbaakkaaaabbbbka.eeeeddzzzzzzkzzzzzzkkkk
+.........aaaaabbbbbbbbbbbbaakkaaaabbbbka.eeeeddzzzzzzkzzzzzzkkkk
+.........aaaaabbbbbbbbbbbbaakkaaaabbbbka.eeeeddzzzzzzkzzzzzzkkkk
+........aaaaabbbbbbbbbbbbbaakkaaaabbbbka.eeeeddzzzzzzkzzzzzzkkkk
+........aaaaabbbbbbbbbbbbbaakkaaaabbbbkb.eeeeddzzzzzzkzzzzzzzkkk
+.......aaaaabbbbbbbbbbbbbbaakkaaaabbbbkb.eeeeddzzzzzzkkzzzzzzzkk
+.......aaaaabbbbbbbbbbbbbbaakkaaaabbbbkb.eeeedddzzzzzkkzzzzzzzzz
+......aaaaabbbbbbbbbbbbbbbaakkaaaabbbbkb..eeedddzzzzzzkkzzzzzzzz
+......aaaaabbbbbbbbbbbbbbbaakkaaaabbbbkb..eeeeddzzzzzzzkzzzzzzzz
+......aaaabbbbbbbbbbbbbbbbaakkaaaabbbbkbb.eeeedddzzzzzzkkzzzzzzz
+......aaaabbbbbbbbbbbbbbbbaakkaaaabbbbkbb..eeedddzzzzzzzkkkzzzzz
+......aaaabbbbbbbbbbbbbbbbaakkkkkkkkkkkbb..eeeedddzzzzzzzzkkkzzz
+......aaaabbbbbbbbbbbbbbbbaakkkkkkkkkkkbbb..eeeedddzzzzzzzzkkkkk
+......aaaabbbbbbbbbbbbbbbbaaaa...bbbbbbbbb..eeeedddzzzzzzzzzzzzz
+......aaaabbbbbbbbbbbbbbbbaaaa...bbbbbbbbbb..eeeedddzzzzzzzzzzzz
+......aaaabbbbbbbbbbbbbbbbaaaa....bbbbbbbbbb.eeeeeddddzzzzzzzzzz
+......aaaabbbbbbbbbbbbbbbbaaaa....bbbbbbbbbb..eeeeeddddzzzzzzzzz
+......aaaabbbbbbbbbbbbbbbbaaaa.....bbbbbbbbbb..eeeeedddddzzzzzzz
+......aaaabbbbbbbbbbbbbbbbaaaa.....bbbbbbbbbbb..eeeeeeddddddzzzz
+......aaaabbbbbbbbbbbbbbbbaaaa......bbbbbbbbbbb..eeeeeeddddddddd
+......aaaa.................aaa.......bbbbbbbbbbb..eeeeeeeedddddd
+......aaaa.................aaa.......bbbbbbbbbbbb...eeeeeeeeeeee
+......aaaabbbbbbbbbbbbbbbbaaaa........bbbbbbbbbbbbb...eeeeeeeeee
+......aaaabbbbbbbbbbbbbbbbaaaa.........bbbbbbbbbbbbb....eeeeeeee
+......aaaabbbbbbbbbbbbbbbbaaaa..........bbbbbbbbbbbbbb.....eeeee
+......aaaabbbbbbbbbbbbbbbbaaaa...........bbbbbbbbbbbbbbbb.......
+......aaaabbbbbbbbbbbbbbbbaaaa............bbbbbbbbbbbbbbbbbbbbaa
+......aaaabbbbbbbbbbbbbbbbaaaa.............bbbbbbbbbbbbbbbbbbbaa
+......aaaabbbbbbbbbbbbbbbbaaaa.......aaaaaaabbbbbbbbbbbbbbbbbbaa
+......aaaabbbbbbbbbbbbbbbbaaaa......aaaaaaaaaabbbbbbbbbbbbbbbbaa
+......aaaabbbbbbbbbbbbbbbbaaaa.....aaaaaaaaaaaabbbbbbbbbbbbbbbaa
+......aaaabbbbbbbbbbbbbbbbaaaa...aaaaaaaaaaaaaaaabbbbbbbbbbbbaaa
+......aaaabbbbbbbbbbbbbbbbaaaa..aaaaaaaaaaaaaaaaaaabbbbbbbbbbaaa
+......aaaabbbbbbbbbbbbbbbbaaaa.aaaaaaaaaaaaaaaaaaaaaaabbbbbbbaaa
+......aaaa.................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbaaa
+......aaaa.................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+......aaaaabbbbbbbbbbbbbbbaaaaaaaaaakkkkkkkkkkkkkkllllllllllllll
+......aaaaaabbbbbbbbbbbbbbaaaaaaaaaakkkkkkkkkkkkkkllllllllllllll
+......aaaaaabbbbbbbbbbbbbbaaaaaaaaaakkkkkkkkkkkkkkllllllllllllll
+.......aaaaaabbbbbbbbbbbbbaaaaaaaaaakkkkkkkkkkkkkkllllllllllllll
+........aaaaabbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+........aaaaaabbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+.........aaaaabbbbbbbbbbbbaaaaaaaaaakkkkkkkkkkkkkkllllllllllllll
+.........aaaaaabbbbbbbbbbbaaaaaaaaaakkkkkkkkkkkkkkllllllllllllll
+..........aaaaabbbbbbbbbbaaaaaaaaaaakkkkkkkkkkkkkkllllllllllllll
+...........aaaaabbbbbbbaaaaaaaaaaaaakkkkkkkkkkkkkkllllllllllllll
+...........aaaaabbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+............aaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+.............aaaaaaaaaaaaaaaaaaaaaaakkkkkkkkkkkkkkllllllllllllll
+.............aaaaaaaaaaaaaaaaaaaaaaakkkkkkkkkkkkkkllllllllllllll
+..............aaaaaaaaaaaaaa..aaaaaakkkkkkkkkkkkkkllllllllllllll
+..............aaaaaaaaaaa.....aaaaaakkkkkkkkkkkkkkllllllllllllll
+...............aaaaaa.........aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+................aa............aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+..............................aaaaaakkkkkkkkkkkkkkllllllllllllll
+..............................aaaaaakkkkkkkkkkkkkkllllllllllllll
+..............................aaaaaakkkkkkkkkkkkkkllllllllllllll
+..............................aaaaaakkkkkkkkkkkkkkllllllllllllll
+..............................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+..............................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+..............................aaaaaakkkkkkkkkkkkkkllllllllllllll
+...............................aaaaakkkkkkkkkkkkkkllllllllllllll
+................................aaaakkkkkkkkkkkkkkllllllllllllll
+.................................aaakkkkkkkkkkkkkkllllllllllllll
+..................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+...................................aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+................................................................
+................................................................
+................................................................
+................................................................

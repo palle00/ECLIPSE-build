@@ -39,7 +39,7 @@ public class SpriteGen{
 
         // Vanilla assets are used only as a base for ECLIPSE transport variants.
         // ECLIPSE machine buildings, walls and storage sprites are drawn independently.
-        vanilla = loadVanilla(new File(args[1]), "(conduit-top-\\d|conduit-bottom|titanium-conveyor-\\d-\\d|liquid-router(-bottom)?|liquid-tank(-bottom)?|bridge-conduit(-end|-bridge|-arrow)?)");
+        vanilla = loadVanilla(new File(args[1]), "(conduit-top-\\d|conduit-bottom|titanium-conveyor-\\d-\\d|liquid-router(-bottom)?|liquid-tank(-bottom)?|bridge-conduit(-end|-bridge|-arrow)?|gamma|gamma-cell)");
 
         liquid("purified-water", 0x8fd3ff);
         liquid("brine", 0xa7c9b4);
@@ -265,6 +265,12 @@ public class SpriteGen{
         flowBattery("flow-battery");
         fissionReactor("fission-reactor");
         breederReactor("breeder-reactor");
+        coreArt("core-bastion", 6, 0xff9a3c);
+        coreArt("core-citadel", 7, 0xb37aff);
+        tintVanilla("gamma", "delta", 0xff9a3c, 0.55f);
+        copyVanilla("gamma-cell", "delta-cell");
+        tintVanilla("gamma", "epsilon", 0xb37aff, 0.55f);
+        copyVanilla("gamma-cell", "epsilon-cell");
         combinedCycleTurbine("combined-cycle-turbine");
         solarFarm("solar-farm");
         fusionReactor("fusion-reactor");
@@ -410,12 +416,19 @@ public class SpriteGen{
         // ---- military ----
         etchedIcon("etched", 0xe8d44d);
         jammedIcon("jammed", 0xb37aff);
+        submergedIcon("submerged", 0x3e6fb0);
+        sonarIcon("sonar-contact", 0x7fe0ff);
         mine("mine", 0xe0683a);
         acidMortar("acid-mortar");
         minelayer("minelayer");
         heatLance("heat-lance");
         jammerArt("jammer");
+        sonarArt("sonar");
         piledriver("piledriver");
+        bombard("bombard");
+        primer("primer");
+        stardustLauncher("stardust-launcher");
+        payloadCatapult("payload-catapult");
         kestrel("kestrel");
         thunderhead("thunderhead");
         cloudbreaker("cloudbreaker");
@@ -545,12 +558,23 @@ public class SpriteGen{
         swarmMech("behemoth", 80, 3);
         swarmWasp("wasp");
 
+        // the Tide (enemy faction): amphibious boats, hull tinted by the liquid each one sprays
+        tideBoat("skiff", 24, 0x5a8fd8, 0);
+        tideBoat("slicker", 32, 0x313131, 1);
+        tideBoat("frostwake", 40, 0x6ecdec, 2);
+        tideBoat("cinderwake", 52, 0xffa166, 3);
+        tideBoat("maelstrom", 80, 0x3e6fb0, 4);
+        tideSub("lurker", 28, 0);
+        tideSub("barracuda", 44, 1);
+        tideSub("abyss", 96, 2);
+
         // ---- military endgame ----
         tankUnit("dreadnought", 160, 30, 136, 0xe0683a);
         unitWeapon("dreadnought-cannon", 11, 34, 6, 1, tGrey, true);
         unitWeapon("dreadnought-lance", 14, 32, 6, 1, decalHot, false);
         ewDrone("ew-drone");
         titanComplex("titan-manufacturing-complex");
+        casingFabricator("casing-fabricator");
         orbitalPlatform("orbital-weapons-platform");
     }
 
@@ -583,6 +607,29 @@ public class SpriteGen{
      * both sides, support frames in the corners; "-top" carries the two gantry beams with their crane trolleys,
      * open over the bed.
      */
+    /**
+     * Casing Fabricator (3x3, a Constructor): a stamping bed where the empty shell is built, steel side rails with
+     * sheet stock, and "-top" with a gantry beam across, open in the middle so the shell shows through.
+     */
+    static void casingFabricator(String name) throws IOException{
+        int s = 3 * T;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 10, 4, steel);
+        r.fill(r.rect(18, 18, s - 36, s - 36), 3, deep, 1);
+        for(int x : new int[]{6, s - 16}){
+            r.fill(r.rect(x, 12, 10, s - 24), 8, metal, 2);
+            for(int y = 18; y < s - 18; y += 14) r.fill(r.rect(x + 2, y, 6, 8), 9, dull(0xd9dde6), 1);
+        }
+        r.fill(r.rect(s / 2 - 6, s - 10, 12, 4), 10, lit(0xffb46b), 0);
+        save(r, name);
+
+        R top = canvas(s);
+        top.fill(top.rect(4, 6, s - 8, 10), 13, metal, 2);
+        top.fill(top.rect(s / 2 - 10, 2, 20, 18), 15, steel, 2);
+        top.fill(top.rect(s / 2 - 3, 8, 6, 6), 16, lit(0xffb46b), 0);
+        save(top, name + "-top");
+    }
+
     static void titanComplex(String name) throws IOException{
         int s = 7 * T;
         R r = canvas(s);
@@ -697,6 +744,58 @@ public class SpriteGen{
         leg.fill(leg.rect(1, 0, lw, ll), 4, chitin, 1);
         leg.fill(leg.rect(0, 0, lw + 2, Math.max(2, lw / 2)), 5, chitin, 1);
         save(leg, name + "-leg");
+    }
+
+    /**
+     * A Tide boat seen from above: a pointed bow at the top, a flat stern, a deck with a liquid tank in the boat's liquid
+     * colour (the jet nozzle at the bow), side rails, and from tier 2 a mine rack at the stern; tier 3+ add a shock coil.
+     */
+    static void tideBoat(String name, int s, int liquid, int tier) throws IOException{
+        float c = s / 2f;
+        R r = new R(s).turret();
+        //a slim hull: a long pointed bow, straight sides, a stern that narrows a little
+        int w = Math.max(10, Math.round(s * 0.6f)), left = Math.round(c - w / 2f), bow = Math.max(6, s / 3), stern = s - 2;
+        boolean[] hull = r.or(r.tri(c, bow, new float[]{-w / 2f, 0, w / 2f}, new float[]{0, -bow + 1, 0}, 0),
+            r.poly(new int[]{left, left + w, left + w - Math.max(1, w / 8), left + Math.max(1, w / 8)}, new int[]{bow, bow, stern, stern}));
+        r.fill(hull, 4, tGrey, Math.max(1, s / 18f));
+        r.fill(r.rect(left + 2, bow + 1, w - 4, stern - bow - 3), 6, steel, 1);
+        //the liquid tank amidships, the jet nozzle out to the bow
+        Mat tank = glass(liquid);
+        int tw = Math.max(4, w / 2), th = Math.max(5, s / 4);
+        r.dome(r.oct(c - tw / 2f, bow + 2, tw, th, Math.max(1, tw / 4f)), 7, 2, tank);
+        r.fill(r.rect((int)c - 1, 1, 2, bow + 2), 8, metal, 0);
+        //rails along both sides
+        for(int x : new int[]{left + 1, left + w - 3}) r.fill(r.rect(x, bow + 1, 2, stern - bow - 3), 7, metal, 0);
+        //mine rack at the stern (tier 2+), shock coil (tier 3+)
+        if(tier >= 2) for(int x = left + 3; x < left + w - 4; x += Math.max(4, w / 4)) r.fill(r.rect(x, stern - 4, 3, 3), 8, decalHot, 0);
+        if(tier >= 3) r.fill(r.ring(c, bow + th + (stern - bow - th) * 0.45f, w / 7f, w / 4.5f), 9, tCopper, 1);
+        boolean[] cellM = r.rect(left + 3, bow + th + 3, w - 6, Math.max(2, s / 14));
+        save(r, name);
+        cell(name, s, cellM, 7);
+    }
+
+    /**
+     * A Tide submarine seen from above: a long rounded cigar hull, a conning tower (sail) forward with a periscope, dive
+     * planes at the stern; tier 1 adds twin torpedo doors, tier 2 (the nuclear Abyss) a row of missile hatches.
+     */
+    static void tideSub(String name, int s, int tier) throws IOException{
+        float c = s / 2f;
+        R r = new R(s).turret();
+        int w = Math.max(8, Math.round(s * 0.36f)), left = Math.round(c - w / 2f);
+        boolean[] hull = r.or(r.or(r.circle(c, w / 2f + 1, w / 2f), r.rect(left, w / 2 + 1, w, s - w - 2)), r.circle(c, s - w / 2f - 1, w / 2f));
+        r.fill(hull, 4, deep, Math.max(1, s / 20f));
+        r.fill(r.rect(left + 2, w / 2 + 2, w - 4, s - w - 4), 6, steel, 1);
+        //dive planes at the stern
+        r.fill(r.rect(left - w / 3, s - w, w + 2 * (w / 3), Math.max(2, s / 16)), 5, tGrey, 1);
+        //the sail with its periscope
+        int sh = Math.max(5, s / 5);
+        r.dome(r.oct(c - w / 4f, s * 0.28f, w / 2f, sh, Math.max(1, w / 8f)), 8, 2, tGrey);
+        r.fill(r.rect((int)c - 1, Math.round(s * 0.28f) - 2, 2, 4), 9, metal, 0);
+        if(tier >= 1) for(int dx : new int[]{-w / 4, w / 4 - 1}) r.fill(r.rect((int)c + dx, 2, 2, 3), 7, lit(0x7fe0ff), 0);
+        if(tier >= 2) for(int y = Math.round(s * 0.45f); y < s - w - 4; y += Math.max(4, s / 12)) for(int dx : new int[]{-w / 5, w / 5 - 2}) r.fill(r.rect((int)c + dx, y, 3, 3), 7, decalHot, 0);
+        boolean[] cellM = r.rect(left + 3, Math.round(s * 0.28f) + sh + 2, w - 6, Math.max(2, s / 18));
+        save(r, name);
+        cell(name, s, cellM, 7);
     }
 
     static void swarmWasp(String name) throws IOException{
@@ -902,6 +1001,79 @@ public class SpriteGen{
         heatOf(r, name, r.rect(36, 2, 24, 18));
     }
 
+    /** Bombard: a heavy round turntable, a short fat mortar tube with a wide bore, two recoil pistons and an ammo hopper. */
+    static void bombard(String name) throws IOException{
+        int s = 4 * T;
+        float c = s / 2f;
+        R r = new R(s).turret();
+        r.fill(r.oct(14, 40, 100, 80, 22), 5, tGrey, 4);
+        r.fill(r.ring(c, 76, 34, 42), 7, tGrey, 2);
+        for(int x : new int[]{30, 86}) r.fill(r.rect(x, 22, 12, 52), 9, metal, 1.5f);
+        for(int x : new int[]{28, 84}) r.fill(r.rect(x, 64, 16, 14), 10, tCopper, 1);
+        r.fill(r.oct(44, 10, 40, 74, 10), 11, tGrey, 3);
+        for(int y : new int[]{24, 40, 56}) r.fill(r.rect(42, y, 44, 5), 12, tGrey, 1.5f);
+        r.fill(r.circle(c, 22, 14), 13, metal, 1.5f);
+        r.fill(r.circle(c, 22, 10), 6, bore, 0);
+        r.fill(r.rect(48, 96, 32, 20), 8, tGrey, 2);
+        for(int x = 52; x < 78; x += 8) r.fill(r.rect(x, 100, 4, 12), 9, decalHot, 0);
+        save(r, name);
+        heatOf(r, name, r.ring(c, 22, 9, 16));
+    }
+
+    /** Primer: a slim emitter barrel with an orange-lit tip, capacitor rings and a power coupling at the back. */
+    static void primer(String name) throws IOException{
+        int s = 3 * T;
+        float c = s / 2f;
+        R r = new R(s).turret();
+        r.fill(r.oct(18, 42, 60, 46, 14), 6, tGrey, 3);
+        r.fill(r.circle(c, 64, 13), 8, tGrey, 2);
+        r.fill(r.ring(c, 64, 7, 11), 9, tCopper, 1);
+        r.fill(r.circle(c, 64, 6), 10, lit(0xffb46b), 0.5f);
+        r.fill(r.rect(42, 8, 12, 50), 10, tGrey, 2);
+        for(int y : new int[]{18, 30, 42}) r.fill(r.rect(39, y, 18, 4), 11, tCopper, 1);
+        r.fill(r.rect(44, 4, 8, 8), 12, lit(0xffb46b), 0.5f);
+        for(int x : new int[]{24, 64}) r.fill(r.rect(x, 74, 8, 10), 8, metal, 1);
+        save(r, name);
+        heatOf(r, name, r.or(r.rect(42, 4, 12, 16), r.circle(c, 64, 6)));
+    }
+
+    /** Stardust Launcher: a rotary drum magazine with glass dust windows feeding three short launch tubes. */
+    static void stardustLauncher(String name) throws IOException{
+        int s = 3 * T;
+        float c = s / 2f;
+        R r = new R(s).turret();
+        r.fill(r.oct(16, 40, 64, 48, 12), 6, tGrey, 3);
+        r.fill(r.circle(c, 62, 20), 8, tGrey, 2);
+        r.fill(r.ring(c, 62, 15, 20), 9, metal, 1);
+        int[] tint = {0xd8b25e, 0xb37aff, 0x8fd8ff, 0xff795e};
+        for(int i = 0; i < 4; i++){
+            float a = i * 90f + 45f;
+            r.fill(r.circle(c + (float)Math.cos(Math.toRadians(a)) * 9f, 62 + (float)Math.sin(Math.toRadians(a)) * 9f, 4), 10, glass(tint[i]), 0.5f);
+        }
+        for(int dx : new int[]{-12, 0, 12}) r.fill(r.rect((int)(c + dx - 4), 10, 8, 36), 10, tGrey, 2);
+        for(int dx : new int[]{-12, 0, 12}) r.fill(r.oct(c + dx - 3, 8, 6, 6, 2), 11, bore, 0);
+        r.fill(r.rect(30, 34, 36, 6), 11, tGrey, 1.5f);
+        save(r, name);
+        heatOf(r, name, r.rect(30, 8, 36, 14));
+    }
+
+    /** Payload Catapult: a 5x5 throwing arm on a broad turntable, with a square cradle for the shell and counterweight plates. */
+    static void payloadCatapult(String name) throws IOException{
+        int s = 5 * T;
+        float c = s / 2f;
+        R r = new R(s).turret();
+        r.fill(r.oct(20, 60, s - 40, s - 76, 28), 5, tGrey, 4);
+        r.fill(r.ring(c, s - 52, 30, 40), 7, tGrey, 2);
+        for(int x : new int[]{40, s - 52}) r.fill(r.rect(x, 26, 12, 96), 9, metal, 2);
+        r.fill(r.rect(46, 18, s - 92, 70), 8, tGrey, 3);
+        r.fill(r.rect(54, 26, s - 108, 54), 4, bore, 0);
+        for(int x : new int[]{50, s - 58}) r.fill(r.rect(x, 22, 8, 62), 10, tCopper, 1);
+        for(int i = 0; i < 3; i++) r.fill(r.rect(52, s - 46 + i * 10, s - 104, 7), 11, tGrey, 1.5f);
+        r.fill(r.rect((int)c - 6, 96, 12, 30), 10, metal, 1.5f);
+        save(r, name);
+        heatOf(r, name, r.rect(46, 18, s - 92, 10));
+    }
+
     /** Kestrel: a compact launcher with one interceptor on its rail (lit seeker nose) and a sensor dome. */
     static void kestrel(String name) throws IOException{
         int s = 2 * T;
@@ -1088,6 +1260,26 @@ public class SpriteGen{
         r.clear(r.rect(0, 20, T, 12));
         r.clear(r.bar(16, 16, -16, 32, 3, 45));
         r.fill(r.circle(16, 22, 2.5f), 6, m, 0);
+        save(r, name);
+    }
+
+    /** Status icon: a periscope above three wave lines (under water). */
+    static void submergedIcon(String name, int rgb) throws IOException{
+        R r = new R(T);
+        Mat m = acc(rgb);
+        for(int i = 0; i < 3; i++) r.fill(r.rect(4, 14 + i * 6, 24, 3), 5, m, 1);
+        r.fill(r.rect(18, 4, 3, 12), 6, metal, 1);
+        r.fill(r.rect(13, 4, 8, 3), 6, metal, 1);
+        save(r, name);
+    }
+
+    /** Status icon: sonar rings around a contact dot. */
+    static void sonarIcon(String name, int rgb) throws IOException{
+        R r = new R(T);
+        Mat m = acc(rgb);
+        r.fill(r.ring(16, 16, 11, 13), 5, m, 1);
+        r.fill(r.ring(16, 16, 5, 7), 5, m, 1);
+        r.fill(r.circle(16, 16, 2.5f), 6, lit(rgb), 0);
         save(r, name);
     }
 
@@ -3641,6 +3833,42 @@ public class SpriteGen{
         save(flipY(top), name + "-top2");
     }
 
+    /**
+     * ECLIPSE cores: an armoured square with stepped plating, a central storage vault ringed by an eclipse (a dark disc
+     * with a glowing corona in the accent colour), and power pylons in the corners (the built-in power node). "-team" is
+     * the band along the edges that the game tints in the team colour.
+     */
+    static void coreArt(String name, int size, int accent) throws IOException{
+        int s = size * T;
+        float c = s / 2f;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 7, 5, steel);
+        r.fill(r.oct(8, 8, s - 16, s - 16, 26), 10, metal, 4);
+        //stepped armour plates around the vault
+        for(int i = 0; i < 8; i++) r.fill(r.bar(c, c, s * 0.3f, s * 0.12f, s * 0.11f, i * 45 + 22.5f), 12, steel, 3);
+        r.fill(r.circle(c, c, s * 0.27f), 11, metal, 3);
+        r.fill(r.ring(c, c, s * 0.17f, s * 0.21f), 13, lit(accent), 1);
+        r.fill(r.circle(c, c, s * 0.17f), 4, deep, 1);
+        r.fill(r.circle(c - s * 0.03f, c + s * 0.03f, s * 0.12f), 6, dull(0x2a2633), 1);
+        //power pylons in the corners
+        for(int[] k : new int[][]{{18, 18}, {s - 18, 18}, {18, s - 18}, {s - 18, s - 18}}){
+            r.fill(r.circle(k[0], k[1], 10), 12, steel, 2);
+            r.fill(r.circle(k[0], k[1], 5), 13, acc(0xfbd367), 1);
+        }
+        save(r, name);
+        //team band: a thin frame along the edges, tinted by the game
+        BufferedImage team = img(s);
+        Graphics2D g = g(team);
+        g.setColor(new Color(255, 255, 255, 230));
+        int in = 4, w = 4;
+        g.fillRect(in + 14, in, s - in * 2 - 28, w);
+        g.fillRect(in + 14, s - in - w, s - in * 2 - 28, w);
+        g.fillRect(in, in + 14, w, s - in * 2 - 28);
+        g.fillRect(s - in - w, in + 14, w, s - in * 2 - 28);
+        g.dispose();
+        save(team, name + "-team");
+    }
+
     /** Breeder Reactor (4x4): a fission core inside a ring of thorium blanket tubes, with silver liquid-sodium loops. */
     static void breederReactor(String name) throws IOException{
         int s = 4 * T;
@@ -3969,6 +4197,24 @@ public class SpriteGen{
         r.fill(r.rect(50, 50, 6, 3), 12, lit(0x7fd8ff), 0);
         save(r, name);
         glowOf(r, name);
+    }
+
+    /** Sonar: a squat housing with a ring of hydrophone pods; the scanning bar ("-dish") turns on top, cyan-lit. */
+    static void sonarArt(String name) throws IOException{
+        int s = 2 * T;
+        float c = s / 2f;
+        R r = canvas(s);
+        slab(r, 0, 0, s, s, 6, 6, steel);
+        for(int i = 0; i < 8; i++) r.fill(r.circle(c + (float)Math.cos(Math.toRadians(i * 45)) * 20f, c + (float)Math.sin(Math.toRadians(i * 45)) * 20f, 4), 9, metal, 2);
+        r.fill(r.circle(c, c, 14), 10, metal, 3);
+        r.fill(r.circle(c, c, 8), 5, deep, 0);
+        save(r, name);
+        R dish = canvas(s);
+        dish.fill(dish.rect((int)c - 3, (int)c - 16, 6, 32), 12, steel, 1);
+        dish.fill(dish.oct(c - 7, c - 18, 14, 6, 2), 13, metal, 1);
+        dish.fill(dish.circle(c, c, 4), 14, lit(0x7fe0ff), 1);
+        save(dish, name + "-dish");
+        save(dish.glowImage(), name + "-glow");
     }
 
     static void jammerArt(String name) throws IOException{
@@ -6159,6 +6405,35 @@ public class SpriteGen{
             result.put(r.name, page.getSubimage(r.left, r.top, r.width, r.height));
         }
         return result;
+    }
+
+    /** A vanilla sprite tinted toward a colour, keeping its shading (the same model, recoloured). */
+    static void tintVanilla(String vanillaName, String name, int rgb, float strength) throws IOException{
+        BufferedImage src = vanilla.get(vanillaName);
+        if(src == null) throw new IOException("vanilla sprite not found: " + vanillaName);
+        Color tint = new Color(rgb);
+        BufferedImage img = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        for(int y = 0; y < src.getHeight(); y++){
+            for(int x = 0; x < src.getWidth(); x++){
+                int argb = src.getRGB(x, y), a = argb >>> 24, r = (argb >> 16) & 0xff, g = (argb >> 8) & 0xff, b = argb & 0xff;
+                if(a == 0){
+                    img.setRGB(x, y, argb);
+                    continue;
+                }
+                float lum = (0.299f * r + 0.587f * g + 0.114f * b) / 255f * 1.25f;
+                int nr = Math.min(255, (int)(r + (Math.min(255f, tint.getRed() * lum) - r) * strength));
+                int ng = Math.min(255, (int)(g + (Math.min(255f, tint.getGreen() * lum) - g) * strength));
+                int nb = Math.min(255, (int)(b + (Math.min(255f, tint.getBlue() * lum) - b) * strength));
+                img.setRGB(x, y, (a << 24) | (nr << 16) | (ng << 8) | nb);
+            }
+        }
+        save(img, name);
+    }
+
+    static void copyVanilla(String vanillaName, String name) throws IOException{
+        BufferedImage src = vanilla.get(vanillaName);
+        if(src == null) throw new IOException("vanilla sprite not found: " + vanillaName);
+        save(src, name);
     }
 
     static void polymer(String vanillaName, String name) throws IOException{

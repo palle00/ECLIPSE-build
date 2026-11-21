@@ -1,0 +1,28 @@
+size 20 20
+outline 0
+color Q d99d73
+color q a8664c
+color M 989aa4
+color X 4a4b53
+color W f4e0c8
+grid
+....................
+......qWWWWWWq......
+....qqQqWWWWqQqq....
+...qQqqQQqqQQqqQq...
+..qQqQqqQQQQqqQqQq..
+..qqQqQqqQQqqQqQqq..
+.qQqqQqQqqqqQqQqqQq.
+.qqQqqQqMXMMqQqqQqq.
+.QqQQqqMMXXMMqqQQqQ.
+.QqqQQqMXXXXMqQQqqQ.
+.QqqQQqMXXXXXqQQqqQ.
+.QqQQqqXXXXMXqqQQqQ.
+.qqQqqQqXMMMqQqqQqq.
+.qQqqQqQqqqqQqQqqQq.
+..qqQqQqqQQqqQqQqq..
+..qQqQqqQQQQqqQqQq..
+...qQqqQQqqQQqqQq...
+....qqQqqqqqqQqq....
+......qqQQQQqq......
+....................
