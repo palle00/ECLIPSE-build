@@ -32,7 +32,8 @@ import static mindustry.Vars.*;
  * <li>Continue: the newest save or campaign sector, with a preview, the wave, time played, when, and the next wave
  * that may bring an eclipse. Enter starts it.</li>
  * <li>Play, large; it opens the Play panel ({@link PlayPanel}) beside the column.</li>
- * <li>The other buttons (the ECLIPSE wiki, vanilla's and other mods') in a two-column grid; Settings and Quit small.</li>
+ * <li>The other buttons (the ECLIPSE wiki, vanilla's and other mods') in a two-column grid; Settings and Quit share
+ * its next slot as two half-width buttons.</li>
  * <li>A What's New card under the eclipse, and a footer with a tip, the credits and the version.</li>
  * </ul>
  * Chamfered industrial frames that turn gold when hovered or chosen with the arrow keys. Every action is vanilla's
@@ -51,7 +52,7 @@ public class EclipseMenu{
 
     /** The sizes a menu button comes in: Play; a grid cell; Settings and Quit; a row in another mod's submenu panel. */
     enum Kind{
-        big(80f, 52f, 28f, 1.3f, true), cell(62f, 34f, 19f, 0.9f, false), small(50f, 30f, 17f, 0.8f, false), row(64f, 40f, 22f, 1f, true);
+        big(80f, 52f, 28f, 1.3f, true), cell(62f, 34f, 19f, 0.9f, false), small(62f, 30f, 17f, 0.8f, false), row(64f, 40f, 22f, 1f, true);
 
         final float height, box, icon, title;
         final boolean arrow;
@@ -282,15 +283,17 @@ public class EclipseMenu{
             grid.add(button(b, Kind.cell, cellWidth, tag)).size(cellWidth, Kind.cell.height).padRight(i % 2 == 0 ? gap : 0f).padBottom(gap);
             if(i % 2 == 1) grid.row();
         }
-        column.add(grid).left().padBottom(16f - gap).row();
-
+        //Settings and Quit share the next grid slot, half a button each
         Table util = new Table();
+        float halfWidth = (cellWidth - gap) / 2f;
         for(MenuButton b : all){
             String k = key(b);
-            if("settings".equals(k) || "quit".equals(k)) util.add(button(b, Kind.small, -1f, null)).height(Kind.small.height).padRight(gap);
+            if("settings".equals(k) || "quit".equals(k)) util.add(button(b, Kind.small, halfWidth, null)).size(halfWidth, Kind.small.height).padRight(util.getChildren().isEmpty() ? gap : 0f);
         }
-        util.add(Core.bundle.get("eclipse-menu.keys")).fontScale(0.65f).color(Color.valueOf("6e6e7e")).padLeft(10f);
-        column.add(util).left();
+        if(util.hasChildren()) grid.add(util).size(cellWidth, Kind.cell.height).padRight(cells.size % 2 == 0 ? gap : 0f).padBottom(gap).left();
+        column.add(grid).left().padBottom(16f - gap).row();
+
+        column.add(Core.bundle.get("eclipse-menu.keys")).fontScale(0.65f).color(Color.valueOf("6e6e7e")).left();
     }
 
     /** The newest game to continue: a save or a campaign sector you still hold, by when it was saved. */
@@ -533,6 +536,10 @@ public class EclipseMenu{
         Label title = new Label(text(b).toUpperCase());
         title.setFontScale(kind.title);
         float textWidth = width < 0f ? -1f : width - 12f - kind.box - (kind == Kind.big ? 16f : 12f) - (kind.arrow ? 16f + 14f + 18f : 16f) - (tag != null ? 60f : 0f);
+        //a half-width button: shrink a long title (or a long translation) to fit before cutting it off
+        if(kind == Kind.small && textWidth > 0f){
+            for(float scale = kind.title; title.getPrefWidth() > Scl.scl(textWidth) && scale > 0.55f; scale -= 0.05f) title.setFontScale(scale - 0.05f);
+        }
         if(textWidth > 0f && tag == null) title.setEllipsis(true);
         button.table(texts -> {
             texts.left();

@@ -73,6 +73,7 @@ public class EclipseMod extends Mod{
         EclipseLiquids.load();
         eclipse.exploration.Biomes.load(); //before the blocks that use its floor attribute
         EnvironmentBlocks.load();
+        PlanetTerrain.load(); //after Biomes: copies the attributes of vanilla floors
         ComponentBlocks.load();
         ComponentBlocks.patchVanilla();
         ComponentBlocks.loadDepot();

@@ -108,6 +108,14 @@ public class MenuOrder{
 
         //---- environment (map editor) ----
         after(Blocks.oreThorium, oreNickel, oreChromium, oreCobalt, oreTungsten, oreMolybdenum, orePlatinum, oreAetherite, oreBauxite);
+        //the ECLIPSE planets' terrain, as one group per planet after Serpulo's
+        after(Blocks.whiteTreeDead,
+            PlanetTerrain.tideReefSand, PlanetTerrain.tideBlackSand, PlanetTerrain.tideCoral, PlanetTerrain.tideBarnacleRock, PlanetTerrain.tideLagoon, PlanetTerrain.tideAbyss,
+            PlanetTerrain.tideReefWater, PlanetTerrain.tideBlackSandWater, PlanetTerrain.tideSandstoneWall, PlanetTerrain.tideBasaltWall, PlanetTerrain.tideCoralWall, PlanetTerrain.tidePalm, PlanetTerrain.tideShell,
+            PlanetTerrain.hiveCreep, PlanetTerrain.hiveBroodMoss, PlanetTerrain.hiveSporeSand, PlanetTerrain.hiveChitin, PlanetTerrain.hiveBile, PlanetTerrain.hiveBileShallows,
+            PlanetTerrain.hiveFleshWall, PlanetTerrain.hiveChitinWall, PlanetTerrain.hiveStalk, PlanetTerrain.hivePod,
+            PlanetTerrain.ironholdAsh, PlanetTerrain.ironholdScorchedRock, PlanetTerrain.ironholdPlating, PlanetTerrain.ironholdSludge, PlanetTerrain.ironholdSludgeShallows,
+            PlanetTerrain.ironholdSlagWall, PlanetTerrain.ironholdScrapWall, PlanetTerrain.ironholdScrap);
 
         //---- items (core inventory, item pickers); augmentation modules stay at the end as their own group ----
         after(Items.metaglass, hotMetaglass, hotReinforcedGlass, reinforcedGlass);

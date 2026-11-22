@@ -9,11 +9,14 @@ import mindustry.graphics.g3d.*;
 import mindustry.type.*;
 import mindustry.world.*;
 
+import static eclipse.content.blocks.PlanetTerrain.*;
+
 /**
  * ECLIPSE's own planets (user decisions 2026-11-18): one per enemy faction, each attacked mainly by "its" faction
  * ({@link Factions#apply}). Research is shared with Serpulo (same tech tree), sectors are generated
- * ({@link FactionPlanetGenerator}: Serpulo's layouts, reshaped per world), and they are reached from Serpulo the way
- * Erekir is (launch candidates).
+ * ({@link FactionPlanetGenerator}: Serpulo's layouts, reshaped per world, with each planet's own terrain from
+ * {@link eclipse.content.blocks.PlanetTerrain} in place of every Serpulo floor, wall, tree and boulder), and they are
+ * reached from Serpulo the way Erekir is (launch candidates).
  * - Tide: an ocean world of islands, with a spawn point at sea for the submarines.
  * - Hive: spore jungle, the Swarm's world.
  * - Ironhold: scorched industrial ground, the Dominion's world.
@@ -22,28 +25,56 @@ public class EclipsePlanets{
     public static Planet tide, hive, ironhold;
 
     public static void load(){
-        tide = planet("tide", new FactionPlanetGenerator(0.87f, -0.02f, true, new ObjectMap<>(), Color.clear, 0f),
+        tide = planet("tide", new FactionPlanetGenerator(0.87f, -0.02f, true, ObjectMap.of(
+                Blocks.deepwater, tideAbyss, Blocks.deepTaintedWater, tideAbyss, Blocks.water, tideLagoon, Blocks.taintedWater, tideLagoon,
+                Blocks.sandWater, tideReefWater, Blocks.darksandWater, tideBlackSandWater, Blocks.darksandTaintedWater, tideBlackSandWater,
+                Blocks.sand, tideReefSand, Blocks.darksand, tideBlackSand, Blocks.dirt, tideBlackSand, Blocks.mud, tideBlackSand, Blocks.charr, tideBlackSand,
+                Blocks.moss, tideCoral, Blocks.sporeMoss, tideCoral, Blocks.grass, tideCoral,
+                Blocks.stone, tideBarnacleRock, Blocks.basalt, tideBarnacleRock, Blocks.shale, tideBarnacleRock, Blocks.dacite, tideBarnacleRock, Blocks.craters, tideBarnacleRock,
+                Blocks.salt, tideBarnacleRock, Blocks.snow, tideBarnacleRock, Blocks.ice, tideBarnacleRock, Blocks.iceSnow, tideBarnacleRock,
+                Blocks.sandWall, tideSandstoneWall, Blocks.saltWall, tideSandstoneWall, Blocks.snowWall, tideSandstoneWall, Blocks.iceWall, tideSandstoneWall,
+                Blocks.daciteWall, tideSandstoneWall, Blocks.dirtWall, tideSandstoneWall,
+                Blocks.duneWall, tideBasaltWall, Blocks.stoneWall, tideBasaltWall, Blocks.shaleWall, tideBasaltWall,
+                Blocks.sporeWall, tideCoralWall,
+                Blocks.sporePine, tidePalm, Blocks.pine, tidePalm, Blocks.snowPine, tidePalm, Blocks.whiteTree, tidePalm, Blocks.whiteTreeDead, tidePalm, Blocks.shrubs, tidePalm,
+                Blocks.boulder, tideShell, Blocks.sandBoulder, tideShell, Blocks.snowBoulder, tideShell, Blocks.basaltBoulder, tideShell,
+                Blocks.shaleBoulder, tideShell, Blocks.daciteBoulder, tideShell, Blocks.sporeCluster, tideShell
+            )),
             Color.valueOf("2f6fd8"), Color.valueOf("5a8fd8"), Color.valueOf("d8eeff"), 52f);
 
         hive = planet("hive", new FactionPlanetGenerator(1.01f, 0.04f, false, ObjectMap.of(
-                Blocks.stone, Blocks.moss, Blocks.basalt, Blocks.moss, Blocks.dacite, Blocks.moss, Blocks.salt, Blocks.moss,
-                Blocks.grass, Blocks.sporeMoss, Blocks.snow, Blocks.sporeMoss, Blocks.iceSnow, Blocks.sporeMoss, Blocks.ice, Blocks.sporeMoss,
                 //no deep water: its spawn points can end up at sea, and the Swarm walks
-                Blocks.water, Blocks.darksandTaintedWater, Blocks.deepwater, Blocks.darksandTaintedWater, Blocks.taintedWater, Blocks.darksandTaintedWater, Blocks.deepTaintedWater, Blocks.darksandTaintedWater, Blocks.sandWater, Blocks.darksandTaintedWater,
-                Blocks.stoneWall, Blocks.sporeWall, Blocks.sandWall, Blocks.sporeWall, Blocks.daciteWall, Blocks.sporeWall, Blocks.saltWall, Blocks.sporeWall,
-                Blocks.iceWall, Blocks.sporeWall, Blocks.snowWall, Blocks.sporePine, Blocks.pine, Blocks.sporePine
-            ), Color.valueOf("7a4fa0"), 0.35f),
+                Blocks.deepwater, hiveBileShallows, Blocks.deepTaintedWater, hiveBileShallows, Blocks.water, hiveBileShallows, Blocks.taintedWater, hiveBileShallows,
+                Blocks.sandWater, hiveBileShallows, Blocks.darksandWater, hiveBileShallows, Blocks.darksandTaintedWater, hiveBileShallows,
+                Blocks.moss, hiveCreep, Blocks.grass, hiveCreep, Blocks.sporeMoss, hiveBroodMoss,
+                Blocks.sand, hiveSporeSand, Blocks.darksand, hiveSporeSand, Blocks.dirt, hiveSporeSand, Blocks.mud, hiveSporeSand, Blocks.salt, hiveSporeSand, Blocks.charr, hiveSporeSand,
+                Blocks.shale, hiveChitin, Blocks.stone, hiveChitin, Blocks.basalt, hiveChitin, Blocks.dacite, hiveChitin, Blocks.craters, hiveChitin,
+                Blocks.snow, hiveChitin, Blocks.ice, hiveChitin, Blocks.iceSnow, hiveChitin,
+                Blocks.sporeWall, hiveFleshWall, Blocks.stoneWall, hiveFleshWall, Blocks.sandWall, hiveFleshWall, Blocks.saltWall, hiveFleshWall,
+                Blocks.snowWall, hiveFleshWall, Blocks.iceWall, hiveFleshWall, Blocks.dirtWall, hiveFleshWall,
+                Blocks.duneWall, hiveChitinWall, Blocks.shaleWall, hiveChitinWall, Blocks.daciteWall, hiveChitinWall,
+                Blocks.sporePine, hiveStalk, Blocks.pine, hiveStalk, Blocks.snowPine, hiveStalk, Blocks.whiteTree, hiveStalk, Blocks.whiteTreeDead, hiveStalk, Blocks.shrubs, hiveStalk,
+                Blocks.boulder, hivePod, Blocks.sandBoulder, hivePod, Blocks.snowBoulder, hivePod, Blocks.basaltBoulder, hivePod,
+                Blocks.shaleBoulder, hivePod, Blocks.daciteBoulder, hivePod, Blocks.sporeCluster, hivePod
+            )),
             Color.valueOf("8a4fc0"), Color.valueOf("b37aff"), Color.valueOf("d9c2f0"), 66f);
 
         ironhold = planet("ironhold", new FactionPlanetGenerator(1.01f, 0.06f, false, ObjectMap.of(
-                Blocks.stone, Blocks.metalFloorDamaged, Blocks.salt, Blocks.metalFloor, Blocks.dacite, Blocks.basalt,
-                Blocks.grass, Blocks.darksand, Blocks.sand, Blocks.darksand, Blocks.moss, Blocks.darksand, Blocks.sporeMoss, Blocks.darksand,
-                Blocks.snow, Blocks.basalt, Blocks.iceSnow, Blocks.basalt, Blocks.ice, Blocks.basalt,
                 //no deep water: its spawn points can end up at sea, and the Dominion's tanks drive
-                Blocks.deepwater, Blocks.water, Blocks.deepTaintedWater, Blocks.taintedWater,
-                Blocks.stoneWall, Blocks.duneWall, Blocks.sandWall, Blocks.duneWall, Blocks.daciteWall, Blocks.duneWall, Blocks.saltWall, Blocks.duneWall,
-                Blocks.iceWall, Blocks.duneWall, Blocks.snowWall, Blocks.duneWall, Blocks.sporeWall, Blocks.duneWall, Blocks.pine, Blocks.duneWall, Blocks.sporePine, Blocks.duneWall
-            ), Color.valueOf("4a4a52"), 0.4f),
+                Blocks.deepwater, ironholdSludge, Blocks.deepTaintedWater, ironholdSludge, Blocks.water, ironholdSludge, Blocks.taintedWater, ironholdSludge,
+                Blocks.sandWater, ironholdSludgeShallows, Blocks.darksandWater, ironholdSludgeShallows, Blocks.darksandTaintedWater, ironholdSludgeShallows,
+                Blocks.sand, ironholdAsh, Blocks.darksand, ironholdAsh, Blocks.dirt, ironholdAsh, Blocks.mud, ironholdAsh, Blocks.charr, ironholdAsh,
+                Blocks.grass, ironholdAsh, Blocks.moss, ironholdAsh, Blocks.sporeMoss, ironholdAsh,
+                Blocks.basalt, ironholdScorchedRock, Blocks.dacite, ironholdScorchedRock, Blocks.shale, ironholdScorchedRock, Blocks.craters, ironholdScorchedRock,
+                Blocks.snow, ironholdScorchedRock, Blocks.ice, ironholdScorchedRock, Blocks.iceSnow, ironholdScorchedRock,
+                Blocks.salt, ironholdPlating, Blocks.stone, ironholdPlating,
+                Blocks.duneWall, ironholdSlagWall, Blocks.sandWall, ironholdSlagWall, Blocks.saltWall, ironholdSlagWall, Blocks.daciteWall, ironholdSlagWall, Blocks.dirtWall, ironholdSlagWall,
+                Blocks.sporeWall, ironholdScrapWall, Blocks.shaleWall, ironholdScrapWall, Blocks.stoneWall, ironholdScrapWall, Blocks.snowWall, ironholdScrapWall, Blocks.iceWall, ironholdScrapWall,
+                Blocks.sporePine, ironholdScrapWall, Blocks.pine, ironholdScrapWall, Blocks.snowPine, ironholdScrapWall, Blocks.whiteTree, ironholdScrapWall,
+                Blocks.whiteTreeDead, ironholdScrapWall, Blocks.shrubs, ironholdScrapWall,
+                Blocks.boulder, ironholdScrap, Blocks.sandBoulder, ironholdScrap, Blocks.snowBoulder, ironholdScrap, Blocks.basaltBoulder, ironholdScrap,
+                Blocks.shaleBoulder, ironholdScrap, Blocks.daciteBoulder, ironholdScrap, Blocks.sporeCluster, ironholdScrap
+            )),
             Color.valueOf("c0603a"), Color.valueOf("e0683a"), Color.valueOf("8a8a92"), 80f);
     }
 
