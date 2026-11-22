@@ -52,7 +52,7 @@ public class DeploymentIntro implements LaunchAnimator{
             if(core == null) return;
             Core.camera.position.set(core);
             renderer.showLanding(new DeploymentIntro(core));
-            player.deathTimer = duration; //no respawn before the core is down
+            player.deathTimer = Player.deathDelay - duration; //no respawn before the core is down (as vanilla's landing)
             Log.info("[ECLIPSE] deployment intro playing (vanilla landing @)", Core.settings.getBool("skipcoreanimation") ? "was skipped" : "replaced");
         });
         Log.info("[ECLIPSE] deployment intro installed (setting @ = @)", setting, Core.settings.getBool(setting, true));

@@ -101,7 +101,7 @@ public class EclipseCore extends CoreBlock{
             //link the nearest hubs that are on another grid, while links are free
             indexer.eachBlock(this, laserRange * tilesize + size * tilesize / 2f, other -> hub(other) && other.power.graph != power.graph && linkable(other),
                 other -> {
-                    if(power.links.size < maxNodes && other.power.graph != power.graph) configure(other.pos());
+                    if(power.links.size < maxNodes && other.power.graph != power.graph) configureAny(other.pos());
                 });
         }
 

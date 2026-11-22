@@ -64,9 +64,10 @@ public class EclipseEvent{
     }
 
     static void onWave(){
-        if(net.client() || state.rules.editor || !eclipse.content.Factions.neutralWaves()) return;
+        if(net.client()) return;
+        end(); //an eclipse lasts until the next wave (also when waves stopped being eligible meanwhile)
+        if(state.rules.editor || !eclipse.content.Factions.neutralWaves()) return;
         int wave = state.wave - 1; //the wave that just arrived (as the HUD counted it); its spawn index is wave - 1
-        end(); //an eclipse lasts until the next wave
         if(wave > 0 && wave % every == 0 && Mathf.chance(chance(wave))) start(wave);
     }
 

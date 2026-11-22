@@ -22,6 +22,17 @@ import mindustry.world.blocks.storage.CoreBlock.*;
 public class FactionPlanetGenerator extends EclipseSerpuloGenerator{
     public final boolean seaSpawn;
     public final ObjectMap<Block, Block> swap;
+    /** Serpulo's package-private getBlock, looked up once: getColor runs for every vertex of the planet mesh. */
+    static final java.lang.reflect.Method getBlock;
+
+    static{
+        try{
+            getBlock = SerpuloPlanetGenerator.class.getDeclaredMethod("getBlock", Vec3.class, boolean.class);
+            getBlock.setAccessible(true);
+        }catch(NoSuchMethodException e){
+            throw new RuntimeException(e);
+        }
+    }
 
     public FactionPlanetGenerator(float heightScl, float waterOffset, boolean seaSpawn, ObjectMap<Block, Block> swap){
         this.seaSpawn = seaSpawn;
@@ -48,8 +59,12 @@ public class FactionPlanetGenerator extends EclipseSerpuloGenerator{
     /** Serpulo's planet colour (the map colour of the block at that point), read from the swapped block. */
     @Override
     public void getColor(Vec3 position, Color out){
-        //package-private in Serpulo's generator
-        Block block = Reflect.invoke(SerpuloPlanetGenerator.class, this, "getBlock", new Object[]{position, true}, Vec3.class, boolean.class);
+        Block block;
+        try{
+            block = (Block)getBlock.invoke(this, position, true);
+        }catch(ReflectiveOperationException e){
+            throw new RuntimeException(e);
+        }
         block = swap.get(block, block == Blocks.salt ? Blocks.sand : block); //unswapped salt shows as sand, as on Serpulo
         out.set(block.mapColor).a(1f - block.albedo);
     }

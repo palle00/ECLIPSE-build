@@ -411,7 +411,9 @@ public class RecipeCrafter extends GenericCrafter{
         }
 
         boolean ready(Recipe r){
-            return items.has(r.inputs);
+            if(!items.has(r.inputs)) return false;
+            for(LiquidStack s : r.liquidInputs) if(liquids.get(s.liquid) <= 0.001f) return false;
+            return true;
         }
 
         /** The next recipe after the running one that has its inputs (round robin, so no input waits forever). */

@@ -39,7 +39,10 @@ public class EggSpawnAbility extends UnitSpawnAbility{
         egg.rotation = unit.rotation;
         egg.apply(Munitions.incubating, incubation);
         Events.fire(new UnitCreateEvent(egg, null, unit));
-        if(!net.client()) egg.add();
+        if(!net.client()){
+            egg.add();
+            Units.notifyUnitSpawn(egg);
+        }
     }
 
     @Override

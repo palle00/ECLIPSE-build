@@ -48,12 +48,11 @@ public class PayloadCatapult{
         public class CatapultBuild extends TurretBuild{
             public @Nullable BuildPayload shell;
             /** The shell that was just fired, handed to its bullet right after the turret creates it. */
-            @Nullable BuildPayload launching;
             float settle;
 
             @Override
             public boolean acceptPayload(Building source, Payload payload){
-                return shell == null && launching == null && payload instanceof BuildPayload p && shells().contains(p.block());
+                return shell == null && payload instanceof BuildPayload p && shells().contains(p.block());
             }
 
             @Override
@@ -101,14 +100,13 @@ public class PayloadCatapult{
                     settle = 0f;
                 }
                 super.updateTile();
-                //the shot was just created: give it the block (BulletType.create sets a bullet's data after init, so not there)
-                if(launching != null){
-                    Bullet shot = Groups.bullet.find(b -> b.owner == this && b.type == shellType && b.data == null);
-                    if(shot != null){
-                        shot.data = launching;
-                        launching = null;
-                    }
-                }
+            }
+
+            //called with the new shot before useAmmo() empties the cradle: the shot carries the loaded block
+            @Override
+            protected void handleBullet(@Nullable Bullet bullet, float offsetX, float offsetY, float angleOffset){
+                super.handleBullet(bullet, offsetX, offsetY, angleOffset);
+                if(bullet != null) bullet.data = shell;
             }
 
             @Override
@@ -123,7 +121,6 @@ public class PayloadCatapult{
 
             @Override
             public BulletType useAmmo(){
-                launching = shell;
                 shell = null;
                 return shellType;
             }
