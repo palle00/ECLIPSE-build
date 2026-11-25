@@ -95,6 +95,7 @@ public class PhotoShoot{
             else if(path.startsWith("production:")) production(path.substring(11).split(","), 0);
             else if(path.equals("pause")) pauseReview(0);
             else if(path.equals("erekir")) erekirReview();
+            else if(path.startsWith("planets:")) planets(path.substring(8).split(","), 0);
             else open(path);
         });
         return true;
@@ -266,6 +267,79 @@ public class PhotoShoot{
                 save("erekir-2");
                 Log.info("[ECLIPSE] photo mode (erekir) done");
                 Core.app.exit();
+            });
+        });
+    }
+
+    /**
+     * Store shots of the ECLIPSE planets (photos.ps1 -Planets): each map from PlanetShotBuilder (a start sector with an
+     * outpost), the planet's own faction sent at the outpost, then a day shot (planet-NAME) and a night one (planet-NAME-night).
+     */
+    /** Planet mode: the shot the camera holds every frame (null between maps), and whether it is night. */
+    static @Nullable Shot planetShot;
+    static boolean planetNight, planetMode;
+
+    static void planets(String[] paths, int i){
+        if(!planetMode){
+            planetMode = true;
+            statusBefore = Core.settings.getBool("blockstatus", true);
+            Core.settings.put("blockstatus", false); //no status diamonds on the blocks (restored at the end)
+            //every frame: no HUD, the game running (the window is not focused, and "pause in background" would stop it),
+            //the camera on the shot, day or night
+            Events.run(Trigger.update, () -> {
+                if(!planetMode || !state.isGame()) return;
+                ui.hudfrag.shown = false;
+                if(state.isPaused()) state.set(mindustry.core.GameState.State.playing);
+                if(planetShot != null){
+                    state.rules.lighting = planetNight;
+                    state.rules.ambientLight = new Color(0.03f, 0.04f, 0.1f, 0.62f);
+                    aim(planetShot);
+                }
+            });
+        }
+        if(i >= paths.length){
+            planetShot = null;
+            Core.settings.put("blockstatus", statusBefore);
+            Log.info("[ECLIPSE] photo mode (planets) done");
+            Core.app.exit();
+            return;
+        }
+        Map map;
+        try{
+            map = MapIO.createMap(new Fi(paths[i]), true);
+        }catch(Throwable e){
+            Log.err("[ECLIPSE] planet shot: could not load " + paths[i], e);
+            planets(paths, i + 1);
+            return;
+        }
+        String name = map.tags.get("eclipse-planet-shot", "planet" + i);
+        running = true;
+        planetShot = null;
+        planetNight = false;
+        control.playMap(map, map.rules());
+        //past the landing intro, then the planet's faction comes for the outpost (east of the core)
+        Time.runTask(60f * 10f, () -> {
+            Position core = anchor("!core-shard");
+            if(core != null){
+                UnitType[] attackers = switch(name){
+                    case "tide" -> new UnitType[]{eclipse.content.Factions.skiff, eclipse.content.Factions.skiff, eclipse.content.Factions.slicker, eclipse.content.Factions.frostwake, eclipse.content.Factions.lamprey, eclipse.content.Factions.cinderwake};
+                    case "hive" -> new UnitType[]{eclipse.content.Factions.mite, eclipse.content.Factions.mite, eclipse.content.Factions.mite, eclipse.content.Factions.mite, eclipse.content.Factions.wasp, eclipse.content.Factions.wasp, eclipse.content.Factions.spitter, eclipse.content.Factions.brood};
+                    default -> new UnitType[]{eclipse.content.MilitaryUnits.reaper, eclipse.content.MilitaryUnits.reaper, eclipse.content.MilitaryUnits.bulwark,
+                        eclipse.content.MilitaryUnits.rampart, eclipse.content.MilitaryUnits.wraith, eclipse.content.MilitaryUnits.interceptor};
+                };
+                Rand rand = new Rand(11);
+                for(UnitType type : attackers) spawn(type, core.getX() + (14f + rand.range(7f)) * tilesize, core.getY() - (15f + rand.random(4f)) * tilesize);
+            }
+            planetShot = new Shot("planet-" + name, "!core-shard", 12f, -4f, 3.6f);
+            //a few seconds of fighting, then day and night
+            Time.runTask(60f * 3.5f, () -> {
+                save("planet-" + name);
+                planetNight = true;
+                Time.runTask(45f, () -> {
+                    save("planet-" + name + "-night");
+                    planetNight = false;
+                    planets(paths, i + 1);
+                });
             });
         });
     }
