@@ -73,8 +73,17 @@ public class PhotoShoot{
         Fi f = dataDirectory.child(flag);
         Log.info("[ECLIPSE] photo mode flag @: @", f.absolutePath(), f.exists() ? "found" : "absent");
         if(!f.exists()) return false;
-        String path = f.readString().trim();
+        String raw = f.readString().trim();
         f.delete();
+        //"size:1200x540|<scene>" (photos.ps1 -Size): a window that small, to review the UI as on a laptop or phone
+        boolean sized = raw.startsWith("size:") && raw.contains("|");
+        String path = sized ? raw.substring(raw.indexOf('|') + 1) : raw;
+        if(sized){
+            String[] wh = raw.substring(5, raw.indexOf('|')).split("x");
+            int w = Integer.parseInt(wh[0]), h = Integer.parseInt(wh[1]);
+            //again a little later: the game applies its own fullscreen or borderless setting after this
+            for(float delay : new float[]{0f, 30f, 90f}) Time.runTask(delay, () -> resize(w, h));
+        }
         if(path.equals("menu-review")){
             menuReview();
             return true;
@@ -95,6 +104,7 @@ public class PhotoShoot{
             else if(path.startsWith("production:")) production(path.substring(11).split(","), 0);
             else if(path.equals("pause")) pauseReview(0);
             else if(path.equals("erekir")) erekirReview();
+            else if(path.startsWith("planetmap:")) planetMap(path.substring(10));
             else if(path.startsWith("planets:")) planets(path.substring(8).split(","), 0);
             else open(path);
         });
@@ -573,6 +583,43 @@ public class PhotoShoot{
             if(found[0] == null && t.build != null && t.isCenter() && t.build.block.name.equals(full)) found[0] = t.build;
         });
         return found[0];
+    }
+
+    /** The planet map on this planet ("tide"), looking at its start sector: two shots half a pulse apart (planetmap-1, -2). */
+    static void planetMap(String name){
+        Planet planet = content.planet("eclipse-" + name);
+        if(planet == null) planet = content.planet(name);
+        if(planet == null){
+            Log.err("[ECLIPSE] photo mode: no planet @", name);
+            Core.app.exit();
+            return;
+        }
+        Sector start = planet.sectors.get(planet.startSector);
+        Log.info("[ECLIPSE] photo mode planet map: @, start sector @ (has save: @)", planet.name, start.id, start.hasSave());
+        ui.planet.show();
+        ui.planet.state.planet = planet;
+        ui.planet.lookAt(start);
+        Time.runTask(150f, () -> save("planetmap-1"));
+        Time.runTask(150f + 31f, () -> save("planetmap-2"));
+        Time.runTask(240f, Core.app::exit);
+    }
+
+    /** Puts the game in a window of this size (desktop). A maximized or borderless window ignores a new size: restored first. */
+    static void resize(int w, int h){
+        Core.graphics.setFullscreen(false);
+        //by reflection: no SDL on Android
+        try{
+            java.lang.reflect.Field field = Core.app.getClass().getDeclaredField("window");
+            field.setAccessible(true);
+            long window = field.getLong(Core.app);
+            Class<?> sdl = Class.forName("arc.backend.sdl.jni.SDL");
+            sdl.getMethod("SDL_SetWindowBordered", long.class, boolean.class).invoke(null, window, true);
+            sdl.getMethod("SDL_RestoreWindow", long.class).invoke(null, window);
+        }catch(Throwable e){
+            Log.err("[ECLIPSE] photo mode: could not restore the window", e);
+        }
+        Core.graphics.setWindowSize(w, h);
+        Log.info("[ECLIPSE] photo mode window @x@ (asked @x@)", Core.graphics.getWidth(), Core.graphics.getHeight(), w, h);
     }
 
     static void save(String name){

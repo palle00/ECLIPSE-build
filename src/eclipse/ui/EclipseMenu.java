@@ -737,6 +737,7 @@ public class EclipseMenu{
     static void showCredits(){
         if(credits == null){
             credits = new BaseDialog("@eclipse-menu.credits");
+            FitDialog.install(credits);
             credits.addCloseButton();
             credits.cont.pane(p -> p.add(Core.bundle.get("eclipse-menu.credits.text")).wrap().width(Math.min(Core.graphics.getWidth() / Scl.scl(1f) - 80f, 760f)).left())
                 .grow();
@@ -747,6 +748,7 @@ public class EclipseMenu{
     static void showWhatsNew(){
         if(whatsNew == null){
             whatsNew = new BaseDialog("@eclipse-menu.whatsnew");
+            FitDialog.install(whatsNew);
             whatsNew.addCloseButton();
             whatsNew.cont.pane(p -> p.add(Core.bundle.get("eclipse-menu.whatsnew.text")).wrap().width(Math.min(Core.graphics.getWidth() / Scl.scl(1f) - 80f, 760f)).left())
                 .grow();

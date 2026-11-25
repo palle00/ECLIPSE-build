@@ -81,7 +81,7 @@ public class MilitaryBlocks{
             coolant = consumeCoolant(0.2f);
             ammo(
                 ammoniumNitrate, mineShell(48f, 26f, Color.valueOf("f2efe4"), 2f),
-                Items.blastCompound, mineShell(70f, 32f, Color.valueOf("ff795e"), 3f)
+                Items.blastCompound, blasted(mineShell(70f, 32f, Color.valueOf("ff795e"), 3f))
             );
         }};
 
@@ -175,7 +175,7 @@ public class MilitaryBlocks{
             shootSound = Sounds.shootMissile;
             ammo(
                 ammoniumNitrate, interceptor(150f, 18f, 1.5f),
-                Items.blastCompound, interceptor(210f, 26f, 1f)
+                Items.blastCompound, blasted(interceptor(210f, 26f, 1f))
             );
         }};
 
@@ -221,7 +221,7 @@ public class MilitaryBlocks{
             shootY = 8f;
             shootSound = Sounds.shootArtillerySmall;
             ammo(
-                Items.blastCompound, aerialMine(140f, 30f, 2f),
+                Items.blastCompound, blasted(aerialMine(140f, 30f, 2f)),
                 ammoniumNitrate, aerialMine(90f, 24f, 2f)
             );
         }};
@@ -385,7 +385,7 @@ public class MilitaryBlocks{
             ammo(
                 Items.graphite, siegeShell(450f, 48f, Color.valueOf("bfbfd6"), Color.valueOf("7d7d93")),
                 ammoniumNitrate, siegeShell(670f, 60f, Color.valueOf("f2efe4"), Color.valueOf("b9b49c")),
-                Items.blastCompound, siegeShell(1050f, 76f, Color.valueOf("ff795e"), Color.valueOf("c4533d"))
+                Items.blastCompound, blasted(siegeShell(1050f, 76f, Color.valueOf("ff795e"), Color.valueOf("c4533d")))
             );
         }};
         //Supernova, part 1: the Primer leaves a mark that detonates after 2.5 s, pulling in nearby stardust clouds
@@ -531,6 +531,16 @@ public class MilitaryBlocks{
     public static Item[] stardustItems(){
         return new Item[]{Items.sand, Items.scrap, Items.coal, Items.copper, Items.lead, Items.graphite, Items.metaglass, Items.titanium, Items.silicon,
             Items.thorium, Items.sporePod, Items.pyratite, Items.blastCompound, Items.plastanium, Items.phaseFabric, Items.surgeAlloy, sulfur, ammoniumNitrate};
+    }
+
+    /**
+     * Blast compound ammo marks what it hits with vanilla's Blasted, as vanilla's own blast ammo does (players' report,
+     * 2026-11-25). A shell that only drops a mine (no damage of its own) puts it on the mine, which does the damage.
+     */
+    static BulletType blasted(BulletType b){
+        BulletType hits = b.fragBullet != null && b.damage <= 0f && b.splashDamage <= 0f ? b.fragBullet : b;
+        hits.status = StatusEffects.blasted;
+        return b;
     }
 
     /** The Bombard's shell: a slow, high arc (about 3.5 s to full range), a marked landing spot and a big blast. */

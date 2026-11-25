@@ -1,10 +1,14 @@
 package eclipse.content;
 
 import arc.graphics.*;
+import arc.graphics.g3d.*;
+import arc.math.*;
 import arc.struct.*;
+import arc.util.*;
 import eclipse.world.*;
 import mindustry.content.*;
 import mindustry.game.*;
+import mindustry.graphics.*;
 import mindustry.graphics.g3d.*;
 import mindustry.type.*;
 import mindustry.world.*;
@@ -23,6 +27,8 @@ import static eclipse.content.blocks.PlanetTerrain.*;
  */
 public class EclipsePlanets{
     public static Planet tide, hive, ironhold;
+    /** Scratch matrices for drawing the start sector's outline. */
+    static final arc.math.geom.Mat3D projection = new arc.math.geom.Mat3D(), transform = new arc.math.geom.Mat3D();
 
     public static void load(){
         tide = planet("tide", new FactionPlanetGenerator(0.87f, -0.02f, true, ObjectMap.of(
@@ -118,7 +124,26 @@ public class EclipsePlanets{
                 r.placeRangeCheck = false;
             };
             launchCandidates.add(Planets.serpulo);
-        }};
+        }
+
+            /**
+             * The start sector is generated, not a preset, so the planet map draws it like any other sector (players
+             * couldn't find it, 2026-11-25): it pulses gold, as vanilla pulses Ground Zero and Onset, until first landed on.
+             */
+            @Override
+            public void renderSectors(VertexBatch3D batch, Camera3D cam, PlanetParams params){
+                Sector start = sectors.get(startSector);
+                if(!start.hasSave()){
+                    //before the planet map's own lines: what super draws after them (its hover grid) would hide these
+                    projection.set(batch.proj());
+                    batch.proj().mul(getTransform(transform));
+                    drawSelection(batch, start, Tmp.c1.set(Pal.accent).lerp(Color.white, Mathf.absin(Time.time, 10f, 1f)).a(params.uiAlpha), 0.026f, -0.001f);
+                    batch.flush(Gl.triangles);
+                    batch.proj().set(projection);
+                }
+                super.renderSectors(batch, cam, params);
+            }
+        };
         Planets.serpulo.launchCandidates.add(p);
         //Serpulo content is marked as shown on Serpulo only (that is how Erekir hides it); the shared tree must show it here too
         Planets.serpulo.techTree.addPlanet(p);

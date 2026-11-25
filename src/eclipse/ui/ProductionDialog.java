@@ -66,6 +66,7 @@ public class ProductionDialog extends BaseDialog{
 
     public ProductionDialog(){
         super("@eclipse-production");
+        FitDialog.install(this);
         rowEven = rowStyle(rowA);
         rowOdd = rowStyle(rowB);
         addCloseButton();
@@ -139,7 +140,9 @@ public class ProductionDialog extends BaseDialog{
         if(tab == Tab.overview || tab == Tab.power){
             body.add(right).grow();
         }else{
-            body.table(WikiUI.card(), this::leftPanel).width(Math.min(Core.graphics.getWidth() / Scl.scl(1f) * 0.42f, 700f)).growY().padRight(10f);
+            //never narrower than the resources table's columns (small screens): FitDialog then shrinks the panel to fit
+            float least = tab == Tab.resources ? colName + 3f * colNum + colCore + 40f : 0f;
+            body.table(WikiUI.card(), this::leftPanel).width(Math.max(Math.min(Core.graphics.getWidth() / Scl.scl(1f) * 0.42f, 700f), least)).growY().padRight(10f);
             body.add(right).grow();
         }
         refreshData();

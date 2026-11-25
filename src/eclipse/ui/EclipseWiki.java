@@ -206,6 +206,7 @@ public class EclipseWiki extends BaseDialog{
 
     public EclipseWiki(){
         super("@eclipse-wiki.title");
+        FitDialog.install(this);
         addCloseButton();
         buttons.button("@eclipse-production", Icon.chartBar, ProductionStats::show).disabled(b -> !state.isGame()).size(210f, 64f);
 
@@ -910,7 +911,7 @@ public class EclipseWiki extends BaseDialog{
                 }
             }).left().padBottom(4f).row();
         }
-        page.table(kinds -> {
+        Cell<Table> kindsCell = page.table(kinds -> {
             kinds.left();
             for(int i = 0; i < ex.size; i++){
                 BuildLayout l = ex.get(i);
@@ -934,7 +935,9 @@ public class EclipseWiki extends BaseDialog{
             }).checked(x -> buildStep > 0).height(34f).padRight(6f);
             Cell<TextButton> bt = kinds.button("@eclipse-build.build", Icon.copy, Styles.flatt, this::buildThis).disabled(x -> !state.isGame()).height(34f);
             if(!mobile) bt.tooltip("@eclipse-build.build-key");
-        }).width(w).left().padBottom(6f).row();
+        });
+        //never narrower than its buttons (small screens): the page then needs more room and FitDialog shrinks the wiki to fit
+        kindsCell.width(Math.max(w, kindsCell.get().getPrefWidth() / Scl.scl(1f))).left().padBottom(6f).row();
 
         boolean wide = w > 760f;
         float picW = wide ? w - 270f : w;

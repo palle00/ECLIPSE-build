@@ -197,7 +197,7 @@ public class Supernova{
             });
 
             float damage = baseDamage, fire = 0f, charge = 0f;
-            boolean frag = false, spores = false;
+            boolean frag = false, spores = false, blasted = false;
             Color mix = new Color(0f, 0f, 0f, 1f);
             for(Bullet c : clouds){
                 Item item = ((StardustBulletType)c.type).item;
@@ -206,6 +206,7 @@ public class Supernova{
                 charge += item.charge;
                 frag |= item == Items.plastanium;
                 spores |= item == Items.sporePod;
+                blasted |= item == Items.blastCompound;
                 mix.r += item.color.r;
                 mix.g += item.color.g;
                 mix.b += item.color.b;
@@ -223,6 +224,8 @@ public class Supernova{
 
             //traits
             if(spores) Units.nearbyEnemies(b.team, b.x, b.y, radius, u -> u.apply(StatusEffects.sporeSlowed, 60f * 4f));
+            //blast compound marks with Blasted, as vanilla's blast ammo (players' report, 2026-11-25)
+            if(blasted) Units.nearbyEnemies(b.team, b.x, b.y, radius, u -> u.apply(StatusEffects.blasted));
             if(!net.client()){
                 for(int i = 0; i < Math.min((int)(fire * 1.5f), 14); i++){
                     Tmp.v1.rnd(Mathf.random(radius));

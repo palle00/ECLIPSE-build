@@ -28,6 +28,7 @@ public class WelcomeHint{
         if(Core.settings.getBool(shownKey, false) || !state.isGame() || state.rules.editor || PhotoShoot.running) return;
         Core.settings.put(shownKey, true);
         BaseDialog dialog = new BaseDialog("@eclipse-welcome.title");
+        FitDialog.install(dialog);
         String text = mobile ? Core.bundle.get("eclipse-welcome.text.mobile")
             : Core.bundle.format("eclipse-welcome.text", EclipseWiki.keyName(EclipseWiki.entryKey), EclipseWiki.keyName(StallOverlay.key),
                 EclipseWiki.keyName(ProductionStats.key), EclipseWiki.keyName(eclipse.input.UpgradePlanner.key));

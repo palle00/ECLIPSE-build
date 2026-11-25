@@ -67,6 +67,7 @@ public class EclipseSettingsDialog extends BaseDialog{
             pane.setFadeScrollBars(false);
             main.add(pane).grow().padLeft(44f).padRight(36f).padBottom(20f);
         }).grow();
+        FitDialog.install(this);
 
         shown(() -> {
             search.setText("");
