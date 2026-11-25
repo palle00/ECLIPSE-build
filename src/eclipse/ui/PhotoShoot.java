@@ -385,9 +385,7 @@ public class PhotoShoot{
         }
         shots = list.toArray(Shot.class);
         galleryMode = true;
-        warmupTime = 60f * 10f;
-        statusBefore = Core.settings.getBool("blockstatus", true);
-        Core.settings.put("blockstatus", false);
+        warmupTime = 60f * 10f; //(status diamonds and lasers: cleanShots, from begin())
         Events.run(Trigger.update, () -> { if(galleryMode && state.isGame()) feed(); });
     }
 
@@ -431,7 +429,29 @@ public class PhotoShoot{
 
     static void begin(){
         running = true;
+        cleanShots(true);
         Events.run(Trigger.update, PhotoShoot::update);
+    }
+
+    static int lasersBefore = 100;
+    static boolean cleaned;
+
+    /**
+     * Store shots without the clutter (2026-11-25): power lasers and block status diamonds off while shooting, the player's
+     * own values put back before the game quits.
+     */
+    static void cleanShots(boolean on){
+        if(on == cleaned) return;
+        cleaned = on;
+        if(on){
+            lasersBefore = Core.settings.getInt("lasersopacity", 100);
+            statusBefore = Core.settings.getBool("blockstatus", true);
+            Core.settings.put("lasersopacity", 0);
+            Core.settings.put("blockstatus", false);
+        }else{
+            Core.settings.put("lasersopacity", lasersBefore);
+            Core.settings.put("blockstatus", statusBefore);
+        }
     }
 
     static void update(){
@@ -460,7 +480,7 @@ public class PhotoShoot{
             save(s.name);
             timer = 0f;
             if(++index >= shots.length && galleryMode){
-                Core.settings.put("blockstatus", statusBefore);
+                cleanShots(false);
                 galleryMode = false;
                 running = false;
                 Log.info("[ECLIPSE] photo mode (gallery) done");
@@ -485,6 +505,7 @@ public class PhotoShoot{
             if(EclipseWiki.instance != null) EclipseWiki.instance.hide();
             phase = 3;
             running = false;
+            cleanShots(false);
             Log.info("[ECLIPSE] photo mode done: screenshots in @", screenshotDirectory.absolutePath());
             Core.app.exit();
         }
@@ -492,7 +513,7 @@ public class PhotoShoot{
 
     static void lighting(boolean night){
         state.rules.lighting = night;
-        state.rules.ambientLight = new Color(0.02f, 0.03f, 0.08f, 0.82f);
+        state.rules.ambientLight = new Color(0.03f, 0.04f, 0.1f, 0.62f); //dusk, not pitch black (store shots)
     }
 
     /** Ground and air enemies south of the shot's anchor, heading north past the turrets. */
