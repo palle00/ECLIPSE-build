@@ -37,7 +37,7 @@ public class PlacementHints{
     }
 
     static void draw(){
-        if(!state.isGame() || player == null || mobile || Core.scene.hasMouse()) return;
+        if(!state.isGame() || player == null || mobile || Core.scene.hasMouse() || !EclipseSettings.placementHints.on()) return;
         Vec2 m = Core.input.mouseWorld();
         Block selected = control.input.block;
         Draw.z(Layer.overlayUI);

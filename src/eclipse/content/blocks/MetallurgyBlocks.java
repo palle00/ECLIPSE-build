@@ -76,7 +76,7 @@ public class MetallurgyBlocks{
             health = 600;
             tier = 4;
             //compact but fast: carbide bits cut hard ore easily (half the usual hardness penalty), water boost as strong as the airblast drill's
-            drillTime = 120f;
+            drillTime = 170f; //balance audit 2026-11-25: was 120, which out-mined the 4x4 airblast drill; now about level with it
             hardnessDrillMultiplier = 25f;
             liquidBoostIntensity = 1.8f;
             hasPower = true;
@@ -86,14 +86,14 @@ public class MetallurgyBlocks{
 
         superalloyWall = new Wall("superalloy-wall"){{
             requirements(Category.defense, with(superalloy, 6));
-            health = 210 * 4;
+            health = 250 * 4; //balance audit 2026-11-25: was 210 * 4, barely above a thorium wall for a 3-ore alloy
             absorbLasers = true;
         }};
 
         superalloyWallLarge = new Wall("superalloy-wall-large"){{
             requirements(Category.defense, mult(superalloyWall.requirements, 4));
             size = 2;
-            health = 210 * 4 * 4;
+            health = 250 * 4 * 4;
             absorbLasers = true;
         }};
 

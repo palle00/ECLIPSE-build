@@ -138,7 +138,7 @@ public class LiveMap{
     }
 
     static void updateLive(){
-        if(frag == null || !frag.shown() || !state.isGame() || renderer.minimap.getTexture() == null){
+        if(frag == null || !frag.shown() || !state.isGame() || renderer.minimap.getTexture() == null || !EclipseSettings.liveMap.on()){
             live = -1f;
             return;
         }

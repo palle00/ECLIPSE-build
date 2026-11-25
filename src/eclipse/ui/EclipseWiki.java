@@ -201,33 +201,7 @@ public class EclipseWiki extends BaseDialog{
     }
 
     public static void install(){
-        EclipseWiki wiki = instance = new EclipseWiki();
-        //the pause menu rebuilds its buttons every time it opens; this listener runs after that rebuild
-        ui.paused.shown(() -> {
-            Table cont = ui.paused.cont;
-            TextButton button = new Table().button("@eclipse-wiki", Icon.book, wiki::show).get();
-            button.remove();
-            //take the place of "Save & Quit" (or "Quit"), and move that button to a new row right below with the same layout
-            Cell<?> quitCell = cont.getCells().find(c -> c.get() instanceof TextButton b && isQuit(b));
-            if(quitCell != null){
-                arc.scene.Element quit = quitCell.get();
-                Cell<?> widest = quitCell;
-                for(Cell<?> c : cont.getCells()) if(c.get() instanceof TextButton && c.minWidth() > widest.minWidth()) widest = c;
-                Cell<?> quitLayout = new Cell<>().set(quitCell);
-                quitCell.setElement(button);
-                if(widest != quitCell) quitCell.set(widest);
-                cont.row();
-                cont.add(quit).set(quitLayout);
-            }else{
-                cont.row();
-                cont.add(button).colspan(2).width(mobile ? 220f : 450f).height(55f).pad(5f);
-            }
-        });
-    }
-
-    static boolean isQuit(TextButton b){
-        String text = b.getText().toString();
-        return text.equals(Core.bundle.get("save.quit")) || text.equals(Core.bundle.get("quit"));
+        instance = new EclipseWiki(); //the pause menu's wiki button: PauseMenu
     }
 
     public EclipseWiki(){
@@ -1394,7 +1368,8 @@ public class EclipseWiki extends BaseDialog{
     }
 
     public static boolean isEclipse(UnlockableContent c){
-        return c.name.startsWith("eclipse-");
+        //vanilla tungsten and carbide are ECLIPSE's own since the merge (Erekir support, phase E2) and keep their pages
+        return c.name.startsWith("eclipse-") || c == mindustry.content.Items.tungsten || c == mindustry.content.Items.carbide;
     }
 
     /** The menu icon of a guide: its topic's content icon, a play symbol for Getting Started, a book if unknown. */

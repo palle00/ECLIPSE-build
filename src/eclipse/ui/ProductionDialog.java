@@ -33,8 +33,7 @@ import static mindustry.Vars.*;
  * (stopped machines grouped by block and reason, each a jump to why and how to fix it) and what runs short.</li>
  * <li>Resources: every material the base makes or uses, sortable and filterable; the selected one in detail: rates,
  * a one-minute graph, which of your machines make and use it, totals and advice.</li>
- * <li>Chains: a material's whole production chain for a target rate, drawn as a flow with built against needed on
- * every step, and the machines still missing.</li>
+ * <li>Chains: a material's whole production chain for a target rate, drawn as a flow filling the panel.</li>
  * <li>Power: made, used, stored and satisfaction, a one-minute graph, and every generator and consumer as a share.</li>
  * </ul>
  * All numbers come from {@link ProductionStats}; the panel refreshes once a second.
@@ -57,6 +56,8 @@ public class ProductionDialog extends BaseDialog{
     String search = "";
     @Nullable UnlockableContent selected;
     float chainRate = -1f;
+    /** The chain graph's zoom, kept across refreshes and materials. */
+    float chainZoom = 1f;
     float refresh;
 
     final Table tabsBar = new Table(), body = new Table(), list = new Table(), right = new Table();
@@ -604,6 +605,12 @@ public class ProductionDialog extends BaseDialog{
             return;
         }
         if(chainRate <= 0f) chainRate = Math.max(Math.max(used(c), made(c)), 1f);
+        RecipeTree.Step root = RecipeTree.plan(item, chainRate);
+        ChainGraph graph = new ChainGraph(root, x -> {
+            if(x != c) select(x, Tab.chains);
+        });
+        graph.zoom = chainZoom;
+        graph.onZoom = z -> chainZoom = z;
         right.table(top -> {
             top.left();
             top.add(Core.bundle.get("eclipse-wiki.tree.rate") + " ").color(muted);
@@ -616,52 +623,13 @@ public class ProductionDialog extends BaseDialog{
             top.add(Core.bundle.get("eclipse-production.chains.rate-hint")).color(muted).fontScale(0.8f).padLeft(10f);
         }).growX().padBottom(8f).row();
 
-        ObjectIntMap<String> have = builtCounts();
-        RecipeTree.Step root = RecipeTree.plan(item, chainRate);
-        ChainGraph graph = new ChainGraph(root, x -> {
-            if(x != c) select(x, Tab.chains);
-        });
-        graph.built = s -> s.source == null ? 0 : have.get(key(s.source.block, s.item), 0);
-        right.pane(Styles.smallPane, graph).growX().maxHeight(Core.graphics.getHeight() / Scl.scl(1f) * 0.45f).left().row();
-
-        //what's missing to reach the rate: one line per step that has fewer machines than it needs
-        WikiUI.header(right, Core.bundle.get("eclipse-production.chains.todo"));
-        Table todo = new Table().top().left();
-        boolean[] any = {false};
-        collectMissing(root, have, todo, any);
-        if(!any[0]) todo.add(WikiUI.callout(1, Core.bundle.get("eclipse-production.chains.complete"), Core.bundle.get("eclipse-production.chains.complete.text"), 600f)).growX().left().row();
-        right.pane(Styles.smallPane, todo).grow().left().row();
+        right.pane(Styles.smallPane, graph).grow().left().row();
         int tier = RecipeTree.maxTier(root);
         right.table(t -> {
             t.left();
             WikiUI.tag(t, Core.bundle.format("eclipse-wiki.chain.power", Strings.autoFixed(RecipeTree.power(root) * 60f, 0)), accent);
             if(tier > 0) WikiUI.tag(t, Core.bundle.format("eclipse-wiki.tag.tier-power", RecipeCrafter.roman(tier), Strings.autoFixed(RecipeCrafter.tierPower[tier] * 60f, 0)), WikiUI.tierColor(tier));
         }).left().padTop(8f).row();
-        right.add(Core.bundle.get("eclipse-production.chains.hint")).color(muted).fontScale(0.85f).wrap().growX().left().padTop(4f);
-    }
-
-    void collectMissing(RecipeTree.Step s, ObjectIntMap<String> have, Table t, boolean[] any){
-        if(s.source != null){
-            int built = have.get(key(s.source.block, s.item), 0), need = Mathf.ceil(s.machines - 0.001f);
-            if(built < need){
-                any[0] = true;
-                Block b = s.source.block;
-                t.table(WikiUI.card(), r -> {
-                    r.left();
-                    r.image(b.uiIcon).size(32f).padRight(10f);
-                    r.add(Core.bundle.format("eclipse-production.chains.todo.row", need - built, b.localizedName, s.item.localizedName)).growX().left().wrap();
-                    r.add(Core.bundle.format("eclipse-production.chains.have-need", built, need)).color(bad).right().padLeft(10f);
-                    if(EclipseWiki.isEclipse(b)) r.button(Icon.book, Styles.clearNonei, () -> EclipseWiki.openAt(b, "build", recipeOf(b, s.item))).size(40f).padLeft(6f);
-                }).growX().padBottom(4f).row();
-            }
-        }
-        for(RecipeTree.Step in : s.inputs) collectMissing(in, have, t, any);
-    }
-
-    /** The recipe of a universal machine that makes this item (to open its build example), or null. */
-    static @Nullable Object recipeOf(Block b, Item item){
-        if(!(b instanceof RecipeCrafter rc)) return null;
-        return rc.recipes.find(r -> r.outputs.length > 0 && r.outputs[0].item == item);
     }
 
     /** A raw material has no chain of its own: show what it goes into instead, each a jump to that chain. */
@@ -699,23 +667,6 @@ public class ProductionDialog extends BaseDialog{
             if(++n % 3 == 0) grid.row();
         }
         right.pane(Styles.smallPane, grid).grow().top();
-    }
-
-    /** Built machines per block (universal machines per block and recipe product). */
-    ObjectIntMap<String> builtCounts(){
-        ObjectIntMap<String> out = new ObjectIntMap<>();
-        if(player == null) return out;
-        for(Building b : player.team().data().buildings){
-            if(!b.isValid()) continue;
-            if(b instanceof RecipeBuild r){
-                if(r.recipe != null) for(ItemStack s : r.recipe.outputs) out.increment(key(b.block, s.item));
-            }else out.increment(key(b.block, null));
-        }
-        return out;
-    }
-
-    static String key(Block b, @Nullable UnlockableContent product){
-        return b instanceof RecipeCrafter && product != null ? b.name + "/" + product.name : b.name + "/";
     }
 
     // ---------------- power ----------------

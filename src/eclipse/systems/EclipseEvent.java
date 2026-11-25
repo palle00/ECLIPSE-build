@@ -36,7 +36,7 @@ public class EclipseEvent{
         Events.run(Trigger.update, () -> {
             boolean now = state.isGame() && active();
             shade = Mathf.approachDelta(shade, now ? 1f : 0f, 1f / 180f);
-            if(now != wasActive && !headless && state.isGame()){
+            if(now != wasActive && !headless && state.isGame() && eclipse.ui.EclipseSettings.announce()){
                 ui.showInfoToast(now ? Core.bundle.format("eclipse-eclipse.start", Strings.autoFixed(strength(), 2)) : Core.bundle.get("eclipse-eclipse.end"), 6f);
             }
             wasActive = now;
@@ -104,7 +104,7 @@ public class EclipseEvent{
         if(shade < 0.01f) return;
         Camera cam = Core.camera;
         Draw.z(Layer.weather + 1f);
-        Draw.color(sky, 0.5f * shade);
+        Draw.color(sky, 0.5f * shade * eclipse.ui.EclipseSettings.darkness.fraction()); //the Eclipse darkness setting
         Fill.rect(cam.position.x, cam.position.y, cam.width, cam.height);
         //one screen pixel in world units, so the rings and rim keep the menu's line widths at any zoom
         float px = cam.width / Core.graphics.getWidth();

@@ -62,6 +62,10 @@ public class ChemicalBlocks{
             recipe(2, 120f, ItemStack.empty, ItemStack.empty).liquidsIn(flueGas, 12f / 60f, sodiumHydroxide, 2f / 60f)
                 .liquidsOut(sulfuricAcid, 1f / 60f, wastewater, 4f / 60f).sides(1, 3); //regenerative scrubbing: SO2 recovered as sulfuric acid
             recipe(2, 60f, ItemStack.empty, with(sodaAsh, 1)).liquidsIn(sodiumHydroxide, 4f / 60f, carbonDioxide, 2f / 60f); //2 NaOH + CO2 -> Na2CO3 + H2O
+            //Erekir-native (EREKIR_SUPPORT.md phase E4): Erekir's own liquids feed the ECLIPSE chains
+            recipe(2, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(Liquids.ozone, 2f / 60f).liquidsOut(oxygen, 3f / 60f); //2 O3 -> 3 O2, ozone decomposes over a catalyst
+            recipe(3, 60f, ItemStack.empty, ItemStack.empty).liquidsIn(Liquids.arkycite, 8f / 60f)
+                .liquidsOut(naphtha, 4f / 60f, methane, 3f / 60f).sides(1, 3); //arkycite, an organic feedstock, cracked like crude oil's light ends
             drawer = new DrawMulti(new DrawRegion("-bottom"), new DrawLiquidTile(),
                 new DrawBubbles(Color.valueOf("ffffff")){{ amount = 10; radius = 1f; spread = 3f; timeScl = 30f; }}, new DrawDefault());
         }};

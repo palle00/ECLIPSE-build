@@ -43,7 +43,6 @@ public class DeploymentIntro implements LaunchAnimator{
     }
 
     public static void install(){
-        ui.settings.game.checkPref(setting, true);
         //vanilla starts its landing (unless "skip core animation" is on) in the same trigger; this listener is registered
         //later, so it runs after: it takes over vanilla's landing, or starts the intro itself when vanilla skipped it
         Events.run(Trigger.newGame, () -> {

@@ -91,30 +91,23 @@ public class EclipseLoading extends LoadRenderer{
             Draw.proj(0f, 0f, w, h);
             MenuBackdrop.gridLines(0f, 0f, w, h);
             //the eclipse forming with the loading; at 100% the moon is where the menu's intro picks it up (1 s in)
-            MenuBackdrop.drawIntro(MenuBackdrop.eclipseX(w, h), MenuBackdrop.eclipseY(w, h), MenuBackdrop.eclipseR(w, h), Time.globalTime, progress, px);
+            MenuBackdrop.loadingScreen = true;
+            try{
+                MenuBackdrop.drawIntro(MenuBackdrop.eclipseX(w, h), MenuBackdrop.eclipseY(w, h), MenuBackdrop.eclipseR(w, h), Time.globalTime, progress, px);
+            }finally{
+                MenuBackdrop.loadingScreen = false;
+            }
             MenuBackdrop.atmosphere(0f, 0f, w, h);
             float[] at = MenuBackdrop.logoPlace(w, h);
             float lw = at[2], lh = logo == null ? lw * 0.194f : lw * logo.height / logo.width, left = at[0] - lw / 2f, below = at[1] - lh / 2f;
             if(logo != null) MenuBackdrop.drawLogo(logo, glow, at[0], at[1], lw, lh, 1f);
-            //a thin gold bar under the logo, where the menu's buttons will be, and the percentage over its right end
+            //a thin gold bar under the logo, where the menu's buttons will be
             float barY = below - 52f * px, barH = 4f * px;
             Draw.color(track);
             Fill.crect(left, barY, lw, barH);
             Draw.color(MenuBackdrop.gold);
             Fill.crect(left, barY, lw * Math.min(progress, 1f), barH);
             Draw.reset();
-            if(Fonts.def != null){
-                try{
-                    Font font = Fonts.def;
-                    float scale = font.getData().scaleX;
-                    font.getData().setScale(px);
-                    font.setColor(MenuBackdrop.gold);
-                    font.draw((int)(Math.min(progress, 1f) * 100f) + "%", left + lw, barY + 26f * px, Align.right);
-                    font.setColor(Color.white);
-                    font.getData().setScale(scale);
-                }catch(Throwable ignored){ //the font may still be loading
-                }
-            }
             Draw.flush();
             drawn = true;
             if(review && (shots == 0 && progress > 0.3f || shots == 1 && progress > 0.85f)){

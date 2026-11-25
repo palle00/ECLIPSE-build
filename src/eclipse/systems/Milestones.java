@@ -27,7 +27,7 @@ public class Milestones{
         {"chemistry", "eclipse-sulfuric-acid"},
         {"plastic", "eclipse-polyethylene"},
         {"superalloy", "eclipse-superalloy"},
-        {"carbide", "eclipse-tungsten-carbide"},
+        {"carbide", "carbide"},
         {"microchip", "eclipse-microchip"},
         {"aetherite", "eclipse-aetherite"},
         {"surge-superalloy", "eclipse-surge-superalloy"},
@@ -91,7 +91,7 @@ public class Milestones{
     }
 
     static void announce(String id){
-        if(headless) return;
+        if(headless || !eclipse.ui.EclipseSettings.milestones.on()) return;
         UnlockableContent c = null;
         for(String[] m : list) if(m[0].equals(id)) c = content(m[1]);
         ui.hudfrag.showToast(c == null ? Icon.ok : new TextureRegionDrawable(c.uiIcon), Core.bundle.get("eclipse-milestone." + id));

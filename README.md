@@ -3,14 +3,14 @@
 </p>
 
 <p align="center">
-  <b>A Mindustry mod that turns Serpulo into a deep industrial game.</b><br>
+  <b>A Mindustry mod that turns Serpulo and Erekir into a deep industrial game.</b><br>
   Universal machines on power tiers, machine parts built from bolts and motors, real chemistry, new metals,
   upgrade modules you manufacture yourself,
   robots, smarter logistics, 19 new turrets, three enemy factions that join your waves and three new planets to fight them on.
 </p>
 
 <p align="center">
-  <b>139 buildings · 19 turrets · 94 new materials · 29 liquids and gases · 70 upgrade modules · 30 units · 8 ores</b>
+  <b>139 buildings · 19 turrets · 92 new materials · 29 liquids and gases · 70 upgrade modules · 30 units · 8 ores</b>
 </p>
 
 <p align="center">
@@ -112,7 +112,9 @@ Custom games and campaign sectors with waves get three factions on top of the ma
 
 **The ECLIPSE:** every 5th wave may bring an eclipse, more likely the longer the game goes on. The sky darkens, and until the next wave every enemy is tougher and hits harder.
 
-**Three new planets**, one per faction, share Serpulo's research and are reached by launching from Serpulo: **Tide**, an ocean world of islands; **Hive**, a spore jungle; **Ironhold**, an industrial wasteland. Each is attacked only by its own faction.
+**Three new planets**, one per faction, share Serpulo's research and are reached by launching from Serpulo: **Tide**, an ocean world of islands; **Hive**, a spore jungle; **Ironhold**, an industrial wasteland. Each has its own ground, cliffs and plants, and is attacked only by its own faction.
+
+**On Erekir** the factions join Erekir's waves too, three times as tough to match Erekir's stronger defences.
 
 ## Made to be learned
 
@@ -146,7 +148,10 @@ Custom games and campaign sectors with waves get three factions on top of the ma
 ## Good to know
 
 - Requires Mindustry v8 (build 160 or newer). Java mod.
-- Serpulo and the three ECLIPSE planets. Erekir is not supported yet.
+- Serpulo, Erekir and the three ECLIPSE planets. On Erekir, ECLIPSE and the Serpulo basics it needs can be researched and built, and Erekir maps get copper, lead, titanium, coal, scrap and the ECLIPSE ores on their first load.
+- ECLIPSE uses vanilla tungsten and carbide (it had its own before 1.0); saves from older versions keep their tungsten and carbide.
+- Every ECLIPSE option is in **Settings → ECLIPSE**, also reachable from the new pause menu.
+- Multiplayer works, but acid corrosion has not been tested with real players yet.
 - Balance is still being tuned. Feedback and bug reports are very welcome in [Issues](https://github.com/palle00/ECLIPSE-build/issues).
 
 ## License

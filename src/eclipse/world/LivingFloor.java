@@ -37,7 +37,7 @@ public class LivingFloor extends Floor{
     @Override
     public void renderUpdate(UpdateRenderState state){
         Tile tile = state.tile;
-        if(tile.block() != Blocks.air) return;
+        if(tile.block() != Blocks.air || !eclipse.ui.EclipseSettings.terrainParticles.on()) return;
         if((state.data += Time.delta) >= effectSpacing){
             //a random wait so neighbouring emitters drift out of step
             state.data = Mathf.random(-effectSpacing * 0.5f, 0f);

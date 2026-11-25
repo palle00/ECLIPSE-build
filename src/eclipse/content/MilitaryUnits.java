@@ -58,7 +58,7 @@ public class MilitaryUnits{
         });
         bulwark = tank("bulwark", 72, 7, 58, t -> {
             t.health = 620f;
-            t.armor = 9f;
+            t.armor = 6f; //balance audit 2026-11-25: 9 (a T3's armour) at wave 8 shrugged off early turrets
             t.speed = 0.72f;
             t.hitSize = 13f;
             t.weapons.add(new Weapon("eclipse-bulwark-cannon"){{

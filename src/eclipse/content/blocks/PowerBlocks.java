@@ -76,7 +76,7 @@ public class PowerBlocks{
             size = 3;
             health = 600;
             liquidCapacity = 40f;
-            powerProduction = 15f; //900/s: a fission reactor + boiler + 4 turbines gives 3600/s, twice a thorium reactor
+            powerProduction = 35f / 3f; //700/s: a fission reactor + boiler + 4 turbines gives 2800/s, three thorium reactors (balance audit 2026-11-25: was 900)
             consumeLiquid(steam, 12f / 60f);
             outputLiquid = new LiquidStack(purifiedWater, 5f / 60f);
             generateEffect = Fx.steam;
@@ -90,7 +90,7 @@ public class PowerBlocks{
             size = 2;
             health = 300;
             liquidCapacity = 20f;
-            powerProduction = 1.5f; //90/s
+            powerProduction = 3.5f; //210/s: one electrolyzer (120/s) feeds 1.33 cells, about +160/s net (balance audit 2026-11-25: 90/s lost power)
             consumeLiquids(LiquidStack.with(Liquids.hydrogen, 6f / 60f, oxygen, 3f / 60f));
             outputLiquid = new LiquidStack(purifiedWater, 3f / 60f);
             generateEffect = Fx.none;
@@ -119,8 +119,8 @@ public class PowerBlocks{
             health = 1100;
             liquidCapacity = 80f;
             powerProduction = 40f; //2400/s
-            heatOutput = 10f; //drives one Industrial Boiler -> one Steam Turbine (+900/s)
-            consumeLiquid(methane, 20f / 60f); //120 power per methane: twice the Methane Turbine, beating heater + boiler (90)
+            heatOutput = 10f; //drives one Industrial Boiler -> one Steam Turbine (+700/s)
+            consumeLiquid(methane, 20f / 60f); //120 power per methane: twice the Methane Turbine, beating heater + boiler (70)
             outputLiquid = new LiquidStack(flueGas, 23f / 60f); //vented when not piped away
             generateEffect = Fx.generatespark;
             effectChance = 0.08f;
@@ -134,7 +134,7 @@ public class PowerBlocks{
             size = 3;
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion("-glint"){{ color = Color.white; alpha = 0.45f; glowScale = 30f; glowIntensity = 0.8f; }});
             health = 500;
-            powerProduction = 5f; //300/s in full light
+            powerProduction = 3f; //180/s in full light (balance audit 2026-11-25: 300/s made the Large Solar Panel pointless)
         }};
 
         // Lead-acid bank: better storage density than the large battery, costs processed cells.
@@ -164,7 +164,7 @@ public class PowerBlocks{
             health = 300;
             liquidCapacity = 20f;
             heatOutput = 5f;
-            consumeLiquid(methane, 5f / 60f); //90 power per methane through a boiler: below the Combined-Cycle Turbine
+            consumeLiquid(methane, 5f / 60f); //70 power per methane through a boiler: below the Combined-Cycle Turbine
             outputLiquid = new LiquidStack(flueGas, 10f / 60f);
             ignoreLiquidFullness = true; //flue gas is vented when not piped away
             drawer = new DrawMulti(new DrawDefault(), new DrawGlowRegion("-flame"){{ color = Color.valueOf("ff8a3d"); alpha = 0.9f; glowScale = 2f; glowIntensity = 0.5f; }}, new DrawHeatOutput());

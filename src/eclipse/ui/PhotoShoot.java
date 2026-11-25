@@ -93,6 +93,8 @@ public class PhotoShoot{
             else if(path.startsWith("art:")) art(path.substring(4));
             else if(path.startsWith("wiki:")) wiki(path.substring(5).split(","), 0);
             else if(path.startsWith("production:")) production(path.substring(11).split(","), 0);
+            else if(path.equals("pause")) pauseReview(0);
+            else if(path.equals("erekir")) erekirReview();
             else open(path);
         });
         return true;
@@ -197,6 +199,75 @@ public class PhotoShoot{
         running = true; //(keeps the welcome hint away)
         control.playMap(map, map.applyRules(Gamemode.sandbox));
         Time.runTask(60f * 30f, () -> productionShot(entries, 0));
+    }
+
+    /**
+     * Pause menu review (photos.ps1 -Pause): the showcase map as a survival game for 20 s, then the pause menu (pause-1), the
+     * settings screen's ECLIPSE tab (pause-2), its Game tab (pause-3) and Graphics tab (pause-4).
+     */
+    static void pauseReview(int attempt){
+        Map map = maps.all().find(m -> m.name().equals(eclipse.EclipseMod.showcaseName));
+        if(map == null){
+            if(attempt < 20) Time.runTask(30f, () -> pauseReview(attempt + 1));
+            return;
+        }
+        running = true; //(keeps the welcome hint away)
+        control.playMap(map, map.applyRules(Gamemode.survival));
+        Time.runTask(60f * 20f, () -> {
+            ui.paused.show();
+            Time.runTask(90f, () -> {
+                save("pause-1");
+                EclipseSettingsDialog.instance.show();
+                Time.runTask(90f, () -> {
+                    save("pause-2");
+                    EclipseSettingsDialog.instance.show("game");
+                    Time.runTask(90f, () -> {
+                        save("pause-3");
+                        EclipseSettingsDialog.instance.show("graphics");
+                        Time.runTask(90f, () -> {
+                            save("pause-4");
+                            Log.info("[ECLIPSE] photo mode (pause) done");
+                            Core.app.exit();
+                        });
+                    });
+                });
+            });
+        });
+    }
+
+    /**
+     * Erekir check (photos.ps1 -Erekir): a vanilla Erekir map as a custom game (never the campaign), then the log says how
+     * many ECLIPSE blocks can be built there and how many ores the map got; shots of the map (erekir-1) and the build menu
+     * open on the crafting tab (erekir-2).
+     */
+    static void erekirReview(){
+        Map map = maps.all().find(m -> m.rules().planet == mindustry.content.Planets.erekir);
+        if(map == null){
+            Log.err("[ECLIPSE] erekir review: no Erekir map found");
+            Core.app.exit();
+            return;
+        }
+        running = true;
+        control.playMap(map, map.applyRules(Gamemode.survival));
+        Time.runTask(60f * 8f, () -> {
+            int buildable = 0, total = 0, ores = 0;
+            for(mindustry.world.Block b : content.blocks()){
+                if(!b.name.startsWith("eclipse-") || !b.isVisible()) continue;
+                total++;
+                if(b.isOnPlanet(state.rules.planet) && b.environmentBuildable() && b.isPlaceable()) buildable++;
+            }
+            for(var t : world.tiles) if(t.overlay() instanceof mindustry.world.blocks.environment.OreBlock) ores++;
+            Log.info("[ECLIPSE] erekir review: map @, planet @, @ of @ ECLIPSE blocks buildable, @ ore tiles, factions tag @, spawn groups @",
+                map.name(), state.rules.planet.name, buildable, total, ores, state.rules.tags.get(eclipse.content.Factions.tag), state.rules.spawns.size);
+            save("erekir-1");
+            ui.hudfrag.blockfrag.currentCategory = mindustry.type.Category.crafting;
+            ui.hudfrag.blockfrag.rebuild();
+            Time.runTask(60f, () -> {
+                save("erekir-2");
+                Log.info("[ECLIPSE] photo mode (erekir) done");
+                Core.app.exit();
+            });
+        });
     }
 
     static void productionShot(String[] entries, int i){

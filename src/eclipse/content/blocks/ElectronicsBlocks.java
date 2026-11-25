@@ -65,6 +65,7 @@ public class ElectronicsBlocks{
             liquidCapacity = 20f;
             recipe(2, 30f, with(Items.graphite, 1, copperWire, 1), with(resistor, 2));
             recipe(3, 30f, with(aluminiumFoil, 2, polyethylene, 1), with(capacitor, 2));
+            recipe(3, 60f, with(tungstenRod, 1, Items.beryllium, 1), with(heatingCoil, 1)); //Erekir-native: element in beryllium-oxide ceramic (conducts heat, insulates)
             recipe(3, 40f, with(highPuritySilicon, 1, copperWire, 1, polyethylene, 1), with(transistor, 2));
             recipe(3, 30f, with(copperWire, 2, syntheticRubber, 1), with(insulatedCable, 2));
             recipe(3, 60f, with(copperFoil, 2, polyethylene, 1, resistor, 2, capacitor, 1, transistor, 1), with(circuitBoard, 1))

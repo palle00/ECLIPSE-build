@@ -1,6 +1,7 @@
 package eclipse.content;
 
 import arc.graphics.*;
+import mindustry.content.*;
 import mindustry.type.*;
 
 public class EclipseItems{
@@ -20,6 +21,23 @@ public class EclipseItems{
         electricMotor, permanentMagnetMotor, superconductingMotor, pumpUnit, piston, rotor, heatingCoil, sensor, emitter,
         sodaAsh, petroleumCoke, magnesium, bauxite, redMud,
         pentlandite, chromite, cobaltite, wolframite, molybdenite, sperrylite;
+
+    /**
+     * Erekir support, phase E2: ECLIPSE's tungsten and tungsten carbide are vanilla's tungsten and carbide (see load()).
+     * Saves from before name the old items "eclipse-tungsten" and "eclipse-tungsten-carbide": the game's own fallback map
+     * reads them as the vanilla items, so nothing in a core, a machine or on a belt is lost. Vanilla shows the two items on
+     * Erekir only (its research tree); ECLIPSE uses them on Serpulo and its own planets too.
+     */
+    public static void mergeIntoVanilla(){
+        mindustry.io.SaveFileReader.fallback.put("eclipse-tungsten", "tungsten");
+        mindustry.io.SaveFileReader.fallback.put("eclipse-tungsten-carbide", "carbide");
+        for(Item i : new Item[]{Items.tungsten, Items.carbide}){
+            i.shownPlanets.add(Planets.serpulo);
+            i.shownPlanets.add(EclipsePlanets.tide);
+            i.shownPlanets.add(EclipsePlanets.hive);
+            i.shownPlanets.add(EclipsePlanets.ironhold);
+        }
+    }
 
     public static void load(){
         sulfur = new Item("sulfur", Color.valueOf("e8d44d")){{
@@ -64,10 +82,9 @@ public class EclipseItems{
             cost = 1.1f;
         }};
 
-        tungsten = new Item("tungsten", Color.valueOf("8a8c96")){{
-            hardness = 4;
-            cost = 1.4f;
-        }};
+        //Erekir support, phase E2 (user decision 2026-11-18): ECLIPSE uses vanilla tungsten and carbide, one of each in the
+        //game. Old saves' eclipse-tungsten / eclipse-tungsten-carbide load as the vanilla items (mergeIntoVanilla).
+        tungsten = Items.tungsten;
 
         // extracted from brine, not mined
         lithium = new Item("lithium", Color.valueOf("d9cfe9")){{
@@ -81,9 +98,7 @@ public class EclipseItems{
             cost = 1.6f;
         }};
 
-        tungstenCarbide = new Item("tungsten-carbide", Color.valueOf("50525e")){{
-            cost = 1.6f;
-        }};
+        tungstenCarbide = Items.carbide;
 
         // ---- aluminium ----
         alumina = new Item("alumina", Color.valueOf("ece8e2")){{
@@ -294,7 +309,8 @@ public class EclipseItems{
         pentlandite = new Item("pentlandite", Color.valueOf("b8a46a")){{ hardness = nickel.hardness; cost = nickel.cost * 0.6f; }};
         chromite = new Item("chromite", Color.valueOf("4e4a52")){{ hardness = chromium.hardness; cost = chromium.cost * 0.6f; }};
         cobaltite = new Item("cobaltite", Color.valueOf("8f95b8")){{ hardness = cobalt.hardness; cost = cobalt.cost * 0.6f; }};
-        wolframite = new Item("wolframite", Color.valueOf("3e3a38")){{ hardness = tungsten.hardness; cost = tungsten.cost * 0.6f; }};
+        //ECLIPSE tungsten's old hardness and cost (vanilla tungsten is hardness 5, out of reach of the laser drill)
+        wolframite = new Item("wolframite", Color.valueOf("3e3a38")){{ hardness = 4; cost = 1.4f * 0.6f; }};
         molybdenite = new Item("molybdenite", Color.valueOf("6f7686")){{ hardness = molybdenum.hardness; cost = molybdenum.cost * 0.6f; }};
         sperrylite = new Item("sperrylite", Color.valueOf("c8ccd2")){{ hardness = platinum.hardness; cost = platinum.cost * 0.6f; }};
     }

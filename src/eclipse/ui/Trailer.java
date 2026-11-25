@@ -5,11 +5,10 @@ import arc.files.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
-import arc.math.geom.*;
+import arc.struct.*;
 import arc.util.*;
 import eclipse.content.*;
-import mindustry.content.*;
-import mindustry.ctype.*;
+import eclipse.systems.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.input.*;
@@ -17,219 +16,283 @@ import mindustry.io.*;
 import mindustry.maps.*;
 import mindustry.type.*;
 import mindustry.ui.*;
-
-import java.io.*;
+import mindustry.world.*;
 
 import static mindustry.Vars.*;
 
 /**
- * Developer trailer mode (photos.ps1 -Trailer): plays a scripted sequence on the photo scene and records it with
- * ffmpeg, one frame per game step at a fixed 30 fps, so the video is smooth however slow the capture is.
+ * Developer trailer mode (photos.ps1 -Trailer): a 30-second teaser played in real time on the trailer arena
+ * (arena.ps1), with the game's own sound and the boss music, recorded by OBS.
  * <ol>
- * <li>The opener: the eclipse forming over the factory grid (the menu's intro, slower), then the logo and "1.0".</li>
- * <li>Slow camera moves over the factories, each with a caption.</li>
- * <li>A Swarm and Dominion attack on the turret line, then an eclipse darkening the sky over the same fight.</li>
- * <li>The wiki's animated build example, and the end card.</li>
+ * <li>The eclipse forming; the fortress; the Swarm, the Dominion and the Tide coming in.</li>
+ * <li>The turret line holding against a constant stream of enemies, in quick cuts.</li>
+ * <li>The sky going dark, the bosses arriving stronger, a pull-back over the whole front; the end card.</li>
  * </ol>
- * Started by the photo flag "trailer:&lt;ffmpeg&gt;|&lt;scene map&gt;|&lt;output video&gt;"; the game quits when the video is written.
+ * Started by the photo flag "trailer:&lt;signal folder&gt;|&lt;arena map&gt;". After a warm-up the game writes "ready"
+ * into the signal folder and waits for "go" (written once OBS records), plays the trailer, writes "done" and quits.
  */
 public class Trailer{
-    static final int fps = 30;
-    static final int night = 1, enemies = 2, darken = 4, wiki = 8, right = 16;
+    static final float length = 30f, warmup = 8f, musicStart = 12f;
+    static final int night = 1, flash = 2;
 
-    /** A shot: anchor (as in photo mode), camera offset in tiles and zoom at its start and end, length, caption, flags. */
-    record Shot(String anchor, float dx0, float dy0, float dx1, float dy1, float zoom0, float zoom1, float seconds, String caption, String sub, int flags){}
+    /** A shot: start time, camera from/to (tiles), zoom from/to, caption, flags. Each shot lasts until the next one starts. */
+    record Shot(float at, float x0, float y0, float x1, float y1, float zoom0, float zoom1, String caption, int flags){}
 
-    static final Shot[] shots = {
-        new Shot("!core-shard", 14f, 9f, 21f, 12f, 2.1f, 2.45f, 4.5f, "A deeper industry", "Machine parts, chemistry, new metals and power", 0),
-        new Shot("blast-furnace", -9f, 0f, -4f, 0f, 3.6f, 4.1f, 4f, "Heat and new metals", "Blast furnaces, heaters and alloys", 0),
-        new Shot("electrolyzer", 0f, -4f, 4f, -4f, 4f, 4.4f, 4f, "Real chemistry", "Brine, acids, gases and plastics", 0),
-        new Shot("component-depot", -9f, -3f, -4f, -3f, 4f, 4.4f, 3.5f, "One machine for every part", "Universal machines, power tiers and overclock", 0),
-        new Shot("fission-reactor", 0f, -2f, 5f, -2f, 4f, 4.4f, 3.5f, "From steam to fusion", "New generators for every stage", 0),
-        new Shot("lattice-drill", 8f, 1f, 13f, 1f, 3.1f, 3.5f, 3f, "Deeper ores", "Ore minerals with real byproducts", 0),
-        new Shot("fission-reactor", -7f, 8f, -2f, 8f, 2.8f, 3.1f, 4f, "", "", night),
-        new Shot("thunderhead", -6f, -6f, -6f, -2f, 3.6f, 3.9f, 6f, "Three enemy factions", "The Swarm, the Dominion and the Tide", enemies),
-        new Shot("thunderhead", -6f, -2f, -6f, 0f, 3.9f, 3.4f, 6f, "Every fifth wave, the sky may go dark", "and the enemy grows stronger", darken),
-        new Shot("!core-shard", 0f, 0f, 0f, 0f, 3f, 3f, 5f, "A wiki that shows you how", "Animated build examples you can place in one click", wiki | right),
-    };
-    static final float openerSeconds = 5.5f, endSeconds = 6f, warmup = 60f * 40f;
+    /** Filled in when the arena is loaded (turret spots come from its rule tags). */
+    static Shot[] shots;
+    static final float openerEnd = 3f, cardStart = 25f;
 
-    static String ffmpeg, output;
-    static @Nullable Process process;
-    static @Nullable OutputStream pipe;
-    static int width, height;
-    /** 0 warming up, 1 opener, 2 shots, 3 end card, 4 done. */
+    static Fi signals;
+    /** 0 loading, 1 warming up, 2 waiting for "go", 3 playing, 4 done. */
     static int phase;
-    static float warm;
-    static int frame, shot, shotFrame;
-    static boolean shotStarted;
+    static float clock, t;
+    static int shot = -1;
+    static boolean blockStatus;
+    static @Nullable arc.audio.Music music;
+    static final Rand rand = new Rand(5);
+    /** The timeline's one-off events, by time; each fires once. */
+    static final FloatSeq eventTimes = new FloatSeq();
+    static final Seq<Runnable> events = new Seq<>();
+    static int nextEvent;
 
     public static void start(String args){
         String[] p = args.split("\\|");
-        if(p.length < 3){
-            Log.err("[ECLIPSE] trailer: expected ffmpeg|scene|output, got @", args);
+        if(p.length < 2){
+            Log.err("[ECLIPSE] trailer: expected signals|arena, got @", args);
             Core.app.exit();
             return;
         }
-        ffmpeg = p[0];
-        output = p[2];
+        signals = new Fi(p[0]);
+        signals.mkdirs();
+        signals.child("ready").delete();
+        signals.child("go").delete();
+        signals.child("done").delete();
         MenuBackdrop.skipIntro();
         PhotoShoot.running = true; //(keeps the welcome hint away)
+        if(!Core.graphics.isFullscreen()) Core.graphics.setFullscreen(true);
         Time.runTask(120f, () -> {
             try{
                 Map map = MapIO.createMap(new Fi(p[1]), true);
                 control.playMap(map, map.rules());
             }catch(Throwable e){
-                Log.err("[ECLIPSE] trailer: could not load the scene", e);
+                Log.err("[ECLIPSE] trailer: could not load the arena", e);
                 Core.app.exit();
                 return;
             }
+            //no random or boss music: the trailer plays its own
+            control.sound.musicChance = control.sound.musicWaveChance = 0f;
+            control.sound.stop();
+            blockStatus = Core.settings.getBool("blockstatus", true);
+            Core.settings.put("blockstatus", false);
+            script();
+            phase = 1;
             Events.run(Trigger.update, Trailer::update);
             Core.app.addListener(new ApplicationListener(){
                 @Override
                 public void update(){
-                    afterFrame();
+                    overlay();
                 }
             });
         });
     }
 
-    /** Before the frame is drawn: the camera, lighting and what happens in the shot. */
-    static void update(){
-        if(!state.isGame() || phase >= 4) return;
-        ui.hudfrag.shown = false;
-        if(phase == 0){
-            aim(shots[0], 0f);
-            if((warm += Time.delta) >= warmup) begin();
-            return;
+    // ---- the script ----
+
+    static void script(){
+        String[] wall = state.rules.tags.get("trailer.wall", "106").split(",");
+        float wx = Strings.parseFloat(wall[0], 106f);
+        float[] thunder = turret("eclipse-thunderhead", wx - 12f, 60f), shadow = turret("foreshadow", wx - 22f, 70f),
+            horizon = turret("eclipse-event-horizon", wx - 20f, 56f), tremor = turret("eclipse-tremor", wx - 10f, 48f);
+        float riverY = waterY(140);
+
+        shots = new Shot[]{
+            new Shot(openerEnd, 30f, 86f, 40f, 72f, 3.4f, 3.0f, "FORGE AN INDUSTRY", 0),
+            new Shot(5.6f, 152f, 74f, 142f, 72f, 3.6f, 3.9f, "THE SWARM", 0),
+            new Shot(7.6f, 158f, 46f, 149f, 46f, 3.4f, 3.7f, "THE DOMINION", 0),
+            new Shot(9.6f, 150f, riverY, 140f, riverY, 3.6f, 3.8f, "THE TIDE", 0),
+            new Shot(11f, wx - 2f, 66f, wx + 2f, 64f, 2.6f, 2.8f, "HOLD THE LINE", 0),
+            new Shot(12.6f, thunder[0] + 7f, thunder[1], thunder[0] + 9f, thunder[1] + 1f, 4.6f, 4.9f, "", 0),
+            new Shot(13.8f, shadow[0] + 8f, shadow[1] - 1f, shadow[0] + 10f, shadow[1], 4.0f, 4.3f, "", 0),
+            new Shot(15f, horizon[0] + 8f, horizon[1], horizon[0] + 9f, horizon[1] + 2f, 4.4f, 4.6f, "", 0),
+            new Shot(16f, tremor[0] + 12f, tremor[1] + 4f, tremor[0] + 13f, tremor[1] + 6f, 3.8f, 3.5f, "", 0),
+            new Shot(17f, wx + 4f, 64f, wx + 2f, 64f, 2.0f, 2.3f, "WHEN THE SKY GOES DARK", night | flash),
+            new Shot(19.2f, wx + 6f, 62f, wx + 3f, 64f, 4.0f, 4.3f, "THEY GROW STRONGER", night),
+            new Shot(21f, wx + 8f, 82f, wx + 4f, 80f, 3.6f, 3.9f, "", night),
+            new Shot(22.6f, wx - 2f, 64f, wx - 8f, 62f, 3.6f, 1.7f, "", night),
+        };
+
+        //the Swarm, the Dominion and the Tide, each a moment before its shot, east of the camera, heading west
+        at(5.3f, () -> {
+            group(Factions.mite, 30, 152f, 172f, 60f, 86f);
+            group(Factions.spitter, 8, 158f, 172f, 62f, 84f);
+            group(Factions.scrabba, 2, 160f, 166f, 68f, 78f);
+            group(Factions.brood, 2, 162f, 170f, 66f, 80f);
+            group(Factions.wasp, 8, 160f, 178f, 60f, 88f);
+        });
+        at(7.3f, () -> {
+            group(MilitaryUnits.bulwark, 4, 158f, 170f, 36f, 56f);
+            group(MilitaryUnits.rampart, 3, 160f, 172f, 36f, 56f);
+            group(MilitaryUnits.reaper, 4, 156f, 168f, 38f, 54f);
+            group(MilitaryUnits.colossus, 1, 166f, 170f, 44f, 48f);
+            group(MilitaryUnits.wraith, 3, 166f, 182f, 34f, 58f);
+            group(MilitaryUnits.valkyrie, 2, 168f, 182f, 38f, 54f);
+        });
+        at(9.3f, () -> {
+            naval(Factions.skiff, 3, 146f, 166f);
+            naval(Factions.slicker, 3, 148f, 168f);
+            naval(Factions.cinderwake, 1, 152f, 160f);
+            naval(Factions.frostwake, 1, 156f, 164f);
+        });
+        //a constant stream at the wall from here on
+        for(float s = 8.5f; s < 24f; s += 1f){
+            at(s, () -> {
+                group(Factions.mite, 4, wx + 14f, wx + 24f, 28f, 100f);
+                group(Factions.spitter, 1, wx + 16f, wx + 24f, 30f, 98f);
+                group(MilitaryUnits.reaper, 1, wx + 18f, wx + 26f, 30f, 98f);
+                if(rand.chance(0.5)) group(Factions.wasp, 2, wx + 18f, wx + 30f, 30f, 98f);
+            });
         }
+        //the eclipse: the sky darkens, the bosses come in stronger
+        at(17.4f, () -> EclipseEvent.start(100));
+        at(18.4f, () -> {
+            group(Factions.behemoth, 2, wx + 12f, wx + 18f, 54f, 70f);
+            group(MilitaryUnits.annihilator, 1, wx + 14f, wx + 18f, 58f, 66f);
+            group(MilitaryUnits.colossus, 2, wx + 14f, wx + 20f, 50f, 76f);
+            group(Factions.brood, 4, wx + 12f, wx + 20f, 50f, 78f);
+            group(Factions.mite, 20, wx + 10f, wx + 22f, 40f, 88f);
+        });
+        at(20.4f, () -> {
+            group(MilitaryUnits.leviathan, 1, wx + 14f, wx + 18f, 78f, 84f);
+            group(MilitaryUnits.tempest, 2, wx + 12f, wx + 20f, 74f, 88f);
+            group(MilitaryUnits.valkyrie, 4, wx + 12f, wx + 22f, 72f, 90f);
+        });
+    }
+
+    static void at(float time, Runnable r){
+        int i = 0;
+        while(i < eventTimes.size && eventTimes.get(i) <= time) i++;
+        eventTimes.insert(i, time);
+        events.insert(i, r);
+    }
+
+    /** A turret's position in tiles from the arena's tags ("name:x,y;..."), or a fallback. */
+    static float[] turret(String name, float fx, float fy){
+        for(String s : state.rules.tags.get("trailer.turrets", "").split(";")){
+            String[] kv = s.split(":");
+            if(kv.length == 2 && kv[0].equals(name)){
+                String[] xy = kv[1].split(",");
+                return new float[]{Strings.parseFloat(xy[0], fx), Strings.parseFloat(xy[1], fy)};
+            }
+        }
+        Log.warn("[ECLIPSE] trailer: no @ in the arena", name);
+        return new float[]{fx, fy};
+    }
+
+    /** The middle of the deep water in a column (the river), or 16. */
+    static float waterY(int x){
+        float sum = 0f;
+        int n = 0;
+        for(int y = 0; y < world.height(); y++){
+            Tile t = world.tile(x, y);
+            if(t != null && t.floor().isDeep()){
+                sum += y;
+                n++;
+            }
+        }
+        return n == 0 ? 16f : sum / n;
+    }
+
+    static void group(@Nullable UnitType type, int count, float x0, float x1, float y0, float y1){
+        if(type == null) return;
+        for(int i = 0; i < count; i++) spawn(type, rand.random(x0, x1), rand.random(y0, y1));
+    }
+
+    /** Boats on deep water in a stretch of the river. */
+    static void naval(@Nullable UnitType type, int count, float x0, float x1){
+        if(type == null) return;
+        for(int i = 0; i < count; i++){
+            int x = (int)rand.random(x0, x1);
+            spawn(type, x, waterY(x) + rand.range(1f));
+        }
+    }
+
+    static void spawn(UnitType type, float tx, float ty){
+        Unit u = type.create(state.rules.waveTeam);
+        u.set(tx * tilesize, ty * tilesize);
+        u.rotation = 180f;
+        u.add();
+    }
+
+    // ---- running it ----
+
+    static void update(){
+        if(!state.isGame() || phase == 0 || phase >= 4) return;
+        ui.hudfrag.shown = false;
+        float dt = Time.delta / 60f;
         if(phase == 1){
             aim(shots[0], 0f);
+            if((clock += dt) >= warmup){
+                signals.child("ready").writeString("ready");
+                phase = 2;
+                Log.info("[ECLIPSE] trailer: ready, waiting for the recording to start");
+            }
             return;
         }
         if(phase == 2){
-            Shot s = shots[shot];
-            if(!shotStarted){
-                shotStarted = true;
-                PhotoShoot.lighting((s.flags & night) != 0);
-                state.rules.ambientLight.a = 0.62f;
-                if((s.flags & enemies) != 0) attack(s.anchor);
-                if((s.flags & darken) != 0) eclipse.systems.EclipseEvent.start(60);
-                if((s.flags & wiki) != 0){
-                    Content furnace = content.getByName(ContentType.block, "eclipse-blast-furnace");
-                    EclipseWiki wikiDialog = EclipseWiki.instance;
-                    if(furnace instanceof UnlockableContent u && wikiDialog != null){
-                        wikiDialog.show();
-                        wikiDialog.pendingBuild = 1; //the full line (three furnaces into a freezer), not the single machine
-                        wikiDialog.open(u, "build", true);
-                    }
-                }
-                //a cut: no zoom easing from the last shot
-                renderer.targetscale = renderer.camerascale = s.zoom0;
+            aim(shots[0], 0f);
+            if(signals.child("go").exists()){
+                phase = 3;
+                t = 0f;
+                music = Musics.boss1;
+                music.setVolume(0.85f);
+                music.setLooping(false);
+                music.play();
+                music.setPosition(musicStart);
+                Log.info("[ECLIPSE] trailer: playing");
+            }else if((clock += dt) >= warmup + 90f){
+                Log.err("[ECLIPSE] trailer: the recording never started");
+                finish();
             }
-            aim(s, shotFrame / (s.seconds * fps));
-        }
-    }
-
-    /** Starts recording: ffmpeg reads raw frames from a pipe; the game steps 1/30 s per frame from now on. */
-    static void begin(){
-        width = Core.graphics.getWidth();
-        height = Core.graphics.getHeight();
-        try{
-            new Fi(output).parent().mkdirs();
-            ProcessBuilder b = new ProcessBuilder(ffmpeg, "-y", "-f", "rawvideo", "-pix_fmt", "rgba", "-s", width + "x" + height, "-r", String.valueOf(fps),
-                "-i", "-", "-vf", "vflip,scale=1920:1080:flags=lanczos", "-c:v", "libx264", "-preset", "slow", "-crf", "17", "-pix_fmt", "yuv420p",
-                "-movflags", "+faststart", output);
-            b.redirectErrorStream(true);
-            b.redirectOutput(new File(output + ".log"));
-            process = b.start();
-            pipe = new BufferedOutputStream(process.getOutputStream(), 1 << 22);
-        }catch(Throwable e){
-            Log.err("[ECLIPSE] trailer: could not start ffmpeg (" + ffmpeg + ")", e);
-            Core.app.exit();
             return;
         }
-        Time.setDeltaProvider(() -> 60f / fps);
-        statusBefore = Core.settings.getBool("blockstatus", true);
-        Core.settings.put("blockstatus", false);
-        phase = 1;
-        frame = 0;
-        Log.info("[ECLIPSE] trailer: recording @x@ to @", width, height, output);
+        t += dt;
+        while(nextEvent < events.size && eventTimes.get(nextEvent) <= t) events.get(nextEvent++).run();
+        //music fades out over the end card
+        if(music != null) music.setVolume(0.85f * (1f - smooth(length - 2f, length, t)));
+        int current = -1;
+        for(int i = 0; i < shots.length; i++) if(t >= shots[i].at) current = i;
+        Shot s = shots[Math.max(current, 0)];
+        if(current != shot){
+            shot = current;
+            //a cut: no zoom easing from the last shot
+            renderer.targetscale = renderer.camerascale = s.zoom0;
+            PhotoShoot.lighting((s.flags & night) != 0);
+            state.rules.ambientLight.a = 0.5f;
+        }
+        float end = current + 1 < shots.length ? shots[current + 1].at : cardStart - 0.4f;
+        aim(s, (t - s.at) / (end - s.at));
+        if(t >= length) finish();
     }
-
-    /** After the frame is drawn: the overlay (opener, captions, end card, fades), then the frame goes to ffmpeg. */
-    static void afterFrame(){
-        if(phase < 1 || phase >= 4 || pipe == null) return;
-        float w = Core.graphics.getWidth(), h = Core.graphics.getHeight();
-        if((int)w != width || (int)h != height){
-            Log.err("[ECLIPSE] trailer: the window changed size while recording; stopping");
-            finish();
-            return;
-        }
-        Draw.proj(0f, 0f, w, h);
-        float t = frame / (float)fps;
-        if(phase == 1) opener(w, h, t);
-        else if(phase == 2) caption(w, h, shots[shot], shotFrame / (float)fps);
-        else endCard(w, h, t);
-        Draw.flush();
-        Draw.reset();
-        try{
-            pipe.write(ScreenUtils.getFrameBufferPixels(0, 0, width, height, false));
-        }catch(Throwable e){
-            Log.err("[ECLIPSE] trailer: ffmpeg stopped taking frames", e);
-            finish();
-            return;
-        }
-        frame++;
-        if(phase == 1 && t >= openerSeconds){
-            phase = 2;
-            frame = 0;
-            shot = shotFrame = 0;
-            shotStarted = false;
-        }else if(phase == 2){
-            Shot s = shots[shot];
-            if(++shotFrame >= s.seconds * fps){
-                if((s.flags & wiki) != 0 && EclipseWiki.instance != null) EclipseWiki.instance.hide();
-                shotFrame = 0;
-                shotStarted = false;
-                if(++shot >= shots.length){
-                    phase = 3;
-                    frame = 0;
-                }
-            }
-        }else if(phase == 3 && t >= endSeconds){
-            finish();
-        }
-    }
-
-    static boolean statusBefore = true;
 
     static void finish(){
+        if(phase == 4) return;
         phase = 4;
-        Core.settings.put("blockstatus", statusBefore);
-        Time.setDeltaProvider(() -> Math.min(Core.graphics.getDeltaTime() * 60f, 3f));
-        try{
-            if(pipe != null) pipe.close();
-            if(process != null) process.waitFor();
-            Log.info("[ECLIPSE] trailer written: @", output);
-        }catch(Throwable e){
-            Log.err("[ECLIPSE] trailer: ffmpeg did not finish", e);
-        }
-        pipe = null;
-        Core.app.exit();
+        if(music != null) music.stop();
+        EclipseEvent.end();
+        Core.settings.put("blockstatus", blockStatus);
+        signals.child("done").writeString("done");
+        Log.info("[ECLIPSE] trailer: done");
+        //a moment of black for the recording's tail, then quit
+        Time.runTask(90f, Core.app::exit);
     }
 
-    // ---- camera and action ----
-
-    /** The camera on a shot's anchor, eased from its start to its end offset and zoom, kept inside the map. */
+    /** The camera between a shot's two points (tiles), eased, kept inside the map. */
     static void aim(Shot s, float f){
         if(control.input instanceof DesktopInput d) d.panning = true;
         float e = Interp.smooth.apply(Mathf.clamp(f)), zoom = Mathf.lerp(s.zoom0, s.zoom1, e);
         renderer.targetscale = renderer.camerascale = zoom;
-        Position at = PhotoShoot.anchor(s.anchor);
-        if(at == null) return;
         float halfW = Core.graphics.getWidth() / zoom / 2f, halfH = Core.graphics.getHeight() / zoom / 2f;
-        float x = at.getX() + Mathf.lerp(s.dx0, s.dx1, e) * tilesize, y = at.getY() + Mathf.lerp(s.dy0, s.dy1, e) * tilesize;
+        float x = Mathf.lerp(s.x0, s.x1, e) * tilesize, y = Mathf.lerp(s.y0, s.y1, e) * tilesize;
         //six tiles in from the map's edge, where the game draws its dark border
         float margin = 6f * tilesize, maxX = world.width() * tilesize - tilesize / 2f, maxY = world.height() * tilesize - tilesize / 2f;
         x = (halfW + margin) * 2f >= maxX ? maxX / 2f : Mathf.clamp(x, halfW + margin, maxX - halfW - margin);
@@ -237,19 +300,34 @@ public class Trailer{
         Core.camera.position.set(x, y);
     }
 
-    /** The Swarm and the Dominion coming up from the south at the turret line: mites, spitters, wasps, a Scrabba, tanks. */
-    static void attack(String anchorName){
-        Position at = PhotoShoot.anchor(anchorName);
-        if(at == null) return;
-        Rand rand = new Rand(11);
-        UnitType[] ground = {Factions.mite, Factions.mite, Factions.mite, Factions.mite, Factions.mite, Factions.mite, Factions.spitter, Factions.spitter,
-            Factions.spitter, Factions.scrabba, MilitaryUnits.bulwark, MilitaryUnits.bulwark, MilitaryUnits.rampart};
-        UnitType[] air = {Factions.wasp, Factions.wasp, Factions.wasp, Factions.wasp};
-        for(UnitType type : ground) PhotoShoot.spawn(type, at.getX() + rand.range(10f) * tilesize, at.getY() - (8f + rand.random(3f)) * tilesize);
-        for(UnitType type : air) PhotoShoot.spawn(type, at.getX() + rand.range(12f) * tilesize, at.getY() - (13f + rand.random(3f)) * tilesize);
-    }
-
     // ---- the overlay ----
+
+    static void overlay(){
+        if(phase == 0 || phase >= 5) return;
+        float w = Core.graphics.getWidth(), h = Core.graphics.getHeight();
+        Draw.proj(0f, 0f, w, h);
+        if(phase < 3) black(w, h, 1f);
+        else if(phase == 4) black(w, h, 1f);
+        else if(t < openerEnd) opener(w, h, t);
+        else if(t >= cardStart) endCard(w, h, t - cardStart);
+        else{
+            Shot s = shots[Math.max(shot, 0)];
+            float end = shot + 1 < shots.length ? shots[shot + 1].at : cardStart - 0.4f;
+            letterbox(w, h);
+            caption(w, h, s, t - s.at, end - s.at);
+            if((s.flags & flash) != 0){
+                float f = t - 17.4f;
+                if(f > 0f && f < 0.35f){
+                    Draw.color(1f, 1f, 1f, 0.75f * (1f - f / 0.35f));
+                    Fill.crect(0f, 0f, w, h);
+                }
+            }
+            //into the opener's black and out to the end card
+            black(w, h, 1f - smooth(openerEnd, openerEnd + 0.25f, t) + smooth(cardStart - 0.4f, cardStart - 0.15f, t));
+        }
+        Draw.flush();
+        Draw.reset();
+    }
 
     static float smooth(float from, float to, float v){
         return Interp.smooth.apply(Mathf.clamp((v - from) / (to - from)));
@@ -259,6 +337,13 @@ public class Trailer{
         if(alpha <= 0f) return;
         Draw.color(0f, 0f, 0f, Math.min(alpha, 1f));
         Fill.crect(0f, 0f, w, h);
+    }
+
+    static void letterbox(float w, float h){
+        float bar = h * 0.07f;
+        Draw.color(Color.black);
+        Fill.crect(0f, 0f, w, bar);
+        Fill.crect(0f, h - bar, w, bar);
     }
 
     static void text(String s, float x, float y, float scale, Color c, float alpha, int align){
@@ -287,38 +372,33 @@ public class Trailer{
         }
     }
 
+    /** The eclipse forming, fast, out of black. */
     static void opener(float w, float h, float t){
-        //the eclipse forms (the menu's intro at 80% speed), then the logo and the version
-        title(w, h, frame * 2f, t * 0.8f, smooth(3.1f, 3.8f, t));
-        text("VERSION 1.0", w / 2f, h * 0.24f - h * 0.075f, 2f * h / 1080f, MenuBackdrop.gold, smooth(3.6f, 4.2f, t), Align.center);
-        black(w, h, 1f - smooth(0f, 0.5f, t) + smooth(openerSeconds - 0.5f, openerSeconds, t));
+        title(w, h, t * 120f, t * 1.05f, 0f);
+        black(w, h, 1f - smooth(0f, 0.3f, t) + smooth(openerEnd - 0.2f, openerEnd, t));
     }
 
-    /** A caption over the bottom left, on a soft dark band, fading in and out; a quick fade through black at the cuts. */
-    static void caption(float w, float h, Shot s, float t){
-        float px = h / 1080f, alpha = smooth(0.4f, 0.9f, t) * (1f - smooth(s.seconds - 0.8f, s.seconds - 0.35f, t));
-        if(!s.caption.isEmpty() && alpha > 0f){
-            float band = 320f * px, a = 0.72f * alpha;
-            float bottom = Color.toFloatBits(0f, 0f, 0f, a), top = Color.toFloatBits(0f, 0f, 0f, 0f);
-            Fill.quad(0f, 0f, bottom, w, 0f, bottom, w, band, top, 0f, band, top);
-            boolean onRight = (s.flags & right) != 0;
-            float barX = onRight ? w - 115f * px : 110f * px, textX = onRight ? w - 136f * px : 136f * px;
-            int align = onRight ? Align.right : Align.left;
-            //on the right (the wiki shot) lower down, under the wiki's page
-            float lift = onRight ? -70f * px : 0f;
-            Draw.color(MenuBackdrop.gold, alpha);
-            Fill.crect(barX, 140f * px + lift, 5f * px, 100f * px);
-            text(s.caption, textX, 240f * px + lift, 2.1f * px, Color.white, alpha, align);
-            text(s.sub, textX + (onRight ? 0f : 2f * px), 176f * px + lift, 1.15f * px, Color.lightGray, alpha, align);
+    /** A big centred caption low on the screen, punching in and fading out; the shot's cut comes from black. */
+    static void caption(float w, float h, Shot s, float time, float shotLength){
+        float px = h / 1080f;
+        if(!s.caption.isEmpty()){
+            float in = smooth(0.05f, 0.3f, time), alpha = in * (1f - smooth(shotLength - 0.35f, shotLength - 0.1f, time));
+            if(alpha > 0f){
+                float scale = (2.9f + 0.5f * (1f - in)) * px, y = h * 0.2f;
+                Draw.color(MenuBackdrop.gold, alpha);
+                float bar = 240f * px * in;
+                Fill.crect(w / 2f - bar / 2f, y - 74f * px, bar, 4f * px);
+                text(s.caption, w / 2f, y, scale, Color.white, alpha, Align.center);
+            }
         }
-        black(w, h, 1f - smooth(0f, 0.3f, t) + smooth(s.seconds - 0.3f, s.seconds, t));
+        black(w, h, 0.6f * (1f - smooth(0f, 0.12f, time)));
     }
 
     static void endCard(float w, float h, float t){
-        title(w, h, frame * 2f, 9f, 1f);
+        title(w, h, (cardStart + t) * 120f, 9f, smooth(0.2f, 0.9f, t));
         float px = h / 1080f;
-        text("VERSION 1.0", w / 2f, h * 0.165f, 2f * px, MenuBackdrop.gold, smooth(0.6f, 1.2f, t), Align.center);
-        text("A mod for Mindustry  -  on the Steam Workshop", w / 2f, h * 0.1f, 1.4f * px, Color.lightGray, smooth(1f, 1.6f, t), Align.center);
-        black(w, h, 1f - smooth(0f, 0.6f, t) + smooth(endSeconds - 0.8f, endSeconds, t));
+        text("VERSION 1.0", w / 2f, h * 0.165f, 2f * px, MenuBackdrop.gold, smooth(0.8f, 1.4f, t), Align.center);
+        text("A mod for Mindustry  -  on the Steam Workshop", w / 2f, h * 0.1f, 1.4f * px, Color.lightGray, smooth(1.3f, 1.9f, t), Align.center);
+        black(w, h, 1f - smooth(0f, 0.5f, t) + smooth(length - cardStart - 0.8f, length - cardStart, t));
     }
 }

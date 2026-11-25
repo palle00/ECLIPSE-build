@@ -112,10 +112,13 @@ public class MenuOrder{
         after(Blocks.whiteTreeDead,
             PlanetTerrain.tideReefSand, PlanetTerrain.tideBlackSand, PlanetTerrain.tideCoral, PlanetTerrain.tideBarnacleRock, PlanetTerrain.tideLagoon, PlanetTerrain.tideAbyss,
             PlanetTerrain.tideReefWater, PlanetTerrain.tideBlackSandWater, PlanetTerrain.tideSandstoneWall, PlanetTerrain.tideBasaltWall, PlanetTerrain.tideCoralWall, PlanetTerrain.tidePalm, PlanetTerrain.tideShell,
+            PlanetTerrain.tideOilSeep, PlanetTerrain.tideVentRock, PlanetTerrain.tideVent, PlanetTerrain.tideSunkenPlating, PlanetTerrain.tideSunkenPanel, PlanetTerrain.tideWreckWall,
             PlanetTerrain.hiveCreep, PlanetTerrain.hiveBroodMoss, PlanetTerrain.hiveSporeSand, PlanetTerrain.hiveChitin, PlanetTerrain.hiveBile, PlanetTerrain.hiveBileShallows,
             PlanetTerrain.hiveFleshWall, PlanetTerrain.hiveChitinWall, PlanetTerrain.hiveStalk, PlanetTerrain.hivePod,
+            PlanetTerrain.hiveResin, PlanetTerrain.hiveFeverFlesh, PlanetTerrain.hiveHeart, PlanetTerrain.hiveOvergrownPlating, PlanetTerrain.hiveOvergrownPanel, PlanetTerrain.hiveEngulfedWall,
             PlanetTerrain.ironholdAsh, PlanetTerrain.ironholdScorchedRock, PlanetTerrain.ironholdPlating, PlanetTerrain.ironholdSludge, PlanetTerrain.ironholdSludgeShallows,
-            PlanetTerrain.ironholdSlagWall, PlanetTerrain.ironholdScrapWall, PlanetTerrain.ironholdScrap);
+            PlanetTerrain.ironholdSlagWall, PlanetTerrain.ironholdScrapWall, PlanetTerrain.ironholdScrap,
+            PlanetTerrain.ironholdTar, PlanetTerrain.ironholdCinder, PlanetTerrain.ironholdMagma, PlanetTerrain.ironholdDarkPlating, PlanetTerrain.ironholdBulwarkWall);
 
         //---- items (core inventory, item pickers); augmentation modules stay at the end as their own group ----
         after(Items.metaglass, hotMetaglass, hotReinforcedGlass, reinforcedGlass);

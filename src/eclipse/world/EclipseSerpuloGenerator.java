@@ -53,8 +53,12 @@ public class EclipseSerpuloGenerator extends SerpuloPlanetGenerator{
      * rings, and on a mirror-symmetric map the veins are mirrored too, so both sides get the same ore.
      */
     public static void addOres(Tiles tiles, int seed, boolean fair){
-        // ore, noise scale, threshold near the core, threshold at the far edge, minimum distance (0-1 of map)
-        Object[][] ores = {
+        addOres(tiles, seed, fair, eclipseOres());
+    }
+
+    /** ECLIPSE's ores: ore, noise scale, threshold near the core, threshold at the far edge, minimum distance (0-1 of map). */
+    public static Object[][] eclipseOres(){
+        return new Object[][]{
             {oreNickel, 26f, 0.84f, 0.79f, 0.00f},
             {oreChromium, 24f, 0.85f, 0.80f, 0.10f},
             {oreCobalt, 22f, 0.86f, 0.81f, 0.20f},
@@ -64,6 +68,10 @@ public class EclipseSerpuloGenerator extends SerpuloPlanetGenerator{
             {oreAetherite, 14f, 0.91f, 0.86f, 0.55f},
             {oreBauxite, 25f, 0.845f, 0.795f, 0.05f}, //aluminium is a mid-game staple: fairly common
         };
+    }
+
+    /** As {@link #addOres(Tiles, int, boolean)}, with a table of ores in the {@link #eclipseOres()} format. */
+    public static void addOres(Tiles tiles, int seed, boolean fair, Object[][] ores){
 
         Tile core = null;
         Seq<Tile> cores = new Seq<>();

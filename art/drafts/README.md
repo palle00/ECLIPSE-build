@@ -35,4 +35,5 @@ some approved grids were hand-adjusted after drafting (draft.py / draft2-4 regen
   `assets/sprites/blocks/environment` (floors must be on the environment page): land floors (3 variants, every shape inside
   its tile like vanilla), single wrapping liquid tiles, cliff walls (2 variants + `-large`; shapes touching a tile edge are
   shared by all variants so walls join without seams), trees and boulders. Shallow-water blends and floor edges are made
-  by the game. Run with `python -I terrain.py OUT [name...]`.
+  by the game. Run with `python -I terrain.py OUT [name...]`. Also each planet's oil (tar), heat floors (hot rock / magma
+  rock), metal decks (metal floor / dark panels) and metal wall (dark metal), so no Serpulo terrain is left on the planets.

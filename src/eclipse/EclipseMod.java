@@ -38,13 +38,19 @@ public class EclipseMod extends Mod{
         eclipse.ui.ProductionStats.registerKey(); //O: production panel
         eclipse.ui.StallOverlay.registerKey(); //K: mark stopped machines
         //custom games on premade Serpulo maps get ECLIPSE ores too (before the renderer caches the floor)
-        Events.on(WorldLoadEndEvent.class, e -> EclipseSerpuloGenerator.addToCustomMap());
+        Events.on(WorldLoadEndEvent.class, e -> {
+            EclipseSerpuloGenerator.addToCustomMap();
+            eclipse.world.ErekirSupport.addOres(); //Erekir maps: Serpulo base ores and ECLIPSE's, once per map
+        });
 
         Events.on(ClientLoadEvent.class, e -> {
             Log.info("[ECLIPSE] client loaded");
             //optional UI extras that hook into vanilla's UI: one that no longer fits a game update stays off (logged), the game runs on
+            CrashLog.optional("settings", eclipse.ui.EclipseSettings::install); //every ECLIPSE setting: defaults, vanilla's ECLIPSE section
+            CrashLog.optional("settings screen", eclipse.ui.EclipseSettingsDialog::install);
             CrashLog.optional("compact core display", CompactCoreDisplay::install);
             CrashLog.optional("wiki", EclipseWiki::install);
+            CrashLog.optional("pause menu", eclipse.ui.PauseMenu::install); //the ECLIPSE pause menu (desktop); the wiki button elsewhere
             CrashLog.optional("production panel", eclipse.ui.ProductionStats::install);
             CrashLog.optional("menu backdrop", MenuBackdrop::install);
             CrashLog.optional("deployment intro", DeploymentIntro::install); //the ECLIPSE landing sequence for new games
@@ -102,6 +108,8 @@ public class EclipseMod extends Mod{
         CoreContent.load(); //core upgrades after the Nucleus (Bastion, Citadel) and their core units (Delta, Epsilon)
         EclipseTechTree.load();
         EclipsePlanets.load(); //after the tech tree: the new planets share it
+        EclipseItems.mergeIntoVanilla(); //after the planets: vanilla tungsten and carbide shown everywhere ECLIPSE is, old saves aliased
+        eclipse.world.ErekirSupport.load(); //ECLIPSE (and the Serpulo base it needs) researched and built on Erekir too
         UnitPolish.load(); //after every unit exists: pulsing accent lights, drone rotors, wasp wings
         Animations.load(); //after every crafter exists: product-coloured glow and turning parts while working
         Polish.load(); //after Animations: working sounds, lights and effects by kind of machine

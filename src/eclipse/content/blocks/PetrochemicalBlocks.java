@@ -125,7 +125,7 @@ public class PetrochemicalBlocks{
         // Light, strong and partly deflects bullets. Sits between superalloy and surge-superalloy walls.
         compositeWall = new Wall("composite-wall"){{
             requirements(Category.defense, with(carbonComposite, 5));
-            health = 250 * 4;
+            health = 275 * 4; //kept above the Superalloy Wall (balance audit 2026-11-25)
             chanceDeflect = 5f;
             absorbLasers = true;
         }};
@@ -133,7 +133,7 @@ public class PetrochemicalBlocks{
         compositeWallLarge = new Wall("composite-wall-large"){{
             requirements(Category.defense, mult(compositeWall.requirements, 4));
             size = 2;
-            health = 250 * 4 * 4;
+            health = 275 * 4 * 4;
             chanceDeflect = 5f;
             absorbLasers = true;
         }};

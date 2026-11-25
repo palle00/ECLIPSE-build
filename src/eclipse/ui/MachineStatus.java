@@ -166,16 +166,28 @@ public class MachineStatus{
         return null;
     }
 
-    /** A status bar on every ECLIPSE crafter. Call on ClientLoadEvent. */
+    public static final String bar = "eclipse-status";
+    static boolean barsShown;
+
+    /** A status bar on every ECLIPSE crafter, unless the Machine status line setting is off. Call on ClientLoadEvent. */
     public static void install(){
-        Events.on(ClientLoadEvent.class, e -> {
-            for(Block block : content.blocks()){
-                if(!(block instanceof GenericCrafter) || !block.name.startsWith("eclipse-")) continue;
-                block.addBar("eclipse-status", (GenericCrafterBuild b) -> {
-                    Status[] last = {of(b)};
-                    return new Bar(() -> (last[0] = of(b)).text(), () -> last[0].color(), () -> 1f);
-                });
+        Events.on(ClientLoadEvent.class, e -> showBars(EclipseSettings.machineStatus.on()));
+    }
+
+    /** Adds the status bar to every ECLIPSE crafter, or takes it away again (the Machine status line setting). */
+    public static void showBars(boolean show){
+        if(show == barsShown) return;
+        barsShown = show;
+        for(Block block : content.blocks()){
+            if(!(block instanceof GenericCrafter) || !block.name.startsWith("eclipse-")) continue;
+            if(!show){
+                block.removeBar(bar);
+                continue;
             }
-        });
+            block.addBar(bar, (GenericCrafterBuild b) -> {
+                Status[] last = {of(b)};
+                return new Bar(() -> (last[0] = of(b)).text(), () -> last[0].color(), () -> 1f);
+            });
+        }
     }
 }

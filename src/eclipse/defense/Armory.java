@@ -98,6 +98,27 @@ public class Armory{
         }
     }
 
+    // ---- Heat Lance ----
+
+    /**
+     * A continuous beam that grows stronger with heat above its requirement, up to {@link #maxHeatEfficiency}. Vanilla's
+     * continuous turrets cap beam damage at 100% efficiency, so extra heat did nothing (found in the balance audit,
+     * 2026-11-25).
+     */
+    public static class HeatBeamTurret extends ContinuousTurret{
+        public HeatBeamTurret(String name){
+            super(name);
+        }
+
+        public class HeatBeamTurretBuild extends ContinuousTurretBuild{
+            @Override
+            protected void updateBullet(BulletEntry entry){
+                super.updateBullet(entry);
+                if(scaleDamageEfficiency && entry.bullet != null) entry.bullet.damage = entry.bullet.type.damage * efficiency * timeScale * entry.bullet.damageMultiplier();
+            }
+        }
+    }
+
     // ---- Sickle ----
 
     /**

@@ -43,10 +43,10 @@ public class Factions{
     static final Color acid = Color.valueOf("8f8a3a");
 
     public static void load(){
-        mite = swarmMech("mite", t -> {
+        mite = swarmSpider("mite", 6, 14f, 2f, t -> {
             t.health = 70f;
             t.speed = 0.9f;
-            t.hitSize = 8f;
+            t.hitSize = 9f; //the reaper's (same tier)
             t.abilities.add(regen(0.1f), new ExoskeletonAbility(30f, 0.1f));
             t.weapons.add(new Weapon(){{
                 mirror = false;
@@ -86,11 +86,11 @@ public class Factions{
                 }};
             }});
         });
-        spitter = swarmMech("spitter", t -> {
+        spitter = swarmSpider("spitter", 6, 20f, 3f, t -> {
             t.health = 320f;
             t.speed = 0.55f;
             t.armor = 2f;
-            t.hitSize = 12f;
+            t.hitSize = 13f; //the bulwark's (same tier)
             t.abilities.add(regen(0.25f), new ExoskeletonAbility(120f, 0.25f));
             t.weapons.add(new Weapon(){{
                 mirror = false;
@@ -113,7 +113,7 @@ public class Factions{
                 }};
             }});
         });
-        brood = swarmMech("brood", t -> {
+        brood = swarmSpider("brood", 8, 28f, 5f, t -> {
             t.health = 950f;
             t.speed = 0.45f;
             t.armor = 5f;
@@ -136,7 +136,7 @@ public class Factions{
                 }};
             }});
         });
-        behemoth = swarmMech("behemoth", t -> {
+        behemoth = swarmSpider("behemoth", 8, 38f, 7f, t -> {
             t.health = 9000f;
             t.speed = 0.35f;
             t.armor = 10f;
@@ -167,7 +167,7 @@ public class Factions{
 
         //Scrabba: the Swarm's late boss, a giant scorpion and the first melee unit. Its claws crush everything in a 3x3 area
         //in front of it (walls included); its stinger saps (heals it by part of the damage) and leaves the target Sapped
-        scrabba = swarmMech("scrabba", t -> {
+        scrabba = swarmSpider("scrabba", 8, 52f, 10f, t -> {
             t.health = 16000f;
             t.speed = 0.42f;
             t.armor = 14f;
@@ -175,12 +175,13 @@ public class Factions{
             t.rotateSpeed = 2.2f;
             t.abilities.add(regen(2.5f), new ExoskeletonAbility(3000f, 2.5f));
             t.weapons.add(new Weapon(){{
-                x = 11f;
-                y = 14f;
+                //the palms of the 200 px sprite; the crush still lands 25 units ahead, on the block in front of the claw
+                x = 15f;
+                y = 16f;
                 alternate = true;
                 reload = 50f;
                 shootCone = 45f;
-                shootY = 11f; //the crush lands on the block in front of the claw (pressed against a wall: its centre)
+                shootY = 9f; //(pressed against a wall: its centre)
                 shootSound = Sounds.shootSmite;
                 bullet = new ExplosionBulletType(160f, 13f){{ //radius 13 around a block: it and its 8 neighbours
                     killShooter = false;
@@ -195,7 +196,7 @@ public class Factions{
             }}, new Weapon(){{
                 mirror = false;
                 x = 0f;
-                y = -4f;
+                y = -6f;
                 rotate = true;
                 rotateSpeed = 4f;
                 reload = 45f;
@@ -350,12 +351,17 @@ public class Factions{
         Events.on(EventType.WorldLoadEndEvent.class, e -> apply());
     }
 
-    /** Enemy-only units: never researched or built; the database still shows them. */
-    static UnitType swarmMech(String name, arc.func.Cons<UnitType> setup){
+    /**
+     * Enemy-only units: never researched or built; the database still shows them. They walk on long jointed hairy legs
+     * (legs, legLength in world units, legBaseOffset); without allowLegStep they stay ground units, blocked by walls.
+     * The leg sprites (-leg, -leg-base, -joint) are drawn by art/drafts/swarm.py, sized to legLength.
+     */
+    static UnitType swarmSpider(String name, int legs, float legLength, float legBaseOffset, arc.func.Cons<UnitType> setup){
         UnitType t = new UnitType(name){{
-            constructor = MechUnit::create;
-            mechStepParticles = true;
-            mechLegColor = Color.valueOf("4a5a3a");
+            constructor = LegsUnit::create;
+            legCount = legs;
+            this.legLength = legLength;
+            this.legBaseOffset = legBaseOffset;
             shieldColor = ExoskeletonAbility.chitin; //the exoskeleton's hit flash
         }};
         setup.get(t);
@@ -491,9 +497,13 @@ public class Factions{
         //(an older save missing a unit type added since, like Scrabba or the Lamprey, gets the current list)
         if(worldTag.equals(state.rules.tags.get(tag)) && !state.rules.spawns.contains(g -> !ownTypes.contains(g.type))
             && !baseTypes.toSeq().contains(t -> !state.rules.spawns.contains(g -> g.type == t))) return true;
+        //balance audit 2026-11-25: one list served every sector, so even the start sector met a T5 boss by wave 25-30.
+        //Everything after the opening group comes later near the start sector: 15 waves there, none on the far side.
+        int delay = worldDelay();
+        if(delay > 0) for(int i = 1; i < own.size; i++) if(own.get(i).begin > 0) own.get(i).begin += delay;
         state.rules.spawns = own;
         state.rules.tags.put(tag, worldTag);
-        if(!headless) ui.showInfoToast(Core.bundle.get("eclipse-factions-" + worldTag), 6f);
+        if(!headless && eclipse.ui.EclipseSettings.announce()) ui.showInfoToast(Core.bundle.get("eclipse-factions-" + worldTag), 6f);
         return true;
     }
 
@@ -509,30 +519,77 @@ public class Factions{
     public static void apply(){
         if(net.client() || state.rules.editor || !state.rules.waves || !neutralWaves()) return;
         //the factions' own worlds: only that faction
-        if(applyFactionWorld()) return;
+        if(!applyFactionWorld()) addFactions();
+        keepOffDeepWater();
+    }
+
+    /** How much tougher faction units are on Erekir, whose turrets and units are far stronger than Serpulo's (Breach alone
+     * out-damages Serpulo's early turrets several times over). Given as wave shields, so the units themselves are unchanged. */
+    public static final float erekirToughness = 3f;
+
+    /** Whether the current map is on Erekir (a campaign sector or a custom game on an Erekir map). */
+    public static boolean onErekir(){
+        return state.rules.planet == Planets.erekir;
+    }
+
+    /**
+     * Faction groups made ready for the current planet: on Erekir each unit gets wave shields worth (erekirToughness - 1)
+     * times its health, so it is about three times as tough (Erekir support, phase E1, 2026-11-25). Unchanged elsewhere.
+     */
+    public static Seq<SpawnGroup> local(Seq<SpawnGroup> groups){
+        if(onErekir()) for(SpawnGroup g : groups) g.shields += g.type.health * (erekirToughness - 1f);
+        return groups;
+    }
+
+    static void addFactions(){
         String done = state.rules.tags.get(tag);
         if(done == null){
             //a new list, so the map's own wave list is never changed
-            state.rules.spawns = new Seq<>(state.rules.spawns).addAll(waves(swarm)).addAll(waves(dominion)).addAll(waves(tide)).addAll(subWaves());
+            state.rules.spawns = new Seq<>(state.rules.spawns).addAll(local(waves(swarm))).addAll(local(waves(dominion))).addAll(local(waves(tide))).addAll(local(subWaves()));
             state.rules.tags.put(tag, "swarm+dominion+tide+scrabba+lamprey");
-            if(!headless) ui.showInfoToast(Core.bundle.get("eclipse-factions-start"), 6f);
+            if(!headless && eclipse.ui.EclipseSettings.announce()) ui.showInfoToast(Core.bundle.get("eclipse-factions-start"), 6f);
             return;
         }
         if(!done.contains("tide")){
             //an older save that has the Swarm and the Dominion: the Tide joins (with its Lampreys)
-            state.rules.spawns = new Seq<>(state.rules.spawns).addAll(waves(tide)).addAll(subWaves());
+            state.rules.spawns = new Seq<>(state.rules.spawns).addAll(local(waves(tide))).addAll(local(subWaves()));
             done += "+tide+lamprey";
             state.rules.tags.put(tag, done);
-            if(!headless) ui.showInfoToast(Core.bundle.get("eclipse-factions-tide"), 6f);
+            if(!headless && eclipse.ui.EclipseSettings.announce()) ui.showInfoToast(Core.bundle.get("eclipse-factions-tide"), 6f);
         }
         if(!done.contains("scrabba")){
             //an older save from before Scrabba and the Lamprey: they join their factions' rhythms
             Seq<SpawnGroup> newcomers = waves(swarm).select(g -> g.type == scrabba);
             if(!done.contains("lamprey")) newcomers.addAll(waves(tide).select(g -> g.type == lamprey));
-            state.rules.spawns = new Seq<>(state.rules.spawns).addAll(newcomers);
+            state.rules.spawns = new Seq<>(state.rules.spawns).addAll(local(newcomers));
             state.rules.tags.put(tag, done + "+scrabba" + (done.contains("lamprey") ? "" : "+lamprey"));
-            if(!headless) ui.showInfoToast(Core.bundle.get("eclipse-factions-newcomers"), 6f);
+            if(!headless && eclipse.ui.EclipseSettings.announce()) ui.showInfoToast(Core.bundle.get("eclipse-factions-newcomers"), 6f);
         }
+    }
+
+    /**
+     * ECLIPSE ground units that come from every spawn point would drown at one on deep water: on a map with such a spawn,
+     * each of those groups is pinned to every land spawn instead (none at all if every spawn is on deep water).
+     * Runs on every load, so older saves are fixed too; pinned groups are left alone the next time.
+     */
+    static void keepOffDeepWater(){
+        Seq<mindustry.world.Tile> spawns = spawner.getSpawns(), land = spawns.select(t -> !t.floor().isDeep());
+        if(land.size == spawns.size) return;
+        Seq<SpawnGroup> out = new Seq<>();
+        for(SpawnGroup g : state.rules.spawns){
+            UnitType t = g.type;
+            boolean drowns = !t.flying && !t.hovering && !t.naval && t.canDrown;
+            if(g.spawn != -1 || !drowns || !t.name.startsWith("eclipse-")){
+                out.add(g);
+                continue;
+            }
+            for(mindustry.world.Tile spawn : land){
+                SpawnGroup c = g.copy();
+                c.spawn = spawn.pos();
+                out.add(c);
+            }
+        }
+        state.rules.spawns = out;
     }
 
     /**
@@ -544,39 +601,54 @@ public class Factions{
         Seq<SpawnGroup> s = new Seq<>();
         if(faction == swarm){
             //the Swarm (waves 2, 4, 6...): mites from the start, flyers and spitters soon, breeders mid-game, a Behemoth every 12 waves
-            s.add(group(mite, 1, -1, 2, 2, 1f, 0f, 16));
-            s.add(group(wasp, 5, -1, 2, 1, 2f, 0f, 10));
+            //balance audit 2026-11-25: unit growth halved and caps lowered (with all three factions a custom game had 2-3x vanilla's enemy health)
+            s.add(group(mite, 1, -1, 2, 2, 2f, 0f, 10));
+            s.add(group(wasp, 5, -1, 2, 1, 4f, 0f, 6));
             //no wave shields: the Swarm grows its own exoskeleton
-            s.add(group(spitter, 9, -1, 4, 1, 2f, 0f, 6));
-            s.add(group(brood, 15, -1, 4, 1, 3f, 0f, 4));
-            SpawnGroup boss = group(behemoth, 23, -1, 12, 1, 0f, 0f, 2), scrabbaBoss = group(scrabba, 39, -1, 20, 1, 0f, 0f, 1);
+            s.add(group(spitter, 9, -1, 4, 1, 4f, 0f, 4));
+            s.add(group(brood, 15, -1, 4, 1, 6f, 0f, 3));
+            SpawnGroup boss = group(behemoth, 29, -1, 12, 1, 0f, 0f, 2), scrabbaBoss = group(scrabba, 49, -1, 20, 1, 0f, 0f, 1);
             boss.effect = scrabbaBoss.effect = StatusEffects.boss;
             s.add(boss, scrabbaBoss);
         }else if(faction == tide){
-            //the Tide (waves 5, 10, 15...): skiffs first, then oil and cryofluid boats, slag boats late, a Maelstrom every 20 waves from wave 35
-            s.add(group(skiff, 4, -1, 5, 2, 1.5f, 0f, 12));
-            s.add(group(slicker, 9, -1, 5, 1, 2f, 0f, 8));
-            s.add(group(frostwake, 14, -1, 5, 1, 2.5f, 5f, 6));
-            s.add(group(lamprey, 14, -1, 5, 1, 2.5f, 0f, 6));
-            s.add(group(cinderwake, 24, -1, 10, 1, 3f, 10f, 4));
-            SpawnGroup boss = group(maelstrom, 34, -1, 20, 1, 0f, 30f, 2);
+            //the Tide (waves 5, 10, 15...): skiffs first, then oil and cryofluid boats, slag boats late, a Maelstrom every 20 waves from wave 45
+            s.add(group(skiff, 4, -1, 5, 1, 3f, 0f, 6));
+            s.add(group(slicker, 9, -1, 5, 1, 4f, 0f, 5));
+            s.add(group(frostwake, 14, -1, 5, 1, 5f, 5f, 4));
+            s.add(group(lamprey, 14, -1, 5, 1, 5f, 0f, 4));
+            s.add(group(cinderwake, 24, -1, 10, 1, 6f, 10f, 3));
+            SpawnGroup boss = group(maelstrom, 44, -1, 20, 1, 0f, 30f, 2);
             boss.effect = StatusEffects.boss;
             s.add(boss);
         }else{
             //the Dominion (waves 3, 6, 9...): few, heavy, armoured; shields from mid-game; Colossus and Leviathan bosses late
-            s.add(group(reaper, 2, -1, 3, 1, 2f, 0f, 6));
-            s.add(group(wraith, 5, -1, 3, 1, 3f, 0f, 5));
-            s.add(group(bulwark, 8, -1, 6, 1, 3f, 5f, 4));
-            s.add(group(interceptor, 11, -1, 6, 1, 3f, 5f, 4));
-            s.add(group(rampart, 14, -1, 6, 1, 3f, 10f, 3));
-            s.add(group(valkyrie, 17, -1, 6, 1, 3f, 10f, 3));
-            s.add(group(annihilator, 26, -1, 9, 1, 3f, 20f, 2));
-            s.add(group(tempest, 32, -1, 9, 1, 3f, 20f, 2));
-            SpawnGroup colossusBoss = group(colossus, 38, -1, 15, 1, 0f, 40f, 2), leviathanBoss = group(leviathan, 47, -1, 15, 1, 0f, 40f, 2);
+            s.add(group(reaper, 2, -1, 3, 1, 4f, 0f, 4));
+            s.add(group(wraith, 5, -1, 3, 1, 6f, 0f, 3));
+            s.add(group(bulwark, 8, -1, 6, 1, 6f, 5f, 3));
+            s.add(group(interceptor, 11, -1, 6, 1, 6f, 5f, 3));
+            s.add(group(rampart, 14, -1, 6, 1, 6f, 10f, 2));
+            s.add(group(valkyrie, 17, -1, 6, 1, 6f, 10f, 2));
+            s.add(group(annihilator, 26, -1, 9, 1, 6f, 20f, 2));
+            s.add(group(tempest, 32, -1, 9, 1, 6f, 20f, 2));
+            SpawnGroup colossusBoss = group(colossus, 47, -1, 15, 1, 0f, 40f, 2), leviathanBoss = group(leviathan, 56, -1, 15, 1, 0f, 40f, 2);
             colossusBoss.effect = leviathanBoss.effect = StatusEffects.boss;
             s.add(colossusBoss, leviathanBoss);
         }
         return s;
+    }
+
+    /**
+     * Waves by which a faction world's heavier groups and bosses start later on this sector: 15 on the start sector, falling
+     * with the distance from it to 0 on the opposite side of the planet. (Distance, not threat: every sector of these
+     * planets has the same threat.)
+     */
+    static int worldDelay(){
+        Sector s = state.rules.sector;
+        if(s == null) return 0;
+        Sector start = s.planet.sectors.get(s.planet.startSector);
+        //angle from the dot product, clamped: Vec3.angle gives NaN for a sector against itself (acos of 1.0000001)
+        float cos = arc.math.Mathf.clamp(s.tile.v.dot(start.tile.v) / (s.tile.v.len() * start.tile.v.len()), -1f, 1f);
+        return Math.round((1f - (float)Math.acos(cos) / arc.math.Mathf.PI) * 15f);
     }
 
     /** The Swarm on its own world (Hive): every wave, breeders and Behemoths sooner than elsewhere. */
@@ -612,7 +684,7 @@ public class Factions{
     /** The Tide on its own world: a wave every wave, the heavier boats on shorter rhythms than on other planets. */
     public static Seq<SpawnGroup> tideWorldWaves(){
         Seq<SpawnGroup> s = new Seq<>();
-        s.add(group(skiff, 0, -1, 1, 2, 2f, 0f, 14));
+        s.add(group(skiff, 0, -1, 1, 1, 2f, 0f, 14)); //one skiff to open (balance audit 2026-11-25: two was 4x a Serpulo first wave)
         s.add(group(slicker, 2, -1, 2, 1, 2f, 0f, 8));
         s.add(group(frostwake, 6, -1, 3, 1, 2.5f, 5f, 6));
         s.add(group(lamprey, 4, -1, 2, 1, 2.5f, 0f, 8));
@@ -641,7 +713,7 @@ public class Factions{
 
     /** The submarine groups one water spawn point gets (not yet pinned to it); also what the wiki's unit pages read. */
     public static Seq<SpawnGroup> subGroups(){
-        SpawnGroup lurkers = group(lurker, 9, -1, 5, 1, 2f, 0f, 6), barracudas = group(barracuda, 19, -1, 10, 1, 3f, 5f, 4), boss = group(abyss, 49, -1, 25, 1, 0f, 40f, 1);
+        SpawnGroup lurkers = group(lurker, 9, -1, 5, 1, 2f, 0f, 6), barracudas = group(barracuda, 19, -1, 10, 1, 3f, 5f, 4), boss = group(abyss, 59, -1, 25, 1, 0f, 40f, 1);
         boss.effect = StatusEffects.boss;
         return Seq.with(lurkers, barracudas, boss);
     }

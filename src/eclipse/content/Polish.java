@@ -69,6 +69,7 @@ public class Polish{
             if(b.ambientSound == Sounds.none){
                 b.ambientSound = sound(k);
                 b.ambientSoundVolume = k == Kind.reactor ? 0.12f : 0.06f;
+                eclipse.ui.EclipseSettings.baseSoundVolume.put(b, b.ambientSoundVolume); //scaled by the Machine sounds setting
             }
 
             Color light = lightColor(k, product);

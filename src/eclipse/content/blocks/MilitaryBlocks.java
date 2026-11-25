@@ -55,11 +55,11 @@ public class MilitaryBlocks{
             velocityRnd = 0.15f;
             shootSound = Sounds.shootArtillerySap;
             ammo(
-                acidicWaste, acidShell(acidicWaste, 20f, 1), //the leaching byproduct: weaker, but free
-                hydrochloricAcid, acidShell(hydrochloricAcid, 30f, 1),
-                sulfuricAcid, acidShell(sulfuricAcid, 34f, 1),
-                nitricAcid, acidShell(nitricAcid, 40f, 1),
-                aquaRegia, acidShell(aquaRegia, 55f, 2)
+                acidicWaste, acidShell(acidicWaste, 15f, 1), //the leaching byproduct: weaker, but free (splash -25% across, balance audit 2026-11-25)
+                hydrochloricAcid, acidShell(hydrochloricAcid, 22f, 1),
+                sulfuricAcid, acidShell(sulfuricAcid, 26f, 1),
+                nitricAcid, acidShell(nitricAcid, 30f, 1),
+                aquaRegia, acidShell(aquaRegia, 41f, 2)
             );
         }};
 
@@ -85,7 +85,7 @@ public class MilitaryBlocks{
             );
         }};
 
-        heatLance = new ContinuousTurret("heat-lance"){{
+        heatLance = new Armory.HeatBeamTurret("heat-lance"){{
             drawer = new DrawTurret(){{ parts.add(new RegionPart("-emitter"){{ progress = PartProgress.warmup; moveY = 2f; heatColor = Color.valueOf("ff8a3d"); }}); }};
             requirements(Category.turret, with(Items.silicon, 120, Items.graphite, 100, Items.titanium, 80, reinforcedGlass, 30, superalloyFrame, 8, precisionComponent, 4));
             size = 3;
@@ -94,14 +94,16 @@ public class MilitaryBlocks{
             shootY = 11f; //the emitter lens at the tip of the sprite
             rotateSpeed = 2.5f;
             heatRequirement = 12f;
-            maxHeatEfficiency = 2f;
+            //balance audit 2026-11-25: extra heat never raised the damage (vanilla caps it at 100%), so 42 damage at the bare
+            //12 heat was already twice a Fuse. Now 24 damage (about a Fuse) and up to 1.5x with 18 heat (HeatBeamTurret).
+            maxHeatEfficiency = 1.5f;
             scaleDamageEfficiency = true;
             heatColor = Color.valueOf("ff8a3d");
             shootSound = Sounds.none;
             loopSound = Sounds.beamMeltdown;
             loopSoundVolume = 1f;
-            shootType = new ContinuousLaserBulletType(42f){{
-                damageInterval = 15f; //same damage per second as 14 every 5 ticks, in bigger hits that armour blunts less
+            shootType = new ContinuousLaserBulletType(24f){{
+                damageInterval = 15f; //same damage per second as 8 every 5 ticks, in bigger hits that armour blunts less
                 length = 180f;
                 width = 4f;
                 colors = new Color[]{Color.valueOf("ff8a3d55"), Color.valueOf("ff8a3daa"), Color.valueOf("ffd29a"), Color.white};
@@ -296,7 +298,7 @@ public class MilitaryBlocks{
             predictTarget = false;
             shootSound = Sounds.shockwaveTower;
             consumePower(4f);
-            shootType = new Armory.ShockwaveBulletType(175f){{
+            shootType = new Armory.ShockwaveBulletType(260f){{ //balance audit 2026-11-25: was 175, knockback threw units out before the next wave
                 radius = 120f;
             }};
         }};
@@ -317,7 +319,7 @@ public class MilitaryBlocks{
             coolant = consumeCoolant(0.3f);
             ammo(
                 Items.silicon, drone(14f, 30f, 1f),
-                microchip, drone(24f, 22f, 2f)
+                microchip, drone(14f, 22f, 2f) //balance audit 2026-11-25: 24 damage out-damaged a Spectre
             );
         }};
 
@@ -488,6 +490,41 @@ public class MilitaryBlocks{
             maxBlockSize = 3;
             consumePower(2f);
         }};
+
+        firingFeel();
+    }
+
+    /**
+     * How each turret's shot looks and feels (user, 2026-11-25: turret shooting should feel finished). Most of them used the
+     * bullet's default small flash, the same as a Duo's, whatever their size; none threw casings. Set on the turret, so
+     * every ammo gets the same: a flash and smoke that fit the weapon (gunfire, a pneumatic puff for launchers, sparks for
+     * energy weapons), spent casings for guns that fire cartridges, and screen shake that grows with size. The heat glow
+     * after a shot comes from each turret's -heat sprite (all have one).
+     */
+    static void firingFeel(){
+        feel(rivet, Fx.shootSmall, Fx.shootSmallSmoke, Fx.casing1, 0f);             //1x1 spinning gun: small muzzle flash, brass
+        feel(sickle, Fx.sparkShoot, Fx.shootSmallSmoke, Fx.none, 1f);               //sawblade flung out: sparks off the rail
+        feel(kestrel, Fx.shootBig, Fx.shootBigSmoke, Fx.casing2, 1.5f);             //flak cannon: big flash, big casings
+        feel(minelayer, Fx.shootSmokeSquare, Fx.shootSmallSmoke, Fx.none, 1f);      //mines lobbed by compressed air
+        feel(acidMortar, Fx.shootSmokeSquare, Fx.shootBigSmoke, Fx.none, 2f);       //acid shells: a gas-driven mortar, no fire
+        feel(cloudbreaker, Fx.shootSmokeSquare, Fx.shootSmallSmoke, Fx.none, 1f);   //aerial mines puffed into the air
+        feel(tremor, Fx.shootSmokeSquareBig, Fx.none, Fx.none, 2f);                 //shockwave: a ring of dust kicked up
+        feel(thunderhead, Fx.lightningShoot, Fx.shootSmallSmoke, Fx.none, 1f);
+        feel(piledriver, Fx.shootBig, Fx.shootBigSmoke, Fx.casing3, 3f);            //tungsten slugs: heavy casings
+        feel(apiary, Fx.shootSmokeSquare, Fx.none, Fx.none, 0f);                    //drones launched by catapult
+        feel(primer, Fx.sparkShoot, Fx.shootSmallSmoke, Fx.none, 1.5f);             //an energy mark: sparks
+        feel(stardustLauncher, Fx.shootSmokeSquare, Fx.shootSmallSmoke, Fx.none, 0.5f);
+        feel(eventHorizon, Fx.lancerLaserShoot, Fx.shootBigSmoke2, Fx.none, 4f);
+        //Bombard and Payload Catapult had their own big effects already; the Bombard's shells now leave casings too
+        ((Turret)bombard).ammoUseEffect = Fx.casing3;
+    }
+
+    static void feel(Block block, Effect shoot, Effect smoke, Effect casing, float shakeAmount){
+        Turret t = (Turret)block;
+        t.shootEffect = shoot;
+        t.smokeEffect = smoke;
+        t.ammoUseEffect = casing;
+        t.shake = Math.max(t.shake, shakeAmount); //never less than a turret already had
     }
 
     /** Everything the Stardust Launcher fires: each item's properties set what its cloud adds to the blast. */

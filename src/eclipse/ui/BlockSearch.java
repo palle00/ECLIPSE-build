@@ -70,6 +70,10 @@ public class BlockSearch{
 
         Events.run(Trigger.update, () -> {
             if(state.isMenu()) return;
+            if(!EclipseSettings.blockSearch.on()){
+                detach(frag);
+                return;
+            }
             ScrollPane pane = get(blockPane, frag);
             //the menu rebuilt its frame: put the box back on top of the new grid
             if(pane != attachedTo && pane != null && pane.parent instanceof Table column){
@@ -96,6 +100,22 @@ public class BlockSearch{
                 frag.rebuild();
             }
         });
+    }
+
+    /** Takes the search box away again (the Build menu search setting turned off): the grid gets its old place back. */
+    static void detach(PlacementFragment frag){
+        if(attachedTo == null) return;
+        ScrollPane pane = attachedTo;
+        attachedTo = null;
+        field.setText("");
+        if(field.parent instanceof Table box && box.parent instanceof Table column){
+            Cell<?> cell = column.getCell(box);
+            if(cell != null){
+                cell.setElement(pane);
+                cell.height(gridHeight);
+            }
+        }
+        frag.rebuild();
     }
 
     /** Shows the matches in the menu's own grid, with buttons like vanilla's, from the first slot. */

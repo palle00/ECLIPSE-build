@@ -210,7 +210,7 @@ public class WorldEngine extends PowerGenerator{
             delivered = new float[16];
             if(!headless){
                 Fx.spawnShockwave.at(x, y, block.size * tilesize * 1.5f);
-                ui.showInfoToast(complete() ? Core.bundle.get("eclipse-engine.online") : Core.bundle.format("eclipse-engine.stage-done", stage, stages.length), 4f);
+                if(eclipse.ui.EclipseSettings.announce()) ui.showInfoToast(complete() ? Core.bundle.get("eclipse-engine.online") : Core.bundle.format("eclipse-engine.stage-done", stage, stages.length), 4f);
             }
         }
 

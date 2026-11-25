@@ -51,8 +51,6 @@ public class MenuBackdrop extends Element{
 
     /** Puts the backdrop into the main menu; while it is on, vanilla's background and logo are hidden. Call on ClientLoadEvent. */
     public static void install(){
-        ui.settings.graphics.checkPref(setting, true);
-        ui.settings.graphics.checkPref(introSetting, true);
         if(ui.menuGroup == null || ui.menuGroup.getChildren().isEmpty() || !(ui.menuGroup.getChildren().first() instanceof Group menu) || menu.getChildren().isEmpty()){
             Log.warn("[ECLIPSE] menu backdrop: main menu not found");
             return;
@@ -292,9 +290,12 @@ public class MenuBackdrop extends Element{
         }
     }
 
-    /** A filled circle: the atlas's smooth one, or a polygon on the loading screen (before the game's sprites exist). */
+    /** Set while the loading screen draws: the atlas may be there but not ready yet (its circle shows as a black square). */
+    static boolean loadingScreen;
+
+    /** A filled circle: the atlas's smooth one, or a polygon on the loading screen (before the game's sprites are ready). */
     static void circle(float x, float y, float r){
-        if(Core.atlas != null && Core.atlas.has("circle")) Fill.circle(x, y, r);
+        if(!loadingScreen && Core.atlas != null && Core.atlas.has("circle")) Fill.circle(x, y, r);
         else Fill.poly(x, y, Math.max(12, Math.min(96, (int)(r / 3f))), r);
     }
 

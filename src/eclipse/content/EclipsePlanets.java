@@ -38,7 +38,10 @@ public class EclipsePlanets{
                 Blocks.sporeWall, tideCoralWall,
                 Blocks.sporePine, tidePalm, Blocks.pine, tidePalm, Blocks.snowPine, tidePalm, Blocks.whiteTree, tidePalm, Blocks.whiteTreeDead, tidePalm, Blocks.shrubs, tidePalm,
                 Blocks.boulder, tideShell, Blocks.sandBoulder, tideShell, Blocks.snowBoulder, tideShell, Blocks.basaltBoulder, tideShell,
-                Blocks.shaleBoulder, tideShell, Blocks.daciteBoulder, tideShell, Blocks.sporeCluster, tideShell
+                Blocks.shaleBoulder, tideShell, Blocks.daciteBoulder, tideShell, Blocks.sporeCluster, tideShell,
+                Blocks.tar, tideOilSeep, Blocks.hotrock, tideVentRock, Blocks.magmarock, tideVent,
+                Blocks.metalFloor, tideSunkenPlating, Blocks.metalFloorDamaged, tideSunkenPlating,
+                Blocks.darkPanel3, tideSunkenPanel, Blocks.darkPanel4, tideSunkenPanel, Blocks.darkPanel6, tideSunkenPanel, Blocks.darkMetal, tideWreckWall
             )),
             Color.valueOf("2f6fd8"), Color.valueOf("5a8fd8"), Color.valueOf("d8eeff"), 52f);
 
@@ -55,7 +58,10 @@ public class EclipsePlanets{
                 Blocks.duneWall, hiveChitinWall, Blocks.shaleWall, hiveChitinWall, Blocks.daciteWall, hiveChitinWall,
                 Blocks.sporePine, hiveStalk, Blocks.pine, hiveStalk, Blocks.snowPine, hiveStalk, Blocks.whiteTree, hiveStalk, Blocks.whiteTreeDead, hiveStalk, Blocks.shrubs, hiveStalk,
                 Blocks.boulder, hivePod, Blocks.sandBoulder, hivePod, Blocks.snowBoulder, hivePod, Blocks.basaltBoulder, hivePod,
-                Blocks.shaleBoulder, hivePod, Blocks.daciteBoulder, hivePod, Blocks.sporeCluster, hivePod
+                Blocks.shaleBoulder, hivePod, Blocks.daciteBoulder, hivePod, Blocks.sporeCluster, hivePod,
+                Blocks.tar, hiveResin, Blocks.hotrock, hiveFeverFlesh, Blocks.magmarock, hiveHeart,
+                Blocks.metalFloor, hiveOvergrownPlating, Blocks.metalFloorDamaged, hiveOvergrownPlating,
+                Blocks.darkPanel3, hiveOvergrownPanel, Blocks.darkPanel4, hiveOvergrownPanel, Blocks.darkPanel6, hiveOvergrownPanel, Blocks.darkMetal, hiveEngulfedWall
             )),
             Color.valueOf("8a4fc0"), Color.valueOf("b37aff"), Color.valueOf("d9c2f0"), 66f);
 
@@ -73,7 +79,10 @@ public class EclipsePlanets{
                 Blocks.sporePine, ironholdScrapWall, Blocks.pine, ironholdScrapWall, Blocks.snowPine, ironholdScrapWall, Blocks.whiteTree, ironholdScrapWall,
                 Blocks.whiteTreeDead, ironholdScrapWall, Blocks.shrubs, ironholdScrapWall,
                 Blocks.boulder, ironholdScrap, Blocks.sandBoulder, ironholdScrap, Blocks.snowBoulder, ironholdScrap, Blocks.basaltBoulder, ironholdScrap,
-                Blocks.shaleBoulder, ironholdScrap, Blocks.daciteBoulder, ironholdScrap, Blocks.sporeCluster, ironholdScrap
+                Blocks.shaleBoulder, ironholdScrap, Blocks.daciteBoulder, ironholdScrap, Blocks.sporeCluster, ironholdScrap,
+                Blocks.tar, ironholdTar, Blocks.hotrock, ironholdCinder, Blocks.magmarock, ironholdMagma,
+                Blocks.metalFloor, ironholdPlating, Blocks.metalFloorDamaged, ironholdPlating,
+                Blocks.darkPanel3, ironholdDarkPlating, Blocks.darkPanel4, ironholdDarkPlating, Blocks.darkPanel6, ironholdDarkPlating, Blocks.darkMetal, ironholdBulwarkWall
             )),
             Color.valueOf("c0603a"), Color.valueOf("e0683a"), Color.valueOf("8a8a92"), 80f);
     }

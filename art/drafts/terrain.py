@@ -432,6 +432,330 @@ def scrap(v, rnd, n=32):
         for k in (-7, 0, 7): cv.paint(circle(c + k, c - 2.5 - k * .23, 1), "d0a070")
     return cv
 
+# ================================================================== special ground (oil, heat, old metal decks; 2026-11-25)
+# Serpulo's generator also places tar (oil), hot rock / magma rock (heat) and metal floors / dark panels / dark metal (the
+# rings around enemy bases and its "tech" patches); every planet gets its own version of each.
+def seams(cv, lit, dark, gap):
+    """A deck plate per tile like vanilla metal floors: seam on the top and left (plates line up), rim lit top-right,
+    dark bottom-left."""
+    cv.paint(union(capsule(1.5, 1.6, N - 1.5, 1.6, .55), capsule(N - 1.6, 1.5, N - 1.6, N - 1.5, .55)), lit)
+    cv.paint(union(capsule(1.5, N - 1.6, N - 1.5, N - 1.6, .55), capsule(1.6, 1.5, 1.6, N - 1.5, .55)), dark)
+    cv.paint(union(capsule(-1, .5, N + 1, .5, .6), capsule(.5, -1, .5, N + 1, .6)), gap)
+
+def vent(cv, x, y, r, crust, crust_lit, mouth, glow, core):
+    """A vent: a crust mound with a dark mouth and a glowing core."""
+    cv.paint(circle(x + .6, y + .7, r + .4), mouth)
+    cv.paint(circle(x, y, r), crust)
+    cv.paint(clip(circle(x - r * .3, y - r * .3, r * .8), circle(x, y, r)), crust_lit)
+    cv.paint(circle(x, y, r * .55), mouth)
+    cv.paint(circle(x, y, r * .38), glow)
+    if core: cv.paint(circle(x - .2, y - .2, r * .2), core)
+
+def crack(cv, rnd, x, y, steps, dark, hot, w=1.0):
+    """A glowing crack: a dark groove with a hot line inside."""
+    s, pts = walk(x, y, rnd, steps, 2.4, w, .9, lo=2.5, hi=N - 2.5)
+    cv.paint(s, dark)
+    cv.paint(path(pts[1:-1], w * .5), hot)
+
+def oil(base, swell, sheen1, sheen2):
+    def draw(rnd):
+        """Oil: one dark wrapping tile; the game's tar shader moves light sheen over it, as on vanilla tar."""
+        cv = water(base)
+        bands(cv, rnd, swell, 2, 2.6, 2.2)
+        bands(cv, rnd, sheen1, 1, .7, 1.6, 2)
+        bands(cv, rnd, sheen2, 1, .6, 1.2, 3)
+        return cv
+    return draw
+
+def deck_wall(base, pieces, extra=None):
+    """Old metal walls: tilted plates lit on their upper edges (pieces = (top, mid, dark) palettes), then extra(cv, name)."""
+    def draw(v, name, n):
+        cv = Canvas(n, n, base, var=v)
+        def piece(cv, x, y, rnd):
+            a = math.radians(R(rnd, 0, 180))
+            top, mid, dark = rnd.choice(pieces)
+            L, W = R(rnd, 4.2, 5.6), R(rnd, 2.6, 3.6)
+            p = poly([(x + math.cos(a) * L * sx - math.sin(a) * W * sy, y + math.sin(a) * L * sx + math.cos(a) * W * sy) for (sx, sy) in ((-1, -1), (1, -1), (1, 1), (-1, 1))])
+            cv.paint(shifted(p, 1.2, 1.2), "16181c")
+            cv.paint(p, mid)
+            cv.paint(minus(p, shifted(p, -1.1, -1.1)), dark)
+            cv.paint(minus(p, shifted(p, 1.1, 1.1)), top)
+        scatter(cv, name, "pieces", 9, 7.5, piece)
+        if extra: extra(cv, name)
+        return cv
+    return draw
+
+# ---- Tide: seabed oil, hydrothermal vents, sunken hull decks
+tide_oil = oil("1a1e26", "1f242e", "2a2a3c", "1f3438")
+
+def tide_vent_rock(v, rnd):
+    """Vent rock: the tide-pool rock with small hydrothermal chimneys, sulfur crusts and a warm glow."""
+    cv = land("4a6062")
+    for i in range(2):
+        r = R(rnd, 4, 6); x, y = inside(rnd, r * 1.3)
+        cv.paint(blob(x, y, r, rnd, .3), "3e5254")
+    for i in range(1 + (v != 1)):
+        r = R(rnd, 3.4, 4.2); x, y = inside(rnd, r + 1.5)
+        vent(cv, x, y, r, "33403f", "52625f", "1a2022", "e0782c", "ffb050")
+        for k in range(3):
+            a = rnd.uniform(0, 6.3)
+            cv.paint(circle(x + math.cos(a) * (r + .8), y + math.sin(a) * (r + .8), .7), "d8d07c")
+    for i in range(4):
+        x, y = inside(rnd, 1); cv.paint(circle(x, y, R(rnd, .6, .9)), "d8d07c", cv.on("4a6062", "3e5254"))
+    return cv
+
+def tide_vent(v, rnd):
+    """A black smoker: a big mineral chimney with a bright core and hot cracks running out from it."""
+    cv = land("4a6062")
+    x, y = inside(rnd, 7.5, pad=2)
+    a0 = rnd.uniform(0, 6.3)
+    for k in range(3):
+        a = a0 + k * 2.09 + rnd.uniform(-.25, .25); L = R(rnd, 8, 9.5)
+        cv.paint(capsule(x, y, x + math.cos(a) * L, y + math.sin(a) * L, .9), "3a4a4a")
+        cv.paint(capsule(x, y, x + math.cos(a) * (L - 1.5), y + math.sin(a) * (L - 1.5), .4), "c8642c")
+    mound = blob(x, y, 6, rnd, .22, lobes=5)
+    cv.paint(shifted(mound, .8, 1), "1a2022")
+    cv.paint(mound, "33403f")
+    cv.paint(clip(blob(x - 1.6, y - 1.6, 4.5, rnd, .2), mound), "4a5a58")
+    for k in range(4):
+        a = rnd.uniform(0, 6.3); d = R(rnd, 4, 5.2)
+        cv.paint(clip(blob(x + math.cos(a) * d, y + math.sin(a) * d, R(rnd, .9, 1.4), rnd, .3), mound), "c8bc5a")
+    cv.paint(circle(x, y, 3.6), "1a1e20")
+    cv.paint(circle(x, y, 2.8), "e06a2a")
+    cv.paint(circle(x - .3, y - .3, 1.8), "ffa848")
+    cv.paint(circle(x - .5, y - .5, .9), "fff0b0")
+    return cv
+
+def tide_sunken_plating(v, rnd):
+    """A sunken hull deck: sea-green steel plates, rust streaks, algae and barnacles; variant 3 is torn open."""
+    cv = land("4e6a66")
+    seams(cv, "64827c", "3c5450", "263432")
+    plate = cv.on("4e6a66")
+    for (x, y) in ((5, 5), (N - 5, 5), (5, N - 5), (N - 5, N - 5)):
+        cv.paint(circle(x + .5, y + .5, 1.3), "2e3e3c"); cv.paint(circle(x, y, 1.1), "86a29a")
+    x = R(rnd, 9, 23); cv.paint(capsule(x, 6, x + R(rnd, -2, 2), 18 + 4 * v, .7), "7a5a3c", plate)
+    for i in range(2):
+        r = R(rnd, 2, 3.2); x, y = inside(rnd, r * 1.4, pad=3)
+        cv.paint(blob(x, y, r, rnd, .4), "4f7a4a", plate)
+    for i in range(2 + v):
+        x, y = inside(rnd, 2.2, pad=3)
+        cv.paint(circle(x + .5, y + .5, 1.5), "2e3e3c"); cv.paint(circle(x, y, 1.4), "c4c1ad"); cv.paint(circle(x + .2, y + .2, .5), "3a4a4c")
+    if v == 2:
+        x, y = inside(rnd, 7, pad=3)
+        g = wavy(x - 6, y - 2, x + 6, y + 2, .9, .8, 1, R(rnd, 0, 6))
+        cv.paint(shifted(g, -.7, -.7), "86a29a", plate)
+        cv.paint(g, "1a2426")
+    return cv
+
+def tide_sunken_panel(v, rnd):
+    """A dark hull panel: a porthole (variant 1), a drain grate (2) or a hatch half hidden by kelp (3)."""
+    cv = land("2e3e3e")
+    seams(cv, "425656", "263232", "1a2424")
+    c = N / 2 + .5
+    if v == 0:
+        cv.paint(circle(c + .6, c + .6, 7), "1a2424")
+        cv.paint(circle(c, c, 6.6), "5e7472")
+        cv.paint(circle(c, c, 4.8), "1c3a48")
+        cv.paint(clip(circle(c - 1.6, c - 1.6, 2.6), circle(c, c, 4.8)), "3e7a90")
+        cv.paint(circle(c - 2.2, c - 2.2, .9), "a8dce8")
+        for a in range(4):
+            aa = a * math.pi / 2 + math.pi / 4
+            cv.paint(circle(c + math.cos(aa) * 5.7, c + math.sin(aa) * 5.7, .8), "9ab2ae")
+    elif v == 1:
+        cv.paint(poly([(8, 8), (N - 7, 8), (N - 7, N - 7), (8, N - 7)]), "425656")
+        for k in range(4):
+            y = 10.5 + k * 3.7
+            cv.paint(capsule(10, y, N - 9, y, .9), "141c1c")
+    else:
+        cv.paint(poly([(7, 7), (N - 6, 7), (N - 6, N - 6), (7, N - 6)]), "38494a")
+        cv.paint(poly([(9, 9), (N - 8, 9), (N - 8, N - 8), (9, N - 8)]), "2e3e3e")
+        for (x, y) in ((10, 10), (N - 9, 10), (10, N - 9), (N - 9, N - 9)):
+            cv.paint(circle(x, y, .9), "86a29a")
+        for i in range(4):
+            x, y = R(rnd, 11, N - 11), R(rnd, 11, N - 11)
+            cv.paint(circle(x + .5, y + .5, 1.6), "1a2424"); cv.paint(circle(x, y, 1.5), "c4c1ad"); cv.paint(circle(x + .2, y + .2, .5), "3a4a4c")
+    return cv
+
+def tide_barnacles(cv, name):
+    def cluster(cv, x, y, rnd):
+        for k in range(3):
+            dx, dy, r = R(rnd, -2, 2), R(rnd, -2, 2), R(rnd, 1, 1.5)
+            cv.paint(circle(x + dx + .5, y + dy + .5, r), "1e2a2c")
+            cv.paint(circle(x + dx, y + dy, r), "c4c1ad")
+            cv.paint(circle(x + dx + .2, y + dy + .2, .45), "3a4a4c")
+    scatter(cv, name, "barnacles", 3, 4.5, cluster)
+
+tide_wreck_wall = deck_wall("1e2a2c", [("7a9a94", "567470", "34484a"), ("7a9a94", "567470", "34484a"), ("a8784e", "7a563a", "4e382a")], tide_barnacles)
+
+# ---- Hive: resin pools, fevered flesh, decks the creep took over
+hive_resin = oil("2e1c0e", "3a2412", "553612", "4a2a2a")
+
+def fever_flesh(v, rnd):
+    """Fevered flesh: the creep mat with swollen veins glowing hot."""
+    cv = land("47243f")
+    for i in range(2):
+        r = R(rnd, 4, 6); x, y = inside(rnd, r * 1.3)
+        cv.paint(blob(x, y, r, rnd, .3), "53294a")
+    for i in range(2 + (v == 0)):
+        r = R(rnd, 2, 3.2); x, y = inside(rnd, r * 1.5 + .5)
+        cv.paint(blob(x + .5, y + .6, r + .5, rnd, .35), "2a1028")
+        b = blob(x, y, r, rnd, .35)
+        cv.paint(b, "b8344e")
+        cv.paint(clip(blob(x - .4, y - .4, r * .5, rnd, .3), b), "ff8a6a")
+    return cv
+
+def hive_heart(v, rnd):
+    """A burning heart in the creep: a swollen glowing organ with thick veins running out of it."""
+    cv = land("47243f")
+    x, y = inside(rnd, 7.5, pad=2)
+    x, y = inside(rnd, 9, pad=1.5)
+    o = blob(x, y, 8.5, rnd, .2, lobes=4)
+    cv.paint(shifted(o, .8, 1), "220c22")
+    cv.paint(o, "8a2a4a")
+    inner = clip(blob(x, y, 6.2, rnd, .25), o)
+    cv.paint(inner, "d84a5c")
+    cv.paint(clip(blob(x - 1, y - 1, 3.4, rnd, .3), o), "ff8a6a")
+    for k in range(3):
+        g = wavy(x - 7, y - 3.5 + k * 3.5, x + 7, y - 3.5 + k * 3.5, .6, 1.1, 1, k * 2.1 + v)
+        cv.paint(clip(g, inner), "9a2c48")
+    return cv
+
+def overgrown_plating(v, rnd):
+    """An old deck the creep is eating: violet-grey plates with creep growing over them and a pod or two."""
+    cv = land("5a5866")
+    seams(cv, "6e6c7c", "48465a", "302e3c")
+    for (x, y) in ((5, 5), (N - 5, 5), (5, N - 5), (N - 5, N - 5)):
+        cv.paint(circle(x + .5, y + .5, 1.3), "34323e"); cv.paint(circle(x, y, 1.1), "8a8898")
+    x, y = inside(rnd, 7, pad=2)
+    g = blob(x, y, 5 + v, rnd, .18, lobes=3)
+    cv.paint(shifted(g, .6, .6), "2a1428")
+    cv.paint(g, "47243f")
+    cv.paint(clip(blob(x - 1, y - 1, 3 + v * .5, rnd, .3), g), "5c2f53")
+    for i in range(1 + v):
+        a = rnd.uniform(0, 6.3); L = R(rnd, 6 + v, 7.5 + v)
+        cv.paint(capsule(x, y, x + math.cos(a) * L, y + math.sin(a) * L, .7), "47243f")
+    r = R(rnd, 1.4, 1.9)
+    cv.paint(circle(x + .4, y + .5, r), "2a1428"); cv.paint(circle(x, y, r), "b866d6"); cv.paint(circle(x - .5, y - .5, .6), "f3d0ff")
+    return cv
+
+def overgrown_panel(v, rnd):
+    """A dark deck panel with a vent grille (variant 1), a hatch (2) or creep veins running over it (3)."""
+    cv = land("2e2a38")
+    seams(cv, "403c4e", "242030", "18161e")
+    c = N / 2 + .5
+    if v == 0:
+        cv.paint(poly([(8, 8), (N - 7, 8), (N - 7, N - 7), (8, N - 7)]), "403c4e")
+        for k in range(4):
+            y = 10.5 + k * 3.7
+            cv.paint(capsule(10, y, N - 9, y, .9), "120e16")
+        cv.paint(blob(9.5, N - 8.5, 3, rnd, .25), "53294a")
+    elif v == 1:
+        cv.paint(circle(c + .6, c + .6, 7), "18161e")
+        cv.paint(circle(c, c, 6.6), "4a4658")
+        cv.paint(circle(c, c, 4.8), "2e2a38")
+        for a in range(6):
+            aa = a * math.pi / 3
+            cv.paint(circle(c + math.cos(aa) * 5.6, c + math.sin(aa) * 5.6, .75), "7a7690")
+    else:
+        g = blob(N - 10, N - 10, 6.5, rnd, .18, lobes=3)
+        cv.paint(shifted(g, .6, .6), "120e16")
+        cv.paint(g, "47243f")
+        cv.paint(clip(blob(N - 11, N - 11, 3.5, rnd, .3), g), "5c2f53")
+        cv.paint(circle(N - 10.5, N - 10.5, 1.7), "b866d6"); cv.paint(circle(N - 11, N - 11, .6), "f3d0ff")
+    return cv
+
+def engulfing_flesh(cv, name):
+    def mound(cv, x, y, rnd):
+        r = R(rnd, 2.6, 3.8)
+        cv.paint(blob(x + 1, y + 1, r, rnd, .2), "1c0c1c")
+        cv.paint(blob(x, y, r, rnd, .2), "743768")
+        cv.paint(blob(x - r * .35, y - r * .35, r * .45, rnd, .25), "975486")
+    scatter(cv, name, "flesh", 5, 6, mound)
+
+hive_engulfed_wall = deck_wall("241e2c", [("8a8898", "62606e", "3e3c4a"), ("767486", "56546a", "34323e")], engulfing_flesh)
+
+# ---- Ironhold: bitumen, slag crust, magma, dark fortress decks and armour
+ironhold_tar = oil("1c1712", "241e18", "3a2a3e", "2a3030")
+
+def cinder(v, rnd):
+    """Slag crust over hot ground: the scorched rock with molten patches showing through."""
+    cv = land("3a2f2b")
+    for i in range(2):
+        r = R(rnd, 4, 6); x, y = inside(rnd, r * 1.35)
+        cv.paint(blob(x, y, r, rnd, .35, lobes=4), "463a35")
+    for i in range(2 + (v == 0)):
+        r = R(rnd, 2, 3.2); x, y = inside(rnd, r * 1.5 + .5)
+        cv.paint(blob(x + .5, y + .6, r + .5, rnd, .35), "221a18")
+        b = blob(x, y, r, rnd, .35)
+        cv.paint(b, "c8501c")
+        cv.paint(clip(blob(x - .4, y - .4, r * .5, rnd, .3), b), "f39040")
+    return cv
+
+def magma(v, rnd):
+    """Magma: a molten pool with dark crust floes drifting on it."""
+    cv = land("3a2f2b")
+    x, y = inside(rnd, 9, pad=1.5)
+    pool = blob(x, y, 9, rnd, .2, lobes=4)
+    cv.paint(shifted(pool, .6, .8), "221a18")
+    cv.paint(pool, "d0581e")
+    cv.paint(clip(blob(x, y, 6.5, rnd, .25), pool), "f08a34")
+    cv.paint(clip(blob(x - 1, y - 1, 3.5, rnd, .3), pool), "ffc860")
+    for i in range(1 + 2 * (v % 2)):
+        a = rnd.uniform(0, 6.3); d = R(rnd, 3, 6)
+        fx, fy = x + math.cos(a) * d, y + math.sin(a) * d
+        f = clip(blob(fx, fy, R(rnd, 1.6, 2.4), rnd, .4), pool)
+        cv.paint(f, "2a2220")
+        cv.paint(clip(shifted(f, -.6, -.6), f), "4a3c36")
+    return cv
+
+def dark_plating(v, rnd):
+    """Dark fortress deck: gunmetal plates with a vent grille (variant 1), a hazard-striped hatch (2) or a bolted cover (3)."""
+    cv = land("34363e")
+    seams(cv, "464954", "282a30", "1c1d22")
+    for (x, y) in ((5, 5), (N - 5, 5), (5, N - 5), (N - 5, N - 5)):
+        cv.paint(circle(x + .5, y + .5, 1.3), "1e1f24"); cv.paint(circle(x, y, 1.1), "6a6e7a")
+    c = N / 2 + .5
+    if v == 0:
+        cv.paint(poly([(8, 9), (N - 7, 9), (N - 7, N - 8), (8, N - 8)]), "1c1d22")
+        for k in range(4):
+            y = 11 + k * 3.4
+            cv.paint(capsule(10, y, N - 9, y, .7), "8a3a1c")
+    elif v == 1:
+        sq = poly([(8, 8), (N - 7, 8), (N - 7, N - 7), (8, N - 7)])
+        cv.paint(sq, "c8a030")
+        for k in range(-2, 4):
+            cv.paint(clip(poly([(8 + k * 7, N - 7), (12 + k * 7, N - 7), (12 + k * 7 + 17, 8), (8 + k * 7 + 17, 8)]), sq), "26272c")
+        cv.paint(poly([(11, 11), (N - 10, 11), (N - 10, N - 10), (11, N - 10)]), "3e414a")
+    else:
+        cv.paint(circle(c + .6, c + .6, 7), "1c1d22")
+        cv.paint(circle(c, c, 6.6), "4e525c")
+        cv.paint(circle(c, c, 4.6), "3a3d46")
+        for a in range(6):
+            aa = a * math.pi / 3
+            cv.paint(circle(c + math.cos(aa) * 5.6, c + math.sin(aa) * 5.6, .75), "8a8e99")
+    return cv
+
+def bulwark_wall(v, name, n):
+    """Fortress armour: riveted armour blocks on a 16 px grid (so every wall tile joins), some with a red-lit firing slit."""
+    cv = Canvas(n, n, "16171b", var=v)
+    vr = random.Random(stable(name, v, n))
+    for gx in range(0, n, 16):
+        for gy in range(0, n, 16):
+            sq = poly([(gx + 1, gy + 1), (gx + 15, gy + 1), (gx + 15, gy + 15), (gx + 1, gy + 15)])
+            cv.paint(sq, "2c2e35")
+            cv.paint(poly([(gx + 1, gy + 1), (gx + 14, gy + 1), (gx + 14, gy + 14), (gx + 1, gy + 14)]), "6c707c")
+            cv.paint(poly([(gx + 2.2, gy + 2.2), (gx + 14, gy + 2.2), (gx + 14, gy + 14), (gx + 2.2, gy + 14)]), "4a4d56")
+            k = vr.random()
+            if k < .25:
+                cv.paint(capsule(gx + 5, gy + 8, gx + 11, gy + 8, 1.1), "16171b")
+                cv.paint(capsule(gx + 5.5, gy + 8, gx + 10.5, gy + 8, .5), "c83a20")
+            elif k < .6:
+                for (x, y) in ((4.5, 4.5), (11.5, 4.5), (4.5, 11.5), (11.5, 11.5)):
+                    cv.paint(circle(gx + x, gy + y, .9), "8a8e99")
+            else:
+                cv.paint(poly([(gx + 5, gy + 5), (gx + 11, gy + 5), (gx + 11, gy + 11), (gx + 5, gy + 11)]), "3c3f47")
+    return cv
+
 # ================================================================== the set
 FLOORS = {  # land floors: name -> (draw, base tone for the map colour)
     "tide-reef-sand": (reef_sand, "e2cfac"), "tide-black-sand": (black_sand, "34353e"), "tide-coral": (coral, "a9534c"),
@@ -439,12 +763,19 @@ FLOORS = {  # land floors: name -> (draw, base tone for the map colour)
     "hive-creep": (creep, "47243f"), "hive-brood-moss": (brood_moss, "6a3778"), "hive-spore-sand": (spore_sand, "86708a"),
     "hive-chitin": (chitin, "352b44"),
     "ironhold-ash": (ash, "4e4a48"), "ironhold-scorched-rock": (scorched_rock, "3a2f2b"), "ironhold-plating": (plating, "5a5d66"),
+    "tide-vent-rock": (tide_vent_rock, "4a6062"), "tide-vent": (tide_vent, "e06a2a"), "tide-sunken-plating": (tide_sunken_plating, "4e6a66"),
+    "tide-sunken-panel": (tide_sunken_panel, "2e3e3e"),
+    "hive-fever-flesh": (fever_flesh, "47243f"), "hive-heart": (hive_heart, "d84a5c"), "hive-overgrown-plating": (overgrown_plating, "5a5866"),
+    "hive-overgrown-panel": (overgrown_panel, "2e2a38"),
+    "ironhold-cinder": (cinder, "3a2f2b"), "ironhold-magma": (magma, "f08a34"), "ironhold-dark-plating": (dark_plating, "34363e"),
 }
-LIQUIDS = {"tide-lagoon": (lagoon, "2f8f9c"), "tide-abyss": (abyss, "1c3b63"), "hive-bile": (bile, "566f2c"), "ironhold-sludge": (sludge, "3f392c")}
+LIQUIDS = {"tide-lagoon": (lagoon, "2f8f9c"), "tide-abyss": (abyss, "1c3b63"), "hive-bile": (bile, "566f2c"), "ironhold-sludge": (sludge, "3f392c"),
+           "tide-oil-seep": (tide_oil, "1a1e26"), "hive-resin": (hive_resin, "3a2412"), "ironhold-tar": (ironhold_tar, "1c1712")}
 WALLS = {
     "tide-sandstone-wall": (sandstone_wall, "f2dfc2"), "tide-basalt-wall": (basalt_wall, "3a3c47"), "tide-coral-wall": (coral_wall, "d8667e"),
     "hive-flesh-wall": (flesh_wall, "743768"), "hive-chitin-wall": (chitin_wall, "342a48"),
     "ironhold-slag-wall": (slag_wall, "4c3f3a"), "ironhold-scrap-wall": (scrap_wall, "666a74"),
+    "tide-wreck-wall": (tide_wreck_wall, "567470"), "hive-engulfed-wall": (hive_engulfed_wall, "62606e"), "ironhold-bulwark-wall": (bulwark_wall, "4a4d56"),
 }
 TREES = {"tide-palm": palm, "hive-stalk": stalk}
 BOULDERS = {"tide-shell": shell, "hive-pod": pod, "ironhold-scrap": scrap}

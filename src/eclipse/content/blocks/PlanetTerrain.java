@@ -22,12 +22,21 @@ public class PlanetTerrain{
     //Tide: an ocean world of reefs and black beaches
     public static Floor tideReefSand, tideBlackSand, tideCoral, tideBarnacleRock, tideLagoon, tideAbyss, tideReefWater, tideBlackSandWater;
     public static Block tideSandstoneWall, tideBasaltWall, tideCoralWall, tidePalm, tideShell;
+    //Tide special ground: oil seeping from the seabed, hydrothermal vents, sunken hull decks
+    public static Floor tideOilSeep, tideVentRock, tideVent, tideSunkenPlating, tideSunkenPanel;
+    public static Block tideWreckWall;
     //Hive: the Swarm's living spore jungle
     public static Floor hiveCreep, hiveBroodMoss, hiveSporeSand, hiveChitin, hiveBile, hiveBileShallows;
     public static Block hiveFleshWall, hiveChitinWall, hiveStalk, hivePod;
+    //Hive special ground: resin pools, fevered flesh, old decks the creep is eating
+    public static Floor hiveResin, hiveFeverFlesh, hiveHeart, hiveOvergrownPlating, hiveOvergrownPanel;
+    public static Block hiveEngulfedWall;
     //Ironhold: the Dominion's scorched fortress world
     public static Floor ironholdAsh, ironholdScorchedRock, ironholdPlating, ironholdSludge, ironholdSludgeShallows;
     public static Block ironholdSlagWall, ironholdScrapWall, ironholdScrap;
+    //Ironhold special ground: bitumen, slag crust, magma, dark fortress decks and armour
+    public static Floor ironholdTar, ironholdCinder, ironholdMagma, ironholdDarkPlating;
+    public static Block ironholdBulwarkWall;
 
     /** Bubbles rising from the deep and popping. */
     public static final Effect bubble = new Effect(70f, e -> {
@@ -79,6 +88,19 @@ public class PlanetTerrain{
         tidePalm = new StaticTree("tide-palm"){{ variants = 0; }};
         tideShell = new Prop("tide-shell"){{ variants = 2; }};
 
+        //Serpulo's tar, hot rock, magma rock and enemy-base metal floors, in each planet's own look (user, 2026-11-25)
+        tideOilSeep = like(new Floor("tide-oil-seep", 0), Blocks.tar);
+        tideVentRock = heat(like(new Floor("tide-vent-rock"), Blocks.hotrock), tideBarnacleRock, "f08a3c");
+        tideVent = heat(like(new LivingFloor("tide-vent"){{
+            effect = bubble;
+            effectColor = Color.valueOf("ffd8a0");
+            effectSpacing = 60f;
+            every = 1;
+        }}, Blocks.magmarock), tideBarnacleRock, "f08a3c");
+        tideSunkenPlating = like(new Floor("tide-sunken-plating"), Blocks.metalFloor);
+        tideSunkenPanel = like(new Floor("tide-sunken-panel"), Blocks.darkPanel3);
+        tideWreckWall = wall("tide-wreck-wall", Blocks.darkMetal);
+
         // ---- Hive ----
         hiveCreep = like(new Floor("hive-creep"), Blocks.moss);
         hiveBroodMoss = like(new LivingFloor("hive-brood-moss"){{
@@ -96,6 +118,18 @@ public class PlanetTerrain{
         hiveChitinWall = wall("hive-chitin-wall", Blocks.shaleWall);
         hiveStalk = new StaticTree("hive-stalk"){{ variants = 0; }};
         hivePod = new Prop("hive-pod"){{ variants = 2; }};
+
+        hiveResin = like(new Floor("hive-resin", 0), Blocks.tar);
+        hiveFeverFlesh = heat(like(new Floor("hive-fever-flesh"), Blocks.hotrock), hiveCreep, "ff6a6a");
+        hiveHeart = heat(like(new LivingFloor("hive-heart"){{
+            effect = sporePuff;
+            effectColor = Color.valueOf("ff9a80");
+            effectSpacing = 120f;
+            every = 2;
+        }}, Blocks.magmarock), hiveCreep, "ff6a6a");
+        hiveOvergrownPlating = like(new Floor("hive-overgrown-plating"), Blocks.metalFloor);
+        hiveOvergrownPanel = like(new Floor("hive-overgrown-panel"), Blocks.darkPanel3);
+        hiveEngulfedWall = wall("hive-engulfed-wall", Blocks.darkMetal);
 
         // ---- Ironhold ----
         ironholdAsh = like(new Floor("ironhold-ash"), Blocks.darksand);
@@ -117,16 +151,33 @@ public class PlanetTerrain{
         ironholdScrapWall = wall("ironhold-scrap-wall", Blocks.stoneWall);
         ironholdScrap = new Prop("ironhold-scrap"){{ variants = 2; }};
 
+        ironholdTar = like(new Floor("ironhold-tar", 0), Blocks.tar);
+        ironholdCinder = heat(like(new Floor("ironhold-cinder"), Blocks.hotrock), ironholdScorchedRock, "f08a3c");
+        ironholdMagma = heat(like(new LivingFloor("ironhold-magma"){{
+            effect = ember;
+            effectColor = Color.valueOf("c8401c");
+            effectSpacing = 90f;
+            every = 2;
+        }}, Blocks.magmarock), ironholdScorchedRock, "ff8a30");
+        ironholdDarkPlating = like(new Floor("ironhold-dark-plating"), Blocks.darkPanel3);
+        ironholdBulwarkWall = wall("ironhold-bulwark-wall", Blocks.darkMetal);
+
         //what the map editor and generators put with each floor
         for(Floor f : new Floor[]{tideReefSand, tideReefWater, tideLagoon, tideAbyss}) f.wall = tideSandstoneWall;
         for(Floor f : new Floor[]{tideBlackSand, tideBlackSandWater, tideBarnacleRock}) f.wall = tideBasaltWall;
         tideCoral.wall = tideCoralWall;
+        for(Floor f : new Floor[]{tideOilSeep, tideVentRock, tideVent}) f.wall = tideBasaltWall;
+        for(Floor f : new Floor[]{tideSunkenPlating, tideSunkenPanel}) f.wall = tideWreckWall;
         for(Floor f : new Floor[]{tideReefSand, tideBlackSand, tideCoral, tideBarnacleRock}) f.decoration = tideShell;
         for(Floor f : new Floor[]{hiveCreep, hiveBroodMoss, hiveSporeSand, hiveBile, hiveBileShallows}) f.wall = hiveFleshWall;
         hiveChitin.wall = hiveChitinWall;
+        for(Floor f : new Floor[]{hiveResin, hiveFeverFlesh, hiveHeart}) f.wall = hiveFleshWall;
+        for(Floor f : new Floor[]{hiveOvergrownPlating, hiveOvergrownPanel}) f.wall = hiveEngulfedWall;
         for(Floor f : new Floor[]{hiveCreep, hiveBroodMoss, hiveSporeSand, hiveChitin}) f.decoration = hivePod;
         for(Floor f : new Floor[]{ironholdAsh, ironholdScorchedRock, ironholdSludge, ironholdSludgeShallows}) f.wall = ironholdSlagWall;
         ironholdPlating.wall = ironholdScrapWall;
+        for(Floor f : new Floor[]{ironholdTar, ironholdCinder, ironholdMagma}) f.wall = ironholdSlagWall;
+        ironholdDarkPlating.wall = ironholdBulwarkWall;
         for(Floor f : new Floor[]{ironholdAsh, ironholdScorchedRock, ironholdPlating}) f.decoration = ironholdScrap;
     }
 
@@ -159,7 +210,20 @@ public class PlanetTerrain{
         to.playerUnmineable = from.playerUnmineable;
         to.albedo = from.albedo;
         to.attributes.add(from.attributes);
+        to.emitLight = from.emitLight;
+        to.lightRadius = from.lightRadius;
+        to.lightColor = from.lightColor.cpy();
         return to;
+    }
+
+    /**
+     * A heat floor (like hot rock / magma rock) set in the planet's rock the way vanilla's sit in basalt: it blends as that
+     * floor at its edges, and glows in the planet's colour at vanilla's light strength.
+     */
+    static <T extends Floor> T heat(T f, Floor rock, String glow){
+        f.blendGroup = rock;
+        f.lightColor = Color.valueOf(glow).a(f.lightColor.a);
+        return f;
     }
 
     /** A shallow blend of a liquid over a floor (the game draws its sprites), playing like a vanilla shallow water. */

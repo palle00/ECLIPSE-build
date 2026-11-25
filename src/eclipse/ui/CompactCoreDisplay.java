@@ -27,7 +27,6 @@ public class CompactCoreDisplay extends Table{
 
     /** Swaps the vanilla display out of the HUD. Call on ClientLoadEvent. */
     public static void install(){
-        ui.settings.game.checkPref(setting, true);
         Table old = ui.hudfrag.coreItems;
         if(old == null || !(old.parent instanceof Table parent)) return;
         Cell<?> cell = parent.getCell(old);

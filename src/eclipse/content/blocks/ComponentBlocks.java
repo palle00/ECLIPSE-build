@@ -50,6 +50,7 @@ public class ComponentBlocks{
             recipe(3, 60f, with(tungsten, 2, Items.graphite, 1), with(tungstenRod, 2));
             recipe(3, 30f, with(aluminium, 1), with(aluminiumWire, 2));
             recipe(3, 40f, with(copperWire, 2, epoxyResin, 1), with(magnetWire, 2)); //enamelled winding wire
+            recipe(3, 40f, with(copperWire, 2, Items.oxide, 1), with(insulatedCable, 2)); //Erekir-native: ceramic-insulated (mineral-insulated) cable
             craftEffect = Fx.pulverizeSmall;
         }};
 
@@ -68,6 +69,7 @@ public class ComponentBlocks{
             recipe(3, 60f, with(tungsten, 2), with(tungstenPlate, 1));
             recipe(1, 30f, with(copperPlate, 1), with(copperFoil, 2));
             recipe(3, 30f, with(aluminiumPlate, 1), with(aluminiumFoil, 2));
+            recipe(2, 40f, with(Items.beryllium, 1, Items.copper, 2), with(titaniumSpring, 2)); //Erekir-native: beryllium-copper springs, pressed and coiled
             craftEffect = Fx.pulverizeSmall;
         }};
 
@@ -82,6 +84,7 @@ public class ComponentBlocks{
             recipe(2, 20f, with(titaniumBolt, 1), with(titaniumScrew, 1));
             recipe(2, 40f, with(titaniumRod, 1), with(titaniumRing, 1));
             recipe(2, 40f, with(titaniumRod, 1), with(titaniumSpring, 2));
+            recipe(2, 60f, with(Items.beryllium, 1, Items.copper, 2), with(industrialBearing, 2)); //Erekir-native: beryllium-copper bushings
             craftEffect = Fx.pulverizeSmall;
         }};
 
