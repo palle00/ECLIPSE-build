@@ -268,7 +268,7 @@ class PlayPanel{
         Button b = new Button(style);
         b.left().margin(4f, 8f, 4f, 8f);
         Label name = new Label(s.getName());
-        name.setFontScale(0.75f);
+        EclipseFonts.crisp(name, 0.75f);
         name.setEllipsis(true);
         String when = ago(System.currentTimeMillis(), s.getTimestamp()), time = playtime(s.meta.timePlayed);
         String detail = s.meta.rules != null && s.meta.rules.waves ? Core.bundle.format("eclipse-menu.load.row", s.getWave(), time) : time;

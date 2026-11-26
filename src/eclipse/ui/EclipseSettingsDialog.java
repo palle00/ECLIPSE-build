@@ -53,10 +53,10 @@ public class EclipseSettingsDialog extends BaseDialog{
                 head.table(t -> {
                     t.left();
                     title.setColor(accent);
-                    title.setFontScale(1.3f);
+                    EclipseFonts.crisp(title, 1.3f);
                     t.add(title).left().row();
                     subtitle.setColor(muted);
-                    subtitle.setFontScale(0.75f);
+                    EclipseFonts.crisp(subtitle, 0.75f);
                     t.add(subtitle).left();
                 }).growX().left();
                 search.setMessageText(Core.bundle.get("eclipse-settings.search"));

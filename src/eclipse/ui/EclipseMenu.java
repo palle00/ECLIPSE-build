@@ -534,11 +534,11 @@ public class EclipseMenu{
         button.add(icon).size(kind.box).padLeft(12f).padRight(kind == Kind.big ? 16f : 12f);
         String subtitle = kind == Kind.small ? null : subtitle(b);
         Label title = new Label(text(b).toUpperCase());
-        title.setFontScale(kind.title);
+        EclipseFonts.crisp(title, kind.title);
         float textWidth = width < 0f ? -1f : width - 12f - kind.box - (kind == Kind.big ? 16f : 12f) - (kind.arrow ? 16f + 14f + 18f : 16f) - (tag != null ? 60f : 0f);
         //a half-width button: shrink a long title (or a long translation) to fit before cutting it off
         if(kind == Kind.small && textWidth > 0f){
-            for(float scale = kind.title; title.getPrefWidth() > Scl.scl(textWidth) && scale > 0.55f; scale -= 0.05f) title.setFontScale(scale - 0.05f);
+            for(float scale = kind.title; title.getPrefWidth() > Scl.scl(textWidth) && scale > 0.55f; scale -= 0.05f) EclipseFonts.crisp(title, scale - 0.05f);
         }
         if(textWidth > 0f && tag == null) title.setEllipsis(true);
         button.table(texts -> {
@@ -716,7 +716,7 @@ public class EclipseMenu{
             b.add(image).size(15f).padRight(8f);
         }
         Label label = new Label(text);
-        label.setFontScale(0.75f);
+        EclipseFonts.crisp(label, 0.75f);
         b.add(label);
         b.clicked(run);
         Element fimage = image;
