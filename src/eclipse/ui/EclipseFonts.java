@@ -7,9 +7,13 @@ import arc.graphics.Color;
 import arc.graphics.Texture.TextureFilter;
 import arc.graphics.g2d.Font;
 import arc.graphics.g2d.PixmapPacker;
+import arc.scene.ui.Label;
+import arc.scene.ui.Label.LabelStyle;
+import arc.scene.ui.layout.Cell;
 import arc.scene.ui.layout.Scl;
 import arc.struct.IntMap;
 import arc.util.Log;
+import mindustry.ui.Fonts;
 
 /** Sizing helpers for crisp fonts; no GL or native state. */
 public class EclipseFonts{
@@ -64,5 +68,19 @@ public class EclipseFonts{
         assert font.getData().scaleX == 1f;
         cache.put(px, font);
         return font;
+    }
+
+    public static <T extends Label> Cell<T> crisp(Cell<T> cell, float scale){
+        crisp(cell.get(), scale);
+        return cell;
+    }
+
+    public static void crisp(Label label, float scale){
+        LabelStyle old = label.getStyle();
+        LabelStyle style = new LabelStyle(old);
+        style.font = get(old.font == Fonts.outline ? Kind.outline : Kind.plain, basePx() * scale);
+        label.setStyle(style);
+        label.setFontScale(1f);
+        label.invalidate();
     }
 }
