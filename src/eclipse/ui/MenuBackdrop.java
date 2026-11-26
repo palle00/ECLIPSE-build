@@ -404,13 +404,8 @@ public class MenuBackdrop extends Element{
         float cx = sx(logoX), cy = sy(logoY);
         drawLogo(logo, logoGlow != null && logoGlow.found() ? logoGlow : null, cx, cy, lw, lh, alpha);
         //what vanilla's hidden logo showed, the game and its version, on the logo's left edge like the buttons below
-        Font font = Fonts.outline;
-        float scale = font.getData().scaleX;
-        font.getData().setScale(Scl.scl(1f));
-        font.setColor(1f, 1f, 1f, 0.73f * alpha);
-        font.draw("for Mindustry " + Version.combined(), cx - lw / 2f, cy - lh / 2f - Scl.scl(10f), Align.left);
-        font.setColor(Color.white);
-        font.getData().setScale(scale);
+        Font font = EclipseFonts.get(EclipseFonts.Kind.plain, EclipseFonts.basePx() * Scl.scl(1f));
+        font.draw("for Mindustry " + Version.combined(), cx - lw / 2f, cy - lh / 2f - Scl.scl(10f), Tmp.c1.set(Color.white).a(0.73f * alpha), 1f, true, Align.left);
         Draw.reset();
     }
 

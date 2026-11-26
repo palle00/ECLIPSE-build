@@ -842,12 +842,13 @@ public class ProductionDialog extends BaseDialog{
             max = niceMax(max);
             float left = Scl.scl(44f), bottom = Scl.scl(8f), top = Scl.scl(8f);
             float px = x + left, pw = width - left - Scl.scl(6f), py = y + bottom, ph = height - bottom - top;
+            Font font = EclipseFonts.get(EclipseFonts.Kind.outline, EclipseFonts.basePx() * 0.8f);
             for(int i = 0; i <= 4; i++){
                 float yy = py + ph * i / 4f;
                 Draw.color(grid, parentAlpha);
                 Lines.stroke(Scl.scl(1f));
                 Lines.line(px, yy, px + pw, yy);
-                Fonts.outline.draw(shortNumber(max * i / 4f), px - Scl.scl(6f), yy + Scl.scl(6f), muted, 0.8f, false, Align.right);
+                font.draw(shortNumber(max * i / 4f), px - Scl.scl(6f), yy + Scl.scl(6f), muted, 1f, true, Align.right);
             }
             series(da, madeColor, px, py, pw, ph, max);
             series(db, usedColor, px, py, pw, ph, max);
