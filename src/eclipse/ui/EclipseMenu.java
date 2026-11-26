@@ -283,17 +283,15 @@ public class EclipseMenu{
             grid.add(button(b, Kind.cell, cellWidth, tag)).size(cellWidth, Kind.cell.height).padRight(i % 2 == 0 ? gap : 0f).padBottom(gap);
             if(i % 2 == 1) grid.row();
         }
-        //Settings and Quit take their own grid cells so they line up with the rest of the buttons
+        //Settings and Quit share the next grid slot, half a button each, with the same gap as the other cells
+        Table util = new Table();
         float halfWidth = (cellWidth - gap) / 2f;
-        int g = cells.size;
+        int n = 0;
         for(MenuButton b : all){
             String k = key(b);
-            if("settings".equals(k) || "quit".equals(k)){
-                grid.add(button(b, Kind.small, halfWidth, null)).size(halfWidth, Kind.small.height).padRight(g % 2 == 0 ? gap : 0f).padBottom(gap).left();
-                if(g % 2 == 1) grid.row();
-                g++;
-            }
+            if("settings".equals(k) || "quit".equals(k)) util.add(button(b, Kind.small, halfWidth, null)).size(halfWidth, Kind.small.height).padRight(n++ == 0 ? gap : 0f);
         }
+        if(util.hasChildren()) grid.add(util).size(cellWidth, Kind.cell.height).padRight(cells.size % 2 == 0 ? gap : 0f).padBottom(gap).left();
         column.add(grid).left().padBottom(16f - gap).row();
 
         EclipseFonts.crisp(column.add(Core.bundle.get("eclipse-menu.keys")), 0.65f).color(Color.valueOf("6e6e7e")).left();
