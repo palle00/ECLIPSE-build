@@ -9,6 +9,7 @@ import arc.graphics.g2d.Font;
 import arc.graphics.g2d.PixmapPacker;
 import arc.scene.ui.layout.Scl;
 import arc.struct.IntMap;
+import arc.util.Log;
 
 /** Sizing helpers for crisp fonts; no GL or native state. */
 public class EclipseFonts{
@@ -36,6 +37,7 @@ public class EclipseFonts{
         IntMap<Font> cache = kind == Kind.outline ? outlineCache : plainCache;
         Font cached = cache.get(px);
         if(cached != null) return cached;
+        Log.debug("EclipseFont baked kind=@ px=@", kind, px);
 
         if(generator == null){
             generator = new FreeTypeFontGenerator(Core.files.internal("fonts/font.woff"));
