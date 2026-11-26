@@ -97,7 +97,7 @@ public class EclipseSettingsDialog extends BaseDialog{
     void rebuildNav(){
         nav.clear();
         nav.top().left().margin(36f, 36f, 24f, 18f);
-        nav.add(Core.bundle.get("eclipse-settings.rail")).fontScale(0.65f).color(muted).left().padBottom(10f).row();
+        EclipseFonts.crisp(nav.add(Core.bundle.get("eclipse-settings.rail")), 0.65f).color(muted).left().padBottom(10f).row();
         for(String id : tabs){
             boolean opensDialog = id.equals("controls") || id.equals("language") || id.equals("data");
             String hint = id.equals("eclipse") ? Core.bundle.format("eclipse-settings.count", EclipseSettings.all.size) : opensDialog ? "↗" : null;
@@ -130,8 +130,8 @@ public class EclipseSettingsDialog extends BaseDialog{
         Drawable normal = style.up;
         Button b = new Button(style);
         b.left();
-        Label label = b.add(text).fontScale(0.9f).left().growX().padLeft(16f).get();
-        if(hint != null) b.add(hint).fontScale(0.6f).color(muted).padRight(14f);
+        Label label = EclipseFonts.crisp(b.add(text), 0.9f).left().growX().padLeft(16f).get();
+        if(hint != null) EclipseFonts.crisp(b.add(hint), 0.6f).color(muted).padRight(14f);
         b.update(() -> {
             boolean lit = chosen || b.isOver();
             style.up = lit ? style.over : normal;
@@ -301,7 +301,7 @@ public class EclipseSettingsDialog extends BaseDialog{
             keysSection();
             section("gameplay");
             row(Core.bundle.get("eclipse-settings.factions"), Core.bundle.get("eclipse-settings.factions.description"),
-                t -> t.table(chamfer(chipFill, steel, 6f), c -> c.add(Core.bundle.get("eclipse-settings.factions.always")).fontScale(0.75f).color(muted).pad(6f, 12f, 6f, 12f)));
+                t -> t.table(chamfer(chipFill, steel, 6f), c -> EclipseFonts.crisp(c.add(Core.bundle.get("eclipse-settings.factions.always")), 0.75f).color(muted).pad(6f, 12f, 6f, 12f)));
             section("data");
             actionRow("eclipse-settings.wiki-history", Core.bundle.get("eclipse-settings.wiki-history.button"), () -> {
                 EclipseSettings.clearWikiHistory();
@@ -322,7 +322,7 @@ public class EclipseSettingsDialog extends BaseDialog{
     }
 
     void section(String id){
-        content.add(Core.bundle.get("eclipse-settings.section." + id)).fontScale(0.7f).color(muted).left().padTop(content.hasChildren() ? 26f : 4f).padBottom(4f).row();
+        EclipseFonts.crisp(content.add(Core.bundle.get("eclipse-settings.section." + id)), 0.7f).color(muted).left().padTop(content.hasChildren() ? 26f : 4f).padBottom(4f).row();
     }
 
     /** One setting: name and description on the left, its control on the right, a thin line under it. */
@@ -332,7 +332,7 @@ public class EclipseSettingsDialog extends BaseDialog{
             r.table(t -> {
                 t.left();
                 t.add(name).left().row();
-                Label d = t.add(text).fontScale(0.72f).color(description).left().wrap().growX().get();
+                Label d = EclipseFonts.crisp(t.add(text), 0.72f).color(description).left().wrap().growX().get();
                 d.setAlignment(Align.left);
             }).growX().left().padRight(24f);
             r.table(control::get).right();
@@ -368,8 +368,8 @@ public class EclipseSettingsDialog extends BaseDialog{
                 {EclipseWiki.entryKey, "eclipse-settings.key.wiki"}, {eclipse.input.UpgradePlanner.key, "eclipse-settings.key.upgrade"}};
             for(Object[] k : keys){
                 if(k[0] == null) continue;
-                r.table(chamfer(chipFill, steel, 5f), c -> c.add(EclipseWiki.keyName((KeyBind)k[0])).fontScale(0.75f).color(accent).pad(3f, 9f, 3f, 9f)).padRight(8f);
-                r.add(Core.bundle.get((String)k[1])).fontScale(0.8f).padRight(26f);
+                r.table(chamfer(chipFill, steel, 5f), c -> EclipseFonts.crisp(c.add(EclipseWiki.keyName((KeyBind)k[0])), 0.75f).color(accent).pad(3f, 9f, 3f, 9f)).padRight(8f);
+                EclipseFonts.crisp(r.add(Core.bundle.get((String)k[1])), 0.8f).padRight(26f);
             }
             r.add().growX();
             r.add(action(null, Core.bundle.get("eclipse-settings.keys.change"), () -> ui.controls.show(), new Seq<>())).height(40f);
