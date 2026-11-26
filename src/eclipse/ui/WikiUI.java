@@ -64,7 +64,7 @@ public class WikiUI{
 
     /** A small framed tag in a colour ("Tier III · 480/s", "Heat 8"). */
     public static void tag(Table t, String text, Color color){
-        t.table(box(Color.clear, Tmp.c1.set(color).a(0.55f).cpy(), 2f, 0f), b -> b.add(text).color(color).fontScale(0.85f).pad(1f, 6f, 1f, 6f)).pad(2f);
+        t.table(box(Color.clear, Tmp.c1.set(color).a(0.55f).cpy(), 2f, 0f), b -> EclipseFonts.crisp(b.add(text).color(color), 0.85f).pad(1f, 6f, 1f, 6f)).pad(2f);
     }
 
     /** An accent heading with a rule after it. */
@@ -138,12 +138,12 @@ public class WikiUI{
                 row.table(n -> {
                     n.left().defaults().left();
                     n.add(c.localizedName).color(Pal.accent).row();
-                    n.add(kindLine(c)).color(Color.lightGray).fontScale(0.85f);
+                    EclipseFonts.crisp(n.add(kindLine(c)).color(Color.lightGray), 0.85f);
                 });
             }).left().row();
             String d = firstSentence(c);
             if(!d.isEmpty()) t.add(d).wrap().width(300f).left().padTop(6f).row();
-            t.add(Core.bundle.get(EclipseWiki.isEclipse(c) ? "eclipse-wiki.hover.open" : "eclipse-wiki.hover.database")).color(dim).fontScale(0.8f).left().padTop(4f);
+            EclipseFonts.crisp(t.add(Core.bundle.get(EclipseWiki.isEclipse(c) ? "eclipse-wiki.hover.open" : "eclipse-wiki.hover.database")).color(dim), 0.8f).left().padTop(4f);
         }){{
             allowMobile = false;
         }});
@@ -175,8 +175,8 @@ public class WikiUI{
             bt.image(c.uiIcon).size(28f).padRight(6f);
             bt.table(txt -> {
                 txt.left().defaults().left();
-                txt.add(amount + c.localizedName).fontScale(0.9f).row();
-                txt.add(perSecond).color(cyan).fontScale(0.75f);
+                EclipseFonts.crisp(txt.add(amount + c.localizedName), 0.9f).row();
+                EclipseFonts.crisp(txt.add(perSecond).color(cyan), 0.75f);
             });
         }, new Button.ButtonStyle(){{
             up = box(well, Color.valueOf("22222a"), 2f, 4f);
@@ -204,8 +204,8 @@ public class WikiUI{
         for(LiquidStack s : liqOut){ chip(outs, s.liquid, "", rate(s.amount * 60f), open); if(++n % 2 == 0) outs.row(); }
         card.add(ins).left();
         card.table(a -> {
-            a.add("→").color(Color.lightGray).fontScale(1.4f).row();
-            a.add(Strings.autoFixed(seconds, 2) + " s").color(Color.lightGray).fontScale(0.8f);
+            EclipseFonts.crisp(a.add("→").color(Color.lightGray), 1.4f).row();
+            EclipseFonts.crisp(a.add(Strings.autoFixed(seconds, 2) + " s").color(Color.lightGray), 0.8f);
         }).pad(0f, 10f, 0f, 10f);
         card.add(outs).left().growX();
         card.row();
