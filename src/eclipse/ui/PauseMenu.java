@@ -77,7 +77,7 @@ public class PauseMenu{
             }
             for(TextButton b : extras) if(b instanceof CheckBox) f.add(b).height(40f).padRight(10f);
             f.add().growX();
-            f.add("ECLIPSE " + modVersion()).fontScale(0.6f).color(Color.valueOf("8f8f9c")).right().bottom();
+            EclipseFonts.crisp(f.add("ECLIPSE " + modVersion()), 0.6f).color(Color.valueOf("8f8f9c")).right().bottom();
         }).growX().pad(0f, 72f, 28f, 72f);
         cont.add(page).size(1280f, 720f);
         page.update(() -> {
@@ -121,8 +121,8 @@ public class PauseMenu{
         t.top().left();
         t.table(head -> {
             head.left();
-            head.table(((TextureRegionDrawable)Tex.whiteui).tint(accent), c -> c.add(Core.bundle.get("eclipse-pause.paused")).fontScale(0.65f).color(dark).pad(3f, 10f, 2f, 10f));
-            head.add(headline()).fontScale(0.7f).color(muted).padLeft(12f);
+            head.table(((TextureRegionDrawable)Tex.whiteui).tint(accent), c -> EclipseFonts.crisp(c.add(Core.bundle.get("eclipse-pause.paused")), 0.65f).color(dark).pad(3f, 10f, 2f, 10f));
+            EclipseFonts.crisp(head.add(headline()), 0.7f).color(muted).padLeft(12f);
         }).left().padBottom(14f).row();
 
         t.add(tile(icon("resume"), Core.bundle.get("eclipse-pause.resume"), Core.bundle.get("eclipse-pause.resume.sub"), "Esc", true, () -> ui.paused.hide()))
@@ -186,7 +186,7 @@ public class PauseMenu{
         Button b = new Button(style);
         b.left();
         Element image = b.add(new SizedIcon(icon)).size(20f).padLeft(14f).padRight(12f).get();
-        Label label = b.add(text).fontScale(0.85f).left().padRight(18f).get();
+        Label label = EclipseFonts.crisp(b.add(text), 0.85f).left().padRight(18f).get();
         b.update(() -> {
             boolean lit = b.isOver();
             style.up = lit ? style.over : normal;
@@ -267,13 +267,13 @@ public class PauseMenu{
         b.userObject = iconColor; //stallTile turns it orange
         b.table(t -> {
             t.left();
-            title1[0] = t.add(big ? title.toUpperCase() : title).fontScale(big ? 1.35f : 0.9f).left().get();
+            title1[0] = EclipseFonts.crisp(t.add(big ? title.toUpperCase() : title), big ? 1.35f : 0.9f).left().get();
             t.row();
-            Cell<Label> c = t.add(sub).fontScale(big ? 0.7f : 0.62f).color(big ? Color.valueOf("c9b58a") : Color.valueOf("8f8f9c")).left().name("sub");
+            Cell<Label> c = EclipseFonts.crisp(t.add(sub), big ? 0.7f : 0.62f).color(big ? Color.valueOf("c9b58a") : Color.valueOf("8f8f9c")).left().name("sub");
             //a long subtitle (or translation) is cut with "..." instead of widening the tile
             if(!big) c.width(half - (keyName != null ? 110f : 70f)).get().setEllipsis(true);
         }).growX().left();
-        if(keyName != null) b.table(chamfer(chipFill, steel, 5f), c -> c.add(keyName).fontScale(0.6f).color(muted).pad(2f, 8f, 2f, 8f)).padRight(16f);
+        if(keyName != null) b.table(chamfer(chipFill, steel, 5f), c -> EclipseFonts.crisp(c.add(keyName), 0.6f).color(muted).pad(2f, 8f, 2f, 8f)).padRight(16f);
         b.update(() -> {
             boolean lit = b.isOver() && !b.isDisabled();
             style.up = lit ? style.over : normal;

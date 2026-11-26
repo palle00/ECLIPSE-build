@@ -489,7 +489,7 @@ public class EclipseWiki extends BaseDialog{
             bt.left();
             bt.image(c.uiIcon).size(24f).padRight(8f);
             bt.add(c.localizedName).left().growX().wrap();
-            if(reason != null && !reason.isEmpty()) bt.add(reason).color(WikiUI.dim).fontScale(0.75f).right().padLeft(6f);
+            if(reason != null && !reason.isEmpty()) EclipseFonts.crisp(bt.add(reason).color(WikiUI.dim), 0.75f).right().padLeft(6f);
             else tierBadge(bt, c);
         }, Styles.flatTogglet, () -> open(c, null, true)).checked(x -> current != null && current.target == c).height(36f).padLeft(4f).get();
         list.row();
@@ -501,7 +501,7 @@ public class EclipseWiki extends BaseDialog{
             b.left();
             b.image(guideIcon(id)).size(24f).padRight(8f);
             b.add(Core.bundle.get("eclipse-wiki.guide." + id + ".name")).left().growX().wrap();
-            if(reason != null && !reason.isEmpty()) b.add(reason).color(WikiUI.dim).fontScale(0.75f).right().padLeft(6f);
+            if(reason != null && !reason.isEmpty()) EclipseFonts.crisp(b.add(reason).color(WikiUI.dim), 0.75f).right().padLeft(6f);
         }, Styles.flatTogglet, () -> open(id, null, true)).checked(x -> current != null && id.equals(current.target)).height(36f).padLeft(4f).row();
     }
 
@@ -527,7 +527,7 @@ public class EclipseWiki extends BaseDialog{
             head.image(guideIcon(id)).size(56f).padRight(14f);
             head.table(n -> {
                 n.left().defaults().left();
-                n.add(Core.bundle.get("eclipse-wiki.guide." + id + ".name")).style(Styles.outlineLabel).color(Pal.accent).fontScale(1.25f).row();
+                EclipseFonts.crisp(n.add(Core.bundle.get("eclipse-wiki.guide." + id + ".name")).style(Styles.outlineLabel).color(Pal.accent), 1.25f).row();
                 n.add(Core.bundle.format("eclipse-wiki.guide.kind", tabs.size)).color(Color.lightGray);
             }).growX();
             return;
@@ -536,7 +536,7 @@ public class EclipseWiki extends BaseDialog{
         head.table(WikiUI.box(WikiUI.well, WikiUI.edge, 2f, 6f), i -> i.image(c.uiIcon).size(mobile ? 52f : 72f)).padRight(14f);
         head.table(n -> {
             n.left().defaults().left();
-            n.add(c.localizedName).style(Styles.outlineLabel).color(Pal.accent).fontScale(1.3f).row();
+            EclipseFonts.crisp(n.add(c.localizedName).style(Styles.outlineLabel).color(Pal.accent), 1.3f).row();
             n.add(WikiUI.kindLine(c)).color(Color.lightGray).row();
             n.table(tags -> {
                 tags.left();
@@ -682,7 +682,7 @@ public class EclipseWiki extends BaseDialog{
     void chapterPage(String id, Seq<GuideChapters.Chapter> chapters, int index){
         float w = textWidth();
         GuideChapters.Chapter ch = chapters.get(index);
-        if(chapters.size > 1) page.add(ch.title).color(Pal.accent).fontScale(1.15f).padBottom(6f).row();
+        if(chapters.size > 1) EclipseFonts.crisp(page.add(ch.title).color(Pal.accent), 1.15f).padBottom(6f).row();
         WikiUI.text(page, ch.body, w);
 
         //the checklist: rows tick themselves from the player's base
@@ -731,7 +731,7 @@ public class EclipseWiki extends BaseDialog{
             r.table(tt -> {
                 tt.left().defaults().left();
                 tt.add(text[0]).row();
-                if(text.length > 1) tt.add(text[1]).color(Color.lightGray).fontScale(0.85f).wrap().width(width - 300f);
+                if(text.length > 1) EclipseFonts.crisp(tt.add(text[1]).color(Color.lightGray), 0.85f).wrap().width(width - 300f);
             }).growX();
             if(built >= 0 && done) r.add(Core.bundle.format("eclipse-wiki.checklist.built", built)).color(WikiUI.good).right().padLeft(10f);
             else r.button("@eclipse-wiki.checklist.show", Styles.flatt, () -> open(b, null, true)).height(36f).right().padLeft(10f);
@@ -953,8 +953,8 @@ public class EclipseWiki extends BaseDialog{
                 box.table(r -> {
                     r.left();
                     r.image(e.key.uiIcon).size(22f).padRight(6f);
-                    r.add(e.key.localizedName).fontScale(0.85f).left().growX();
-                    r.add("×" + e.value).color(WikiUI.cyan).fontScale(0.85f).right().padLeft(8f);
+                    EclipseFonts.crisp(r.add(e.key.localizedName), 0.85f).left().growX();
+                    EclipseFonts.crisp(r.add("×" + e.value).color(WikiUI.cyan), 0.85f).right().padLeft(8f);
                 }).growX().row();
             }
         }).growX().padBottom(6f).row();
@@ -964,8 +964,8 @@ public class EclipseWiki extends BaseDialog{
             for(String[] tot : lay.totals){
                 box.table(r -> {
                     r.left();
-                    r.add(tot[0]).color(Color.lightGray).fontScale(0.85f).left().growX();
-                    r.add(tot[1]).color(WikiUI.cyan).fontScale(0.85f).right().padLeft(8f);
+                    EclipseFonts.crisp(r.add(tot[0]).color(Color.lightGray), 0.85f).left().growX();
+                    EclipseFonts.crisp(r.add(tot[1]).color(WikiUI.cyan), 0.85f).right().padLeft(8f);
                 }).growX().row();
             }
         }).growX();

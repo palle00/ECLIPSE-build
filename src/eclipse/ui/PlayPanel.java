@@ -82,9 +82,9 @@ class PlayPanel{
         t.defaults().left();
         t.table(h -> {
             h.left();
-            h.add(title.toUpperCase()).fontScale(1.3f).color(accent);
+            EclipseFonts.crisp(h.add(title.toUpperCase()), 1.3f).color(accent);
             h.add().growX();
-            h.add(Core.bundle.get("eclipse-menu.panel.esc")).fontScale(0.7f).color(muted).padRight(14f);
+            EclipseFonts.crisp(h.add(Core.bundle.get("eclipse-menu.panel.esc")), 0.7f).color(muted).padRight(14f);
             h.button(Icon.cancel, Styles.cleari, EclipseMenu::close).size(40f);
         }).width(width).padBottom(14f).row();
     }
@@ -101,7 +101,7 @@ class PlayPanel{
             h.table(tx -> {
                 tx.left().defaults().left();
                 tx.add(title.toUpperCase());
-                if(sub != null) tx.row().add(sub).fontScale(0.7f).color(muted).wrap().width(inner - 48f);
+                if(sub != null) EclipseFonts.crisp(tx.row().add(sub), 0.7f).color(muted).wrap().width(inner - 48f);
             }).growX();
         }).width(inner).row();
         return c;
@@ -137,9 +137,9 @@ class PlayPanel{
             int ft = total, fd = done;
             c.table(r -> {
                 r.left();
-                r.add(Core.bundle.get("eclipse-menu.research")).fontScale(0.75f).color(light).padRight(14f);
+                EclipseFonts.crisp(r.add(Core.bundle.get("eclipse-menu.research")), 0.75f).color(light).padRight(14f);
                 r.add(new ProductionDialog.Bar(fd / (float)ft, WikiUI.good)).size(420f, 8f).padRight(14f);
-                r.add(Core.bundle.format("eclipse-menu.research.count", fd, ft)).fontScale(0.75f).color(light);
+                EclipseFonts.crisp(r.add(Core.bundle.format("eclipse-menu.research.count", fd, ft)), 0.75f).color(light);
             }).left().padTop(2f);
         }
         return c;
@@ -155,15 +155,15 @@ class PlayPanel{
         Button b = new Button(style);
         b.top();
         b.add(new Image(pixelPlanet(p))).size(96f).padTop(10f).row();
-        Label name = b.add(p.localizedName).fontScale(0.95f).padTop(6f).get();
+        Label name = EclipseFonts.crisp(b.add(p.localizedName), 0.95f).padTop(6f).get();
         b.row();
-        b.add(Core.bundle.has("eclipse-menu.planet." + p.name) ? Core.bundle.get("eclipse-menu.planet." + p.name) : "").fontScale(0.65f).color(muted).row();
+        EclipseFonts.crisp(b.add(Core.bundle.has("eclipse-menu.planet." + p.name) ? Core.bundle.get("eclipse-menu.planet." + p.name) : ""), 0.65f).color(muted).row();
         if(here){
-            b.table(((TextureRegionDrawable)Tex.whiteui).tint(accent), x -> x.add(Core.bundle.get("eclipse-menu.planet.here")).fontScale(0.55f).color(dark).pad(1f, 6f, 0f, 6f)).padTop(4f);
+            b.table(((TextureRegionDrawable)Tex.whiteui).tint(accent), x -> EclipseFonts.crisp(x.add(Core.bundle.get("eclipse-menu.planet.here")), 0.55f).color(dark).pad(1f, 6f, 0f, 6f)).padTop(4f);
         }else{
             int held = p.sectors.count(Sector::hasBase);
             String text = held == 0 ? Core.bundle.get("eclipse-menu.planet.none") : held == 1 ? Core.bundle.get("eclipse-menu.planet.one") : Core.bundle.format("eclipse-menu.planet.held", held);
-            b.add(text).fontScale(0.65f).color(held > 0 ? WikiUI.good : dim).padTop(2f);
+            EclipseFonts.crisp(b.add(text), 0.65f).color(held > 0 ? WikiUI.good : dim).padTop(2f);
         }
         b.update(() -> {
             boolean lit = b.isOver() || focused(b);
@@ -239,8 +239,8 @@ class PlayPanel{
         Table c = card(icon, text(b), null, w);
         float inner = w - 36f;
         String sub = subtitle(b);
-        if(sub != null) c.add(sub).fontScale(0.75f).color(light).wrap().width(inner).padTop(12f).row();
-        c.add(Core.bundle.get(noteKey)).fontScale(0.75f).color(light).wrap().width(inner).padTop(8f).row();
+        if(sub != null) EclipseFonts.crisp(c.add(sub), 0.75f).color(light).wrap().width(inner).padTop(12f).row();
+        EclipseFonts.crisp(c.add(Core.bundle.get(noteKey)), 0.75f).color(light).wrap().width(inner).padTop(8f).row();
         c.add().growY().row();
         c.add(action(null, Core.bundle.get(goKey) + " >", () -> run(b), panelNav)).height(40f);
         return c;
@@ -252,7 +252,7 @@ class PlayPanel{
         float inner = w - 36f;
         Seq<SaveSlot> recent = control.saves.getSaveSlots().select(s -> !s.isHidden() && s.meta != null)
             .sort((a, b) -> Long.compare(b.getTimestamp(), a.getTimestamp()));
-        if(recent.isEmpty()) c.add(Core.bundle.get("eclipse-menu.load.none")).fontScale(0.75f).color(muted).padTop(12f).row();
+        if(recent.isEmpty()) EclipseFonts.crisp(c.add(Core.bundle.get("eclipse-menu.load.none")), 0.75f).color(muted).padTop(12f).row();
         for(int i = 0; i < Math.min(3, recent.size); i++) c.add(saveRow(recent.get(i), inner)).size(inner, 50f).padTop(i == 0 ? 12f : 4f).row();
         c.add().growY().row();
         c.add(action(null, Core.bundle.get("eclipse-menu.load.all") + " >", () -> run(load), panelNav)).height(40f).padTop(8f);
@@ -268,16 +268,16 @@ class PlayPanel{
         Button b = new Button(style);
         b.left().margin(4f, 8f, 4f, 8f);
         Label name = new Label(s.getName());
-        name.setFontScale(0.75f);
+        EclipseFonts.crisp(name, 0.75f);
         name.setEllipsis(true);
         String when = ago(System.currentTimeMillis(), s.getTimestamp()), time = playtime(s.meta.timePlayed);
         String detail = s.meta.rules != null && s.meta.rules.waves ? Core.bundle.format("eclipse-menu.load.row", s.getWave(), time) : time;
         b.table(t -> {
             t.left();
             t.add(name).width(w - 16f - 110f).left();
-            t.add(when).fontScale(0.6f).color(dim).right().growX();
+            EclipseFonts.crisp(t.add(when), 0.6f).color(dim).right().growX();
             t.row();
-            t.add(detail).fontScale(0.6f).color(muted).left().colspan(2);
+            EclipseFonts.crisp(t.add(detail), 0.6f).color(muted).left().colspan(2);
         }).grow();
         b.update(() -> {
             boolean lit = b.isOver() || focused(b);

@@ -207,10 +207,9 @@ public class BuildDiagram extends Element{
     }
 
     void drawLabel(Label l){
-        Font font = Fonts.outline;
-        GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
         float scale = Mathf.clamp(ts / Scl.scl(40f), 0.55f, 0.85f);
-        font.getData().setScale(scale * Scl.scl(1f) / Scl.scl(1f));
+        Font font = EclipseFonts.get(EclipseFonts.Kind.outline, EclipseFonts.basePx() * scale);
+        GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
         layout.setText(font, l.text);
         float w = layout.width + ts * 0.35f, h = layout.height + ts * 0.3f;
         float lx = l.align < 0 ? tx(l.x) - w : l.align == 0 ? tx(l.x) - w / 2f : tx(l.x), ly = ty(l.y) - h / 2f;
@@ -222,10 +221,7 @@ public class BuildDiagram extends Element{
         Draw.color(c, parentAlpha);
         Lines.stroke(1.5f);
         Lines.rect(lx, ly, w, h);
-        font.setColor(c);
-        font.draw(l.text, lx + ts * 0.17f, ly + h / 2f + layout.height / 2f);
-        font.getData().setScale(1f);
-        font.setColor(Color.white);
+        font.draw(l.text, lx + ts * 0.17f, ly + h / 2f + layout.height / 2f, c, 1f, true, Align.left);
         Pools.free(layout);
     }
 
@@ -236,10 +232,9 @@ public class BuildDiagram extends Element{
         int lx = Mathf.floor(m.x / ts), ly = Mathf.floor(m.y / ts);
         Part p = lay.at(lx, ly);
         if(p == null || !shown(p.step) || p.info.isEmpty()) return;
-        Font font = Fonts.def;
+        Font font = EclipseFonts.get(EclipseFonts.Kind.plain, EclipseFonts.basePx() * 0.85f);
         GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
         String[] lines = p.info.split("\n");
-        font.getData().setScale(0.85f);
         float w = 0f, lh = font.getLineHeight();
         for(String s : lines){
             layout.setText(font, s);
@@ -257,11 +252,8 @@ public class BuildDiagram extends Element{
         //the tile itself, outlined
         Lines.rect(tx(p.minX()), ty(p.minY()), p.block.size * ts, p.block.size * ts);
         for(int i = 0; i < lines.length; i++){
-            font.setColor(i == 0 ? Pal.accent : Color.white);
-            font.draw(lines[i], bx + pad, by + bh - pad - i * lh);
+            font.draw(lines[i], bx + pad, by + bh - pad - i * lh, i == 0 ? Pal.accent : Color.white, 1f, true, Align.left);
         }
-        font.getData().setScale(1f);
-        font.setColor(Color.white);
         Pools.free(layout);
     }
 }

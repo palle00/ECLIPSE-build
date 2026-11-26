@@ -231,12 +231,8 @@ public class DeploymentIntro implements LaunchAnimator{
     /** A line of text in world space at a fixed size on screen. */
     void drawTitle(float x, float y, String text, float alpha){
         if(alpha <= 0.01f) return;
-        Font font = Fonts.outline;
-        boolean ints = font.usesIntegerPositions();
-        font.setUseIntegerPositions(false);
         float scale = 0.9f / Math.max(renderer.getScale(), 0.0001f); //UI-sized on screen at any zoom
-        font.draw(text, x, y, Tmp.c1.set(gold).a(alpha), scale, false, Align.center);
-        font.setUseIntegerPositions(ints);
-        font.setColor(Color.white);
+        Font font = EclipseFonts.get(EclipseFonts.Kind.plain, EclipseFonts.basePx() * scale);
+        font.draw(text, x, y, Tmp.c1.set(gold).a(alpha), 1f, true, Align.center);
     }
 }

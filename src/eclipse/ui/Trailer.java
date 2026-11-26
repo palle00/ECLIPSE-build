@@ -348,13 +348,8 @@ public class Trailer{
 
     static void text(String s, float x, float y, float scale, Color c, float alpha, int align){
         if(alpha <= 0.001f || s.isEmpty()) return;
-        Font font = Fonts.outline;
-        float old = font.getData().scaleX;
-        font.getData().setScale(scale);
-        font.setColor(c.r, c.g, c.b, alpha);
-        font.draw(s, x, y, align);
-        font.setColor(Color.white);
-        font.getData().setScale(old);
+        Font font = EclipseFonts.get(EclipseFonts.Kind.plain, EclipseFonts.basePx() * scale);
+        font.draw(s, x, y, Tmp.c1.set(c).a(alpha), 1f, true, align);
     }
 
     /** The eclipse over the grid, the logo under it: the opener and the end card. */

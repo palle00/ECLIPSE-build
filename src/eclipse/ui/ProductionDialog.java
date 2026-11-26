@@ -210,8 +210,8 @@ public class ProductionDialog extends BaseDialog{
                 h.image(icon).size(22f).color(color).padRight(8f);
                 h.add(title).color(muted).left();
             }).left().row();
-            b.add(value).color(color).fontScale(1.6f).left().padTop(4f).row();
-            b.add(sub).color(muted).fontScale(0.8f).left().wrap().growX().row();
+            EclipseFonts.crisp(b.add(value).color(color), 1.6f).left().padTop(4f).row();
+            EclipseFonts.crisp(b.add(sub).color(muted), 0.8f).left().wrap().growX().row();
             if(bar >= 0f) b.add(new Bar(Mathf.clamp(bar), barColor)).growX().height(6f).padTop(6f);
         }).growX().uniformX().minWidth(150f).pad(0f, 0f, 0f, 10f).top();
     }
@@ -290,7 +290,7 @@ public class ProductionDialog extends BaseDialog{
                 r.table(txt -> {
                     txt.left().defaults().left();
                     txt.add("×" + s.count + "  " + s.block.localizedName).row();
-                    txt.add(s.status.text()).color(StallOverlay.color(s.status.kind)).fontScale(0.85f);
+                    EclipseFonts.crisp(txt.add(s.status.text()).color(StallOverlay.color(s.status.kind)), 0.85f);
                 }).growX();
                 if(s.status.content != null) r.image(s.status.content.uiIcon).size(26f).padRight(10f);
                 if(EclipseWiki.isEclipse(s.block)) r.button("@eclipse-production.why", Icon.book, Styles.flatt, () -> EclipseWiki.openStopped(s.block, s.status)).height(38f).padRight(4f);
@@ -321,7 +321,7 @@ public class ProductionDialog extends BaseDialog{
                 b.table(txt -> {
                     txt.left().defaults().left();
                     txt.add(c.localizedName).row();
-                    txt.add(Core.bundle.format("eclipse-production.made-used", rate(m), rate(u))).color(muted).fontScale(0.8f);
+                    EclipseFonts.crisp(txt.add(Core.bundle.format("eclipse-production.made-used", rate(m), rate(u))).color(muted), 0.8f);
                 }).growX();
                 b.add(net(m - u, Math.max(m, u))).right().padLeft(8f);
             }, rowEven, () -> select(c, Tab.resources)).growX().height(48f).padBottom(2f).row();
@@ -450,7 +450,7 @@ public class ProductionDialog extends BaseDialog{
             if(tab == Tab.chains){
                 row.image(c.uiIcon).size(26f).padLeft(8f).padRight(8f);
                 row.add(c.localizedName).left().ellipsis(true).growX();
-                row.add(Core.bundle.get("eclipse-production.badge." + category(c).name())).color(dim).fontScale(0.75f).right().padRight(12f);
+                EclipseFonts.crisp(row.add(Core.bundle.get("eclipse-production.badge." + category(c).name())).color(dim), 0.75f).right().padRight(12f);
                 row.setChecked(selected == c);
                 row.clicked(() -> select(c, Tab.chains));
                 list.add(row).growX().height(rowHeight).row();
@@ -484,7 +484,7 @@ public class ProductionDialog extends BaseDialog{
             top.table(WikiUI.box(WikiUI.well, WikiUI.edge, 2f, 6f), i -> i.image(c.uiIcon).size(64f)).padRight(14f);
             top.table(n -> {
                 n.left().top().defaults().left();
-                n.add(c.localizedName).style(Styles.outlineLabel).color(accent).fontScale(1.3f).row();
+                EclipseFonts.crisp(n.add(c.localizedName).style(Styles.outlineLabel).color(accent), 1.3f).row();
                 n.table(tags -> {
                     tags.left();
                     WikiUI.tag(tags, Core.bundle.get("eclipse-production.badge." + category(c).name()), muted);
@@ -561,14 +561,14 @@ public class ProductionDialog extends BaseDialog{
                 r.image(b.uiIcon).size(26f).padRight(8f);
                 r.table(txt -> {
                     txt.left().defaults().left();
-                    txt.add(b.localizedName + "  [lightgray]×" + (counts == null ? 0 : counts.get(b, 0))).fontScale(0.9f).row();
+                    EclipseFonts.crisp(txt.add(b.localizedName + "  [lightgray]×" + (counts == null ? 0 : counts.get(b, 0))), 0.9f).row();
                     txt.add(new Bar(fmax <= 0f ? 0f : v / fmax, color)).growX().height(5f).padTop(3f);
                 }).growX();
                 r.add(rate(v)).color(color).right().padLeft(8f);
             }).growX().padBottom(4f).row();
         }
         if(blocks.size > 5) t.add(Core.bundle.format("eclipse-production.attention.more", blocks.size - 5)).color(muted).left().row();
-        t.add(Core.bundle.format("eclipse-production.share-total", rate(total))).color(muted).fontScale(0.8f).left().padTop(2f).row();
+        EclipseFonts.crisp(t.add(Core.bundle.format("eclipse-production.share-total", rate(total))).color(muted), 0.8f).left().padTop(2f).row();
     }
 
     /** 0 balanced or idle, 1 surplus (tip), 2 short or none made (warning). */
@@ -623,7 +623,7 @@ public class ProductionDialog extends BaseDialog{
             }).width(100f);
             top.add(" /s").padRight(10f);
             top.button(Icon.refresh, Styles.cleari, this::refreshData).size(40f);
-            top.add(Core.bundle.get("eclipse-production.chains.rate-hint")).color(muted).fontScale(0.8f).padLeft(10f);
+            EclipseFonts.crisp(top.add(Core.bundle.get("eclipse-production.chains.rate-hint")).color(muted), 0.8f).padLeft(10f);
         }).growX().padBottom(8f).row();
 
         right.pane(Styles.smallPane, graph).grow().left().row();
@@ -728,7 +728,7 @@ public class ProductionDialog extends BaseDialog{
                 r.image(b.uiIcon).size(26f).padRight(8f);
                 r.table(txt -> {
                     txt.left().defaults().left();
-                    txt.add(b.localizedName + "  [lightgray]×" + counts.get(b, 0) + "  " + (int)(share * 100) + "%").fontScale(0.9f).row();
+                    EclipseFonts.crisp(txt.add(b.localizedName + "  [lightgray]×" + counts.get(b, 0) + "  " + (int)(share * 100) + "%"), 0.9f).row();
                     txt.add(new Bar(share, color)).growX().height(5f).padTop(3f);
                 }).growX();
                 r.add(power(v)).color(color).right().padLeft(8f);
@@ -842,12 +842,13 @@ public class ProductionDialog extends BaseDialog{
             max = niceMax(max);
             float left = Scl.scl(44f), bottom = Scl.scl(8f), top = Scl.scl(8f);
             float px = x + left, pw = width - left - Scl.scl(6f), py = y + bottom, ph = height - bottom - top;
+            Font font = EclipseFonts.get(EclipseFonts.Kind.outline, EclipseFonts.basePx() * 0.8f);
             for(int i = 0; i <= 4; i++){
                 float yy = py + ph * i / 4f;
                 Draw.color(grid, parentAlpha);
                 Lines.stroke(Scl.scl(1f));
                 Lines.line(px, yy, px + pw, yy);
-                Fonts.outline.draw(shortNumber(max * i / 4f), px - Scl.scl(6f), yy + Scl.scl(6f), muted, 0.8f, false, Align.right);
+                font.draw(shortNumber(max * i / 4f), px - Scl.scl(6f), yy + Scl.scl(6f), muted, 1f, true, Align.right);
             }
             series(da, madeColor, px, py, pw, ph, max);
             series(db, usedColor, px, py, pw, ph, max);
