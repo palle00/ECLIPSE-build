@@ -293,7 +293,7 @@ public class EclipseMenu{
         if(util.hasChildren()) grid.add(util).size(cellWidth, Kind.cell.height).padRight(cells.size % 2 == 0 ? gap : 0f).padBottom(gap).left();
         column.add(grid).left().padBottom(16f - gap).row();
 
-        column.add(Core.bundle.get("eclipse-menu.keys")).fontScale(0.65f).color(Color.valueOf("6e6e7e")).left();
+        EclipseFonts.crisp(column.add(Core.bundle.get("eclipse-menu.keys")), 0.65f).color(Color.valueOf("6e6e7e")).left();
     }
 
     /** The newest game to continue: a save or a campaign sector you still hold, by when it was saved. */
@@ -357,20 +357,20 @@ public class EclipseMenu{
             t.left().defaults().left();
             t.table(head -> {
                 head.left();
-                head.add(Core.bundle.get("eclipse-menu.continue")).fontScale(0.75f).color(accent);
-                head.table(chamfer(chipFill, Color.valueOf("3a3d4a"), 3f), k -> k.add(Core.bundle.get("eclipse-menu.enter")).fontScale(0.6f).color(muted).pad(1f, 6f, 1f, 6f)).padLeft(10f);
+                EclipseFonts.crisp(head.add(Core.bundle.get("eclipse-menu.continue")), 0.75f).color(accent);
+                head.table(chamfer(chipFill, Color.valueOf("3a3d4a"), 3f), k -> EclipseFonts.crisp(k.add(Core.bundle.get("eclipse-menu.enter")), 0.6f).color(muted).pad(1f, 6f, 1f, 6f)).padLeft(10f);
             }).row();
-            Label name = t.add(saveName(s)).fontScale(1.3f).width(textWidth).get();
+            Label name = EclipseFonts.crisp(t.add(saveName(s)), 1.3f).width(textWidth).get();
             name.setEllipsis(true);
             t.row();
-            t.add(saveMeta(s)).fontScale(0.75f).color(light).width(textWidth).get().setEllipsis(true);
+            EclipseFonts.crisp(t.add(saveMeta(s)), 0.75f).color(light).width(textWidth).get().setEllipsis(true);
             String eclipse = eclipseLine(s);
             if(eclipse != null){
                 t.row();
                 t.table(e -> {
                     e.left();
                     e.add(new EclipseMark()).size(14f).padRight(8f);
-                    e.add(eclipse).fontScale(0.7f).color(eclipseColor).width(textWidth - 22f).get().setEllipsis(true);
+                    EclipseFonts.crisp(e.add(eclipse), 0.7f).color(eclipseColor).width(textWidth - 22f).get().setEllipsis(true);
                 });
             }
         }).width(textWidth).left();
@@ -547,10 +547,10 @@ public class EclipseMenu{
                 head.left();
                 Cell<Label> c = head.add(title).left();
                 if(textWidth > 0f && tag == null) c.width(textWidth);
-                if(tag != null) head.table(((TextureRegionDrawable)Tex.whiteui).tint(accent), x -> x.add(tag).fontScale(0.55f).color(dark).pad(1f, 6f, 0f, 6f)).padLeft(10f);
+                if(tag != null) head.table(((TextureRegionDrawable)Tex.whiteui).tint(accent), x -> EclipseFonts.crisp(x.add(tag), 0.55f).color(dark).pad(1f, 6f, 0f, 6f)).padLeft(10f);
             }).left().row();
             if(subtitle != null){
-                Label s = texts.add(subtitle).fontScale(kind == Kind.cell ? 0.65f : 0.75f).color(muted).left().get();
+                Label s = EclipseFonts.crisp(texts.add(subtitle), kind == Kind.cell ? 0.65f : 0.75f).color(muted).left().get();
                 if(textWidth > 0f){
                     texts.getCell(s).width(textWidth + (tag != null ? 60f : 0f));
                     s.setEllipsis(true);
@@ -615,7 +615,7 @@ public class EclipseMenu{
         Drawable normal = style.up;
         Button b = new Button(style);
         Element image = icon == null ? null : b.add(new SizedIcon(icon)).size(16f).padLeft(14f).padRight(8f).get();
-        Label label = b.add(text).fontScale(0.75f).padLeft(icon == null ? 14f : 0f).padRight(14f).get();
+        Label label = EclipseFonts.crisp(b.add(text), 0.75f).padLeft(icon == null ? 14f : 0f).padRight(14f).get();
         b.update(() -> {
             boolean lit = b.isOver() || focused(b);
             style.up = lit ? style.over : normal;
@@ -635,14 +635,14 @@ public class EclipseMenu{
         news.margin(18f, 20f, 18f, 20f);
         news.defaults().left();
         LoadedMod mod = mods.getMod("eclipse");
-        news.add(Core.bundle.format("eclipse-menu.news.label", mod == null ? "" : mod.meta.version)).fontScale(0.7f).color(accent).row();
+        EclipseFonts.crisp(news.add(Core.bundle.format("eclipse-menu.news.label", mod == null ? "" : mod.meta.version)), 0.7f).color(accent).row();
         news.add(Core.bundle.get("eclipse-menu.news.title")).wrap().width(384f).padTop(6f).row();
         for(int i = 1; Core.bundle.has("eclipse-menu.news." + i); i++){
             String line = Core.bundle.get("eclipse-menu.news." + i);
             news.table(li -> {
                 li.left().top();
                 li.image().color(accent).size(7f).padRight(10f).padTop(9f).top();
-                li.add(line).fontScale(0.75f).color(light).wrap().width(364f);
+                EclipseFonts.crisp(li.add(line), 0.75f).color(light).wrap().width(364f);
             }).padTop(4f).row();
         }
         Seq<Button> none = new Seq<>(); //the news card is not part of the keyboard order
@@ -674,8 +674,8 @@ public class EclipseMenu{
         linksCell = footer.table(row -> {
             row.left();
             if(tips.isEmpty()) return;
-            row.add(Core.bundle.get("eclipse-menu.tip")).fontScale(0.75f).color(accent).padRight(12f);
-            tipLabel = row.add(tips.get(tip % tips.size)).fontScale(0.75f).color(light).maxWidth(Core.graphics.getWidth() / Scl.scl(1f) * 0.55f).get();
+            EclipseFonts.crisp(row.add(Core.bundle.get("eclipse-menu.tip")), 0.75f).color(accent).padRight(12f);
+            tipLabel = EclipseFonts.crisp(row.add(tips.get(tip % tips.size)), 0.75f).color(light).maxWidth(Core.graphics.getWidth() / Scl.scl(1f) * 0.55f).get();
             tipLabel.setEllipsis(true);
             link(row, Core.bundle.get("eclipse-menu.tip.next") + " >", null, () -> {
                 tip = (tip + 1) % tips.size;
@@ -700,7 +700,7 @@ public class EclipseMenu{
             }catch(Throwable ignored){
             }
             String version = "ECLIPSE " + (mod == null ? "" : "v" + mod.meta.version) + (date == null || date.isEmpty() ? "" : "  [#a1a1aa]// BUILD " + date);
-            right.table(chamfer(chipFill, steel, 4f), v -> v.add(version).fontScale(0.75f).color(accent).pad(0f, 12f, 0f, 12f)).height(28f).padLeft(22f);
+            right.table(chamfer(chipFill, steel, 4f), v -> EclipseFonts.crisp(v.add(version), 0.75f).color(accent).pad(0f, 12f, 0f, 12f)).height(28f).padLeft(22f);
         }).padRight(24f);
     }
 
