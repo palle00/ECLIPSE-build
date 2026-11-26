@@ -178,7 +178,8 @@ public class ChainGraph extends Element{
             Lines.curve(x1, y1, mx, y1, mx, y2, x2, y2, 20);
             Fill.tri(x2, y2, x2 - s(7f), y2 + s(4f), x2 - s(7f), y2 - s(4f));
         }
-        Font font = Fonts.def;
+        Font nameFont = EclipseFonts.get(EclipseFonts.Kind.plain, EclipseFonts.basePx() * 0.85f * zoom);
+        Font rateFont = EclipseFonts.get(EclipseFonts.Kind.plain, EclipseFonts.basePx() * 0.75f * zoom);
         GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
         for(Node n : nodes){
             float ax = nx(n), ay = ny(n);
@@ -190,22 +191,15 @@ public class ChainGraph extends Element{
             Lines.rect(ax, ay, w, h);
             Draw.color(1f, 1f, 1f, parentAlpha);
             Draw.rect(n.step.item.uiIcon, ax + s(22f), ay + h - s(22f), s(30f), s(30f));
-            font.getData().setScale(0.85f * zoom);
-            font.setColor(product ? Pal.accent : Color.white);
-            font.draw(fit(font, layout, n.step.item.localizedName, w - s(48f)), ax + s(42f), ay + h - s(10f));
-            font.getData().setScale(0.75f * zoom);
-            font.setColor(WikiUI.cyan);
-            font.draw(Strings.autoFixed(n.step.perSecond, 2) + "/s" + (raw ? "  " + Core.bundle.get("eclipse-wiki.chain.raw") : ""), ax + s(42f), ay + h - s(30f));
+            nameFont.draw(fit(nameFont, layout, n.step.item.localizedName, w - s(48f)), ax + s(42f), ay + h - s(10f), product ? Pal.accent : Color.white, 1f, true, Align.left);
+            rateFont.draw(Strings.autoFixed(n.step.perSecond, 2) + "/s" + (raw ? "  " + Core.bundle.get("eclipse-wiki.chain.raw") : ""), ax + s(42f), ay + h - s(30f), WikiUI.cyan, 1f, true, Align.left);
             if(n.step.source != null){
                 Draw.color(1f, 1f, 1f, parentAlpha);
                 Draw.rect(n.step.source.block.uiIcon, ax + s(14f), ay + s(13f), s(18f), s(18f));
-                font.setColor(Color.lightGray);
                 String liq = n.step.liquids.isEmpty() ? "" : "  + " + n.step.liquids.first().liquid.localizedName;
-                font.draw(fit(font, layout, "×" + Strings.autoFixed(n.step.machines, 2) + " " + n.step.source.block.localizedName + liq, w - s(30f)), ax + s(27f), ay + s(19f));
+                rateFont.draw(fit(rateFont, layout, "×" + Strings.autoFixed(n.step.machines, 2) + " " + n.step.source.block.localizedName + liq, w - s(30f)), ax + s(27f), ay + s(19f), Color.lightGray, 1f, true, Align.left);
             }
         }
-        font.getData().setScale(1f);
-        font.setColor(Color.white);
         Pools.free(layout);
         Draw.reset();
     }
